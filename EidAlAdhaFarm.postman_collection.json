@@ -1,0 +1,394 @@
+{
+  "info": {
+    "name": "Eid Al Adha Farm API",
+    "description": "API for managing the Eid Al Adha sacrifice process",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ali Eid\",\n  \"email\": \"ali@example.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": ["{{base_url}}"],
+              "path": ["register"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('token', response.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ali@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('token', response.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/logout",
+              "host": ["{{base_url}}"],
+              "path": ["logout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', '');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Farm Management",
+      "item": [
+        {
+          "name": "Get Farm Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/farm",
+              "host": ["{{base_url}}"],
+              "path": ["farm"]
+            }
+          }
+        },
+        {
+          "name": "Get Farm Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/farm/statistics",
+              "host": ["{{base_url}}"],
+              "path": ["farm", "statistics"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Animal Management",
+      "item": [
+        {
+          "name": "List Animals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals",
+              "host": ["{{base_url}}"],
+              "path": ["animals"]
+            }
+          }
+        },
+        {
+          "name": "Add Animal - Sheep",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"sheep\",\n  \"name\": \"Whitey\",\n  \"age\": 1.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/animals",
+              "host": ["{{base_url}}"],
+              "path": ["animals"]
+            }
+          }
+        },
+        {
+          "name": "Add Animal - Young Sheep (Ineligible)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"sheep\",\n  \"name\": \"Young Lamb\",\n  \"age\": 0.25\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/animals",
+              "host": ["{{base_url}}"],
+              "path": ["animals"]
+            }
+          }
+        },
+        {
+          "name": "Add Animal - Goat",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"goat\",\n  \"name\": \"Billy\",\n  \"age\": 2.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/animals",
+              "host": ["{{base_url}}"],
+              "path": ["animals"]
+            }
+          }
+        },
+        {
+          "name": "Add Animal - Cow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"cow\",\n  \"name\": \"Bessie\",\n  \"age\": 3.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/animals",
+              "host": ["{{base_url}}"],
+              "path": ["animals"]
+            }
+          }
+        },
+        {
+          "name": "Add Animal - Camel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"camel\",\n  \"name\": \"Humpy\",\n  \"age\": 6.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/animals",
+              "host": ["{{base_url}}"],
+              "path": ["animals"]
+            }
+          }
+        },
+        {
+          "name": "Get Animal Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals/1",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1"]
+            }
+          }
+        },
+        {
+          "name": "Feed Animal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals/1/feed",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "feed"]
+            }
+          }
+        },
+        {
+          "name": "Groom Animal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals/1/groom",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "groom"]
+            }
+          }
+        },
+        {
+          "name": "Sacrifice Animal - Eligible",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals/1/sacrifice",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "sacrifice"]
+            }
+          }
+        },
+        {
+          "name": "Sacrifice Animal - Ineligible",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals/2/sacrifice",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "2", "sacrifice"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+} 
