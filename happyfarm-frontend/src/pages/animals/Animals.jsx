@@ -1,185 +1,143 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import { animalService } from '../../services/api/animals.js'
-import Card from '../../components/common/UI/Card.jsx'
-import Button from '../../components/common/UI/Button.jsx'
+import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { Plus, Beef, AlertCircle } from 'lucide-react'
-import { getAnimalTypeInfo } from '../../constants/animalTypes.js'
+import { C, Hoverable, TYPES, typeInfo, ageText, eligible } from '../../theme/hf.jsx'
+
+const addBtnBase = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '8px',
+  background: C.brown,
+  color: '#fff',
+  fontFamily: "'Zilla Slab', serif",
+  fontWeight: 700,
+  fontSize: '15px',
+  padding: '12px 24px',
+  border: 'none',
+  borderRadius: '9999px',
+  boxShadow: '0 2px 4px rgba(107,92,67,0.16)',
+  cursor: 'pointer',
+  transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55),background-color .2s',
+}
+
+const filterStyle = (active) => ({
+  border: `2px solid ${active ? C.green : C.border}`,
+  cursor: 'pointer',
+  fontFamily: "'Libre Franklin', sans-serif",
+  fontWeight: 600,
+  fontSize: '13.5px',
+  padding: '7px 16px',
+  borderRadius: '9999px',
+  transition: 'all .18s',
+  background: active ? C.green : C.cream,
+  color: active ? '#fff' : C.brown,
+})
+
+const FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'active', label: 'Active' },
+  { key: 'sacrificed', label: 'Sacrificed' },
+  { key: 'sheep', label: 'Sheep' },
+  { key: 'goat', label: 'Goats' },
+  { key: 'cow', label: 'Cows' },
+  { key: 'camel', label: 'Camels' },
+]
 
 const Animals = () => {
-  const { data: animals = [], isLoading, error, refetch } = useQuery(
-    'animals',
-    animalService.getAll,
-    {
-      refetchOnWindowFocus: true,
-      refetchInterval: 30000 // Refresh every 30 seconds
-    }
-  )
+  const navigate = useNavigate()
+  const [filter, setFilter] = useState('all')
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Animals</h1>
-          <Link to="/animals/add">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Animal
-            </Button>
-          </Link>
-        </div>
-        <div className="flex items-center justify-center py-12">
-          <LoadingSpinner size="large" message="Loading animals..." />
-        </div>
-      </div>
-    )
-  }
+  const { data: animals = [], isLoading } = useQuery('animals', animalService.getAll, {
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
+  })
 
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Animals</h1>
-          <Link to="/animals/add">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Animal
-            </Button>
-          </Link>
-        </div>
-        <Card>
-          <div className="text-center py-12">
-            <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Error Loading Animals
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Unable to load your animals. Please try again.
-            </p>
-            <Button onClick={() => refetch()}>
-              Try Again
-            </Button>
-          </div>
-        </Card>
-      </div>
-    )
-  }
-
-  if (animals.length === 0) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Animals</h1>
-          <Link to="/animals/add">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Animal
-            </Button>
-          </Link>
-        </div>
-
-        <Card>
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🐑</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No animals yet
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Add your first animal to start managing your farm.
-            </p>
-            <Link to="/animals/add">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add First Animal
-              </Button>
-            </Link>
-          </div>
-        </Card>
-      </div>
-    )
-  }
+  let list = animals.slice()
+  if (filter === 'active') list = list.filter((a) => !a.is_sacrificed)
+  else if (filter === 'sacrificed') list = list.filter((a) => a.is_sacrificed)
+  else if (TYPES.includes(filter)) list = list.filter((a) => a.type === filter)
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Animals</h1>
-        <Link to="/animals/add">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Animal
-          </Button>
-        </Link>
+    <div className="hf-anim-pop">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '22px' }}>
+        <h1 style={{ fontSize: '34px' }}>Your animals</h1>
+        <Hoverable onClick={() => navigate('/animals/add')} baseStyle={addBtnBase} hoverStyle={{ transform: 'scale(1.04)', background: C.brownDark }}>
+          Add animal <span style={{ fontSize: '18px' }}>→</span>
+        </Hoverable>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {animals.map(animal => {
-          const typeInfo = getAnimalTypeInfo(animal.type)
-          return (
-            <Link key={animal.id} to={`/animals/${animal.id}`}>
-              <Card className="hover:shadow-lg transition-shadow duration-200 cursor-pointer">
-                <div className="flex items-center space-x-4">
-                  <div className="text-3xl">
-                    {typeInfo?.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">
-                      {animal.name}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {typeInfo?.label} • {animal.age} years old
-                    </p>
-                    <div className="flex items-center justify-between mt-2">
-                      {animal.is_sacrificed ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          Sacrificed
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Active
-                        </span>
-                      )}
-                    </div>
+      <div style={{ display: 'flex', gap: '9px', flexWrap: 'wrap', marginBottom: '22px' }}>
+        {FILTERS.map((f) => (
+          <button key={f.key} onClick={() => setFilter(f.key)} style={filterStyle(filter === f.key)}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+          <LoadingSpinner size="large" message="Loading animals…" />
+        </div>
+      ) : list.length > 0 ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '20px' }}>
+          {list.map((a) => {
+            const ti = typeInfo(a.type)
+            return (
+              <Hoverable
+                key={a.id}
+                onClick={() => navigate(`/animals/${a.id}`)}
+                baseStyle={{
+                  textAlign: 'left',
+                  background: C.cream,
+                  border: 'none',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)',
+                  cursor: 'pointer',
+                  transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55),box-shadow .2s',
+                }}
+                hoverStyle={{ transform: 'scale(1.02)', boxShadow: '0 10px 20px -3px rgba(107,92,67,0.22)' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
+                  <span style={{ display: 'inline-flex', width: '62px', height: '62px', background: ti.bg, borderRadius: '16px', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+                    <AnimalIcon type={a.type} size={54} />
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <h3 style={{ fontSize: '20px', lineHeight: 1.2 }}>{a.name}</h3>
+                    <p style={{ margin: '2px 0 0', fontSize: '14px', color: C.tan }}>{ti.label} · {ageText(a.age)}</p>
                   </div>
                 </div>
-              </Card>
-            </Link>
-          )
-        })}
-      </div>
-
-      {/* Summary Card */}
-      <Card title="Farm Summary">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">
-              {animals.length}
-            </div>
-            <div className="text-sm text-gray-600">Total Animals</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">
-              {animals.filter(a => !a.is_sacrificed).length}
-            </div>
-            <div className="text-sm text-gray-600">Active</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-600">
-              {animals.filter(a => a.is_sacrificed).length}
-            </div>
-            <div className="text-sm text-gray-600">Sacrificed</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">
-              {new Set(animals.map(a => a.type)).size}
-            </div>
-            <div className="text-sm text-gray-600">Animal Types</div>
-          </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                  {a.is_sacrificed ? (
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: C.tan, background: '#ECE7D2', border: '2px solid #C9BD9F', borderRadius: '9999px', padding: '3px 12px' }}>Sacrificed</span>
+                  ) : (
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#2E7A48', background: '#E4F5E9', border: '2px solid #C7E9D2', borderRadius: '9999px', padding: '3px 12px' }}>Active</span>
+                  )}
+                  {eligible(a) && (
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#B8771A', background: '#FBF1DD', border: '2px solid #F5E2B8', borderRadius: '9999px', padding: '3px 12px' }}>Eligible</span>
+                  )}
+                </div>
+              </Hoverable>
+            )
+          })}
         </div>
-      </Card>
+      ) : (
+        <div style={{ background: C.cream, borderRadius: '16px', padding: '56px 24px', textAlign: 'center', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }}>
+          <div style={{ width: '90px', height: '90px', margin: '0 auto 12px' }}>
+            <AnimalIcon type="sheep" size={90} />
+          </div>
+          <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>No animals here yet</h3>
+          <p style={{ margin: '0 0 20px', color: C.tan }}>Try another filter, or add your first animal.</p>
+          <Hoverable onClick={() => navigate('/animals/add')} baseStyle={addBtnBase} hoverStyle={{ transform: 'scale(1.04)', background: C.brownDark }}>
+            Add animal <span style={{ fontSize: '18px' }}>→</span>
+          </Hoverable>
+        </div>
+      )}
     </div>
   )
 }
 
-export default Animals 
+export default Animals
