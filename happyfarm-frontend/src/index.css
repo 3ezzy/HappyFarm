@@ -2,62 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-  
-  [dir="rtl"] {
-    font-family: 'Noto Sans Arabic', sans-serif;
-  }
+/* ============================================================
+   HappyFarm — Eid Al Adha design system
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
 }
 
-@layer components {
-  .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
-  }
-  
-  .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
-  }
-  
-  .btn-secondary {
-    @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
-  }
-  
-  .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
-  }
-  
-  .input {
-    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500;
-  }
-  
-  .card {
-    @apply bg-white rounded-lg shadow-md border border-gray-200 p-6;
-  }
-  
-  .animal-card {
-    @apply bg-white rounded-lg shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow duration-200;
-  }
-  
-  .status-indicator {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-  }
-  
-  .status-healthy {
-    @apply bg-green-100 text-green-800;
-  }
-  
-  .status-needs-care {
-    @apply bg-yellow-100 text-yellow-800;
-  }
-  
-  .status-attention {
-    @apply bg-red-100 text-red-800;
-  }
-  
-  .loading-spinner {
-    @apply animate-spin h-5 w-5 border-2 border-gray-300 border-t-primary-600 rounded-full;
-  }
-} 
+body {
+  margin: 0;
+  font-family: 'Libre Franklin', sans-serif;
+  color: #6B5C43;
+  background: #E7F4EC;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Zilla Slab', serif;
+  margin: 0;
+  color: #574A30;
+}
+
+button {
+  font-family: 'Libre Franklin', sans-serif;
+}
+
+input {
+  font-family: 'Libre Franklin', sans-serif;
+}
+
+[dir="rtl"] {
+  font-family: 'Noto Sans Arabic', sans-serif;
+}
+
+/* ---- animations ---- */
+@keyframes hf-pop {
+  0% { opacity: 0; transform: translateY(14px) scale(.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes hf-toast {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-16px) scale(.9); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+@keyframes hf-modal {
+  0% { opacity: 0; transform: scale(.6); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes hf-fade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+.hf-anim-pop { animation: hf-pop .45s cubic-bezier(0.68,-0.55,0.265,1.55) both; }
+.hf-anim-fade { animation: hf-fade .4s ease both; }
+
+/* ---- leaf background patterns ---- */
+.hf-leaf-bg { position: relative; }
+.hf-leaf-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='52' viewBox='0 0 52 52'%3E%3Cg fill='%23008160' opacity='0.05'%3E%3Cpath d='M13 7c5 4 5 13 0 17-5-4-5-13 0-17z'/%3E%3Cpath d='M37 28c5 4 5 13 0 17-5-4-5-13 0-17z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 52px 52px;
+}
+.hf-leaf-bg-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='52' viewBox='0 0 52 52'%3E%3Cg fill='%23ffffff' opacity='0.09'%3E%3Cpath d='M13 7c5 4 5 13 0 17-5-4-5-13 0-17z'/%3E%3Cpath d='M37 28c5 4 5 13 0 17-5-4-5-13 0-17z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 52px 52px;
+}
+
+/* ---- responsive grids ---- */
+@media (max-width: 860px) {
+  .hf-dash-grid, .hf-detail-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 560px) {
+  .hf-type-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .hf-care-grid { grid-template-columns: 1fr !important; }
+}
