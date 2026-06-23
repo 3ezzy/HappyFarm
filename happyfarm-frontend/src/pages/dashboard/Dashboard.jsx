@@ -1,263 +1,198 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import { farmService } from '../../services/api/farm.js'
 import { animalService } from '../../services/api/animals.js'
 import { useAuth } from '../../context/AuthContext.jsx'
-import Card from '../../components/common/UI/Card.jsx'
-import Button from '../../components/common/UI/Button.jsx'
+import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { 
-  Beef, 
-  Plus, 
-  BarChart3, 
-  Calendar,
-  TrendingUp,
-  AlertCircle
-} from 'lucide-react'
-import { getAnimalTypeInfo } from '../../constants/animalTypes.js'
+import { C, Hoverable, TYPES, typeInfo, ageText, eligible } from '../../theme/hf.jsx'
+
+const card = { background: C.cream, borderRadius: '16px', padding: '24px', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }
+
+const StatCard = ({ value, label, bg, valueColor, labelColor }) => (
+  <div style={{ background: bg, borderRadius: '16px', padding: '22px', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }}>
+    <div style={{ fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '38px', color: valueColor, lineHeight: 1 }}>{value}</div>
+    <p style={{ margin: '8px 0 0', fontSize: '14px', color: labelColor, fontWeight: 500 }}>{label}</p>
+  </div>
+)
+
+const QuickAction = ({ label, onClick, bg, color, border, hoverBg }) => (
+  <Hoverable
+    onClick={onClick}
+    baseStyle={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: '8px',
+      background: bg,
+      color,
+      fontFamily: "'Zilla Slab', serif",
+      fontWeight: 700,
+      fontSize: '15px',
+      padding: '13px 20px',
+      border: border || 'none',
+      borderRadius: '9999px',
+      boxShadow: '0 2px 4px rgba(107,92,67,0.16)',
+      cursor: 'pointer',
+      transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55),background-color .2s',
+    }}
+    hoverStyle={{ transform: 'scale(1.03)', background: hoverBg || bg }}
+  >
+    {label} <span style={{ fontSize: '18px' }}>→</span>
+  </Hoverable>
+)
 
 const Dashboard = () => {
+  const navigate = useNavigate()
   const { user, farm } = useAuth()
 
-  // Fetch farm statistics
-  const { data: farmStats, isLoading: farmLoading, error: farmError } = useQuery(
-    'farm-statistics',
-    farmService.getStatistics,
-    {
-      refetchOnWindowFocus: true,
-      refetchInterval: 30000 // Refresh every 30 seconds
-    }
-  )
+  const { data: stats = {}, isLoading: statsLoading } = useQuery('farm-statistics', farmService.getStatistics, {
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
+  })
+  const { data: animals = [], isLoading: animalsLoading } = useQuery('animals', animalService.getAll, {
+    refetchOnWindowFocus: true,
+  })
 
-  // Fetch animals for recent activity
-  const { data: animals = [], isLoading: animalsLoading } = useQuery(
-    'animals',
-    animalService.getAll,
-    {
-      refetchOnWindowFocus: true
-    }
-  )
-
-  if (farmLoading || animalsLoading) {
+  if (statsLoading || animalsLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <LoadingSpinner size="large" message="Loading dashboard..." />
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+        <LoadingSpinner size="large" message="Loading dashboard…" />
       </div>
     )
   }
 
-  if (farmError) {
-    return (
-      <Card className="text-center py-12">
-        <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Error Loading Dashboard
-        </h3>
-        <p className="text-gray-600">
-          Unable to load farm statistics. Please try again later.
-        </p>
-      </Card>
-    )
-  }
+  const total = stats.total_animals ?? animals.length
+  const readyCount = stats.sacrifice_status?.eligible_for_sacrifice ?? animals.filter(eligible).length
+  const notEligibleCount =
+    stats.sacrifice_status?.not_yet_eligible ?? animals.filter((a) => !a.is_sacrificed && !eligible(a)).length
+  const sacrificedCount = stats.sacrifice_status?.already_sacrificed ?? animals.filter((a) => a.is_sacrificed).length
 
-  const stats = farmStats || {}
-  const recentAnimals = animals.slice(0, 5) // Show last 5 animals
+  const byType = TYPES.map((t) => ({
+    type: t,
+    label: typeInfo(t).label,
+    bg: typeInfo(t).bg,
+    count: stats.animals_by_type?.[t] ?? animals.filter((a) => a.type === t).length,
+  }))
+
+  const recent = animals.slice().reverse().slice(0, 4)
+  const firstName = (user?.name || '').split(' ')[0]
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Welcome back, {user?.name}! 👋
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Here's what's happening at {farm?.name} today
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-600">
-              {new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </p>
-          </div>
+    <div className="hf-anim-pop">
+      {/* Welcome banner */}
+      <div
+        style={{
+          background: C.brown,
+          borderRadius: '16px',
+          padding: '26px 28px',
+          boxShadow: '0 10px 20px -3px rgba(107,92,67,0.22)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          gap: '18px',
+          flexWrap: 'wrap',
+          marginBottom: '24px',
+        }}
+      >
+        <div>
+          <h1 style={{ color: C.cream, fontSize: '32px', lineHeight: 1.1, marginBottom: '8px' }}>Welcome back, {firstName}! 🌿</h1>
+          <p style={{ color: '#ECE7D2', fontSize: '16px', margin: 0 }}>Here's what's happening at {farm?.name} today.</p>
+        </div>
+        <div style={{ background: C.greenDark, borderRadius: '9999px', padding: '8px 16px' }}>
+          <span style={{ color: C.cream, fontSize: '13.5px', fontWeight: 500 }}>{today}</span>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="text-center">
-          <div className="text-3xl font-bold text-primary-600">
-            {stats.total_animals || 0}
-          </div>
-          <p className="text-gray-600 mt-1">Total Animals</p>
-                        <div className="text-4xl mx-auto mt-2">🐑</div>
-        </Card>
-
-        <Card className="text-center">
-          <div className="text-3xl font-bold text-green-600">
-            {stats.sacrifice_status?.eligible_for_sacrifice || 0}
-          </div>
-          <p className="text-gray-600 mt-1">Ready for Sacrifice</p>
-          <BarChart3 className="h-8 w-8 text-green-500 mx-auto mt-2" />
-        </Card>
-
-        <Card className="text-center">
-          <div className="text-3xl font-bold text-blue-600">
-            {stats.sacrifice_status?.already_sacrificed || 0}
-          </div>
-          <p className="text-gray-600 mt-1">Already Sacrificed</p>
-          <Calendar className="h-8 w-8 text-blue-500 mx-auto mt-2" />
-        </Card>
-
-        <Card className="text-center">
-          <div className="text-3xl font-bold text-orange-600">
-            {stats.sacrifice_status?.not_yet_eligible || 0}
-          </div>
-          <p className="text-gray-600 mt-1">Not Yet Eligible</p>
-          <TrendingUp className="h-8 w-8 text-orange-500 mx-auto mt-2" />
-        </Card>
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '20px', marginBottom: '24px' }}>
+        <StatCard value={total} label="Total animals" bg={C.cream} valueColor={C.brownText} labelColor={C.tan} />
+        <StatCard value={readyCount} label="Ready for sacrifice" bg={C.green} valueColor="#fff" labelColor="#BEE6D5" />
+        <StatCard value={notEligibleCount} label="Not yet eligible" bg={C.yellow} valueColor={C.brownText} labelColor="#7A5A18" />
+        <StatCard value={sacrificedCount} label="Already sacrificed" bg={C.tan} valueColor="#fff" labelColor="#ECE7D2" />
       </div>
 
-      {/* Animals by Type */}
-      {stats.animals_by_type && (
-        <Card title="Animals by Type">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Object.entries(stats.animals_by_type).map(([type, count]) => {
-              const typeInfo = getAnimalTypeInfo(type)
-              return (
-                <div key={type} className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl mb-2">{typeInfo?.icon}</div>
-                  <div className="text-xl font-bold text-gray-900">{count}</div>
-                  <div className="text-sm text-gray-600">{typeInfo?.label}</div>
+      {/* Flock + quick actions */}
+      <div className="hf-dash-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '24px', alignItems: 'start' }}>
+        <div style={card}>
+          <h2 style={{ fontSize: '22px', marginBottom: '18px' }}>Your flock</h2>
+          <div className="hf-type-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px' }}>
+            {byType.map((bt) => (
+              <div key={bt.type} style={{ background: bt.bg, borderRadius: '16px', padding: '14px 10px', textAlign: 'center' }}>
+                <div style={{ width: '54px', height: '54px', margin: '0 auto 6px' }}>
+                  <AnimalIcon type={bt.type} size={54} />
                 </div>
-              )
-            })}
+                <div style={{ fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '22px', color: C.brownText }}>{bt.count}</div>
+                <div style={{ fontSize: '12.5px', color: C.tan, fontWeight: 500 }}>{bt.label}</div>
+              </div>
+            ))}
           </div>
-        </Card>
-      )}
-
-      {/* Quick Actions */}
-      <Card title="Quick Actions">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link to="/animals/add">
-            <Button variant="primary" className="w-full h-16 text-base">
-              <Plus className="h-5 w-5 mr-2" />
-              Add New Animal
-            </Button>
-          </Link>
-          
-          <Link to="/animals">
-            <Button variant="outline" className="w-full h-16 text-base">
-                              <Beef className="h-5 w-5 mr-2" />
-              View All Animals
-            </Button>
-          </Link>
-          
-          <Link to="/farm">
-            <Button variant="secondary" className="w-full h-16 text-base">
-              <BarChart3 className="h-5 w-5 mr-2" />
-              Farm Statistics
-            </Button>
-          </Link>
         </div>
-      </Card>
 
-      {/* Recent Animals */}
-      {recentAnimals.length > 0 && (
-        <Card title="Recent Animals" subtitle="Your latest animals added to the farm">
-          <div className="space-y-3">
-            {recentAnimals.map(animal => {
-              const typeInfo = getAnimalTypeInfo(animal.type)
+        <div style={{ background: C.greenSoft, borderRadius: '16px', padding: '24px', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }}>
+          <h2 style={{ fontSize: '22px', marginBottom: '16px' }}>Quick actions</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <QuickAction label="Add a new animal" onClick={() => navigate('/animals/add')} bg={C.brown} color="#fff" hoverBg={C.brownDark} />
+            <QuickAction label="View all animals" onClick={() => navigate('/animals')} bg={C.green} color="#fff" hoverBg={C.greenDark} />
+            <QuickAction label="Farm statistics" onClick={() => navigate('/farm')} bg={C.cream} color={C.brownText} border="2px solid #C9BD9F" />
+          </div>
+        </div>
+      </div>
+
+      {/* Recent animals */}
+      <div style={{ ...card, marginTop: '24px' }}>
+        <h2 style={{ fontSize: '22px', marginBottom: '6px' }}>Recent animals</h2>
+        <p style={{ margin: '0 0 18px', fontSize: '14px', color: C.tan }}>Your latest additions to the farm.</p>
+        {recent.length === 0 ? (
+          <p style={{ color: C.tan, margin: 0 }}>No animals yet — add your first one!</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {recent.map((a) => {
+              const ti = typeInfo(a.type)
               return (
-                <Link
-                  key={animal.id}
-                  to={`/animals/${animal.id}`}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                <Hoverable
+                  key={a.id}
+                  onClick={() => navigate(`/animals/${a.id}`)}
+                  baseStyle={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    width: '100%',
+                    textAlign: 'left',
+                    background: C.greenSoft2,
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    transition: 'transform .18s cubic-bezier(0.68,-0.55,0.265,1.55),background-color .18s',
+                  }}
+                  hoverStyle={{ transform: 'scale(1.01)', background: '#DCEFE8' }}
                 >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xl">{typeInfo?.icon}</span>
-                    <div>
-                      <p className="font-medium text-gray-900">{animal.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {typeInfo?.label} • {animal.age} years old
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    {animal.is_sacrificed ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        Sacrificed
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Active
-                      </span>
-                    )}
-                  </div>
-                </Link>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <span style={{ display: 'inline-flex', width: '46px', height: '46px', background: ti.bg, borderRadius: '12px', alignItems: 'center', justifyContent: 'center' }}>
+                      <AnimalIcon type={a.type} size={40} />
+                    </span>
+                    <span>
+                      <span style={{ display: 'block', fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '17px', color: C.brownText }}>{a.name}</span>
+                      <span style={{ display: 'block', fontSize: '13.5px', color: C.tan }}>{ti.label} · {ageText(a.age)}</span>
+                    </span>
+                  </span>
+                  {a.is_sacrificed ? (
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: C.tan, background: '#ECE7D2', border: '2px solid #C9BD9F', borderRadius: '9999px', padding: '3px 12px' }}>Sacrificed</span>
+                  ) : (
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#2E7A48', background: '#E4F5E9', border: '2px solid #C7E9D2', borderRadius: '9999px', padding: '3px 12px' }}>Active</span>
+                  )}
+                </Hoverable>
               )
             })}
           </div>
-          
-          {animals.length > 5 && (
-            <div className="mt-4 text-center">
-              <Link to="/animals">
-                <Button variant="outline" size="small">
-                  View All {animals.length} Animals
-                </Button>
-              </Link>
-            </div>
-          )}
-        </Card>
-      )}
-
-      {/* Empty State */}
-      {animals.length === 0 && (
-        <Card className="text-center py-12">
-          <div className="text-6xl mb-4">🐑</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No animals yet
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Get started by adding your first animal to the farm.
-          </p>
-          <Link to="/animals/add">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add First Animal
-            </Button>
-          </Link>
-        </Card>
-      )}
-
-      {/* Getting Started */}
-      <Card title="Getting Started">
-        <div className="text-center py-8">
-          <div className="text-6xl mb-4">🏡</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Welcome to HappyFarm!
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Start by adding your first animal to begin managing your farm.
-          </p>
-          <Link to="/animals/add">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add First Animal
-            </Button>
-          </Link>
-        </div>
-      </Card>
+        )}
+      </div>
     </div>
   )
 }
 
-export default Dashboard 
+export default Dashboard
