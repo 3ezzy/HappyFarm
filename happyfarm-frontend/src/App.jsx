@@ -26,14 +26,14 @@ function App() {
   // Show loading spinner while initializing auth
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#E7F4EC' }}>
         <LoadingSpinner size="large" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: '#E7F4EC' }}>
       <Routes>
         {/* Public Routes */}
         <Route 
