@@ -1,115 +1,168 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Menu, LogOut, User, ChevronDown } from 'lucide-react'
+import React from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext.jsx'
-import Button from '../UI/Button.jsx'
+import { C, Hoverable, LeafMark, initialsOf } from '../../../theme/hf.jsx'
 
-const Header = ({ onMenuClick, sidebarOpen }) => {
-  const { user, farm, logout, isLoading } = useAuth()
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
+const NavButton = ({ label, active, onClick }) => (
+  <button
+    onClick={onClick}
+    style={{
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      fontFamily: "'Zilla Slab', serif",
+      fontWeight: 700,
+      fontSize: '16px',
+      color: C.brownText,
+      padding: 0,
+      whiteSpace: 'nowrap',
+      transform: active ? 'translateY(-1px)' : 'none',
+    }}
+  >
+    {label}
+    {active && (
+      <span style={{ display: 'block', height: '2px', borderRadius: '2px', background: C.brownText, marginTop: '3px' }} />
+    )}
+  </button>
+)
 
-  const handleLogout = async () => {
-    try {
-      await logout()
-    } catch (error) {
-      console.error('Logout error:', error)
-    }
-  }
+const Header = () => {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const { user } = useAuth()
+
+  const isDashboard = pathname === '/'
+  const isAnimals = pathname.startsWith('/animals')
+  const isFarm = pathname === '/farm'
+  const isProfile = pathname === '/profile'
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Left side - Logo and Menu */}
-          <div className="flex items-center">
-            {/* Mobile menu button */}
-            <button
-              onClick={onMenuClick}
-              className="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200"
-              aria-label="Toggle sidebar"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-
-            {/* Logo and Farm Name */}
-            <div className="flex items-center space-x-4 ml-4 lg:ml-0">
-              <Link to="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">🐑</span>
-                </div>
-                <div className="hidden sm:block">
-                  <h1 className="text-xl font-bold text-gray-900">HappyFarm</h1>
-                  {farm && (
-                    <p className="text-xs text-gray-600">{farm.name}</p>
-                  )}
-                </div>
-              </Link>
-            </div>
-          </div>
-
-          {/* Right side - User menu */}
-          <div className="flex items-center space-x-4">
-            {/* User dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center space-x-2 p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200"
-              >
-                <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary-600" />
-                </div>
-                <div className="hidden sm:block text-left">
-                  <p className="text-sm font-medium">{user?.name}</p>
-                  <p className="text-xs text-gray-600">{user?.email}</p>
-                </div>
-                <ChevronDown className="h-4 w-4" />
-              </button>
-
-              {/* Dropdown menu */}
-              {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span>Profile</span>
-                    </div>
-                  </Link>
-                  
-                  <div className="border-t border-gray-100"></div>
-                  
-                  <button
-                    onClick={() => {
-                      setUserMenuOpen(false)
-                      handleLogout()
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    disabled={isLoading}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <LogOut className="h-4 w-4" />
-                      <span>Logout</span>
-                    </div>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+    <div style={{ position: 'relative' }}>
+      {/* Eid utility strip */}
+      <div
+        style={{
+          background: C.red,
+          color: '#fff',
+          textAlign: 'center',
+          fontSize: '12.5px',
+          letterSpacing: '.3px',
+          padding: '6px 16px',
+          fontWeight: 500,
+        }}
+      >
+        🌙 Eid Al Adha — may your sacrifice be accepted · تقبل الله
       </div>
 
-      {/* Close user menu when clicking outside */}
-      {userMenuOpen && (
+      {/* Green ribbon nav */}
+      <header className="hf-leaf-bg-header" style={{ position: 'relative', background: C.green, padding: '18px 16px 30px' }}>
         <div
-          className="fixed inset-0 z-40"
-          onClick={() => setUserMenuOpen(false)}
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: '12px',
+            background: `radial-gradient(circle 8px at 10px 0,${C.green} 97%,transparent 100%) repeat-x`,
+            backgroundSize: '20px 12px',
+          }}
         />
-      )}
-    </header>
+        <div
+          style={{
+            position: 'relative',
+            maxWidth: '1152px',
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            flexWrap: 'wrap',
+          }}
+        >
+          <button
+            onClick={() => navigate('/')}
+            style={{ display: 'flex', alignItems: 'center', gap: '9px', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            <span
+              style={{
+                display: 'inline-flex',
+                width: '38px',
+                height: '38px',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: C.cream,
+                borderRadius: '12px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
+              }}
+            >
+              <LeafMark size={22} color={C.green} />
+            </span>
+            <span style={{ fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '21px', color: C.cream }}>HappyFarm</span>
+          </button>
+
+          {/* yellow ribbon */}
+          <nav
+            style={{
+              background: C.yellow,
+              padding: '11px 30px',
+              boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)',
+              clipPath: 'polygon(0 0,100% 0,calc(100% - 16px) 50%,100% 100%,0 100%,16px 50%)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '26px' }}>
+              <NavButton label="Home" active={isDashboard} onClick={() => navigate('/')} />
+              <NavButton label="Animals" active={isAnimals} onClick={() => navigate('/animals')} />
+              <NavButton label="Farm" active={isFarm} onClick={() => navigate('/farm')} />
+              <NavButton label="Profile" active={isProfile} onClick={() => navigate('/profile')} />
+            </div>
+          </nav>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Hoverable
+              onClick={() => navigate('/animals/add')}
+              baseStyle={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: C.cream,
+                color: C.brownText,
+                fontFamily: "'Zilla Slab', serif",
+                fontWeight: 700,
+                fontSize: '14px',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '9999px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.16)',
+                cursor: 'pointer',
+                transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55)',
+              }}
+              hoverStyle={{ transform: 'scale(1.05)' }}
+            >
+              <span style={{ fontSize: '16px', lineHeight: 1 }}>+</span> Add
+            </Hoverable>
+            <button
+              onClick={() => navigate('/profile')}
+              title="Profile"
+              style={{
+                width: '38px',
+                height: '38px',
+                border: 'none',
+                borderRadius: '9999px',
+                background: C.greenDark,
+                color: '#fff',
+                fontFamily: "'Zilla Slab', serif",
+                fontWeight: 700,
+                fontSize: '15px',
+                cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
+              }}
+            >
+              {initialsOf(user?.name)}
+            </button>
+          </div>
+        </div>
+      </header>
+    </div>
   )
 }
 
-export default Header 
+export default Header
