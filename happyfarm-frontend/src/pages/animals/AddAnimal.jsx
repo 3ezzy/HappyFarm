@@ -1,266 +1,141 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from 'react-query'
+import toast from 'react-hot-toast'
 import { animalService } from '../../services/api/animals.js'
-import { ANIMAL_TYPE_OPTIONS } from '../../constants/animalTypes.js'
-import Card from '../../components/common/UI/Card.jsx'
-import Button from '../../components/common/UI/Button.jsx'
-import Input from '../../components/common/UI/Input.jsx'
-import { useNotification } from '../../context/NotificationContext.jsx'
-import { ArrowLeft, Save } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext.jsx'
+import AnimalIcon from '../../components/common/AnimalIcon.jsx'
+import { C, Hoverable, HfInput, TYPES, typeInfo, minAgeText } from '../../theme/hf.jsx'
+
+const backBtn = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  background: C.cream,
+  color: C.brownText,
+  fontFamily: "'Zilla Slab', serif",
+  fontWeight: 700,
+  fontSize: '14px',
+  padding: '8px 18px',
+  border: '2px solid #C9BD9F',
+  borderRadius: '9999px',
+  cursor: 'pointer',
+  marginBottom: '20px',
+  transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55)',
+}
+
+const choiceStyle = (active) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  cursor: 'pointer',
+  padding: '14px 8px',
+  borderRadius: '16px',
+  transition: 'transform .18s cubic-bezier(0.68,-0.55,0.265,1.55),background-color .18s,box-shadow .18s',
+  border: `2px solid ${active ? C.green : 'transparent'}`,
+  background: active ? C.greenSoft : C.sand,
+  boxShadow: active ? '0 4px 10px -1px rgba(107,92,67,0.20)' : 'none',
+})
+
+const labelStyle = { display: 'block', fontSize: '14px', fontWeight: 600, color: C.brownText, marginBottom: '8px' }
 
 const AddAnimal = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { showNotification } = useNotification()
-  
-  const [formData, setFormData] = useState({
-    type: '',
-    name: '',
-    age: ''
+  const { farm } = useAuth()
+
+  const [type, setType] = useState('sheep')
+  const [name, setName] = useState('')
+  const [age, setAge] = useState('')
+
+  const createMutation = useMutation(animalService.create, {
+    onSuccess: async (data) => {
+      await Promise.all([
+        queryClient.invalidateQueries('animals'),
+        queryClient.invalidateQueries('farm-details'),
+        queryClient.invalidateQueries('farm-statistics'),
+      ])
+      toast.success(`${data.name} joined the farm! 🌿`)
+      navigate('/animals')
+    },
   })
-  
-  const [errors, setErrors] = useState({})
 
-  // Create animal mutation
-  const createAnimalMutation = useMutation(
-    animalService.create,
-    {
-      onSuccess: async (data) => {
-        showNotification(`${data.name} has been added to your farm!`, 'success')
-        
-        // Invalidate all related queries to ensure data consistency
-        await Promise.all([
-          queryClient.invalidateQueries('animals'),
-          queryClient.invalidateQueries('farm-details'), 
-          queryClient.invalidateQueries('farm-statistics')
-        ])
-        
-        // Small delay to ensure cache updates complete
-        setTimeout(() => {
-          navigate('/animals')
-        }, 100)
-      },
-      onError: (error) => {
-        console.error('Error creating animal:', error)
-        const errorMessage = error.response?.data?.message || 'Failed to add animal. Please try again.'
-        showNotification(errorMessage, 'error')
-        
-        // Handle validation errors from backend
-        if (error.response?.data?.errors) {
-          setErrors(error.response.data.errors)
-        }
-      }
-    }
-  )
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }))
-    }
-  }
-
-  const validateForm = () => {
-    const newErrors = {}
-    
-    if (!formData.type) {
-      newErrors.type = 'Please select an animal type'
-    }
-    
-    if (!formData.name.trim()) {
-      newErrors.name = 'Animal name is required'
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Animal name must be at least 2 characters'
-    }
-    
-    if (!formData.age) {
-      newErrors.age = 'Age is required'
-    } else {
-      const age = parseFloat(formData.age)
-      if (isNaN(age) || age < 0) {
-        newErrors.age = 'Please enter a valid age'
-      } else if (age > 50) {
-        newErrors.age = 'Age seems too high. Please check the value.'
-      }
-    }
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
+  const submit = () => {
+    const trimmed = name.trim()
+    const parsed = parseFloat(age)
+    if (!trimmed) {
+      toast.error('Please give your animal a name.')
       return
     }
-    
-    const animalData = {
-      type: formData.type,
-      name: formData.name.trim(),
-      age: parseFloat(formData.age)
+    if (isNaN(parsed) || parsed < 0) {
+      toast.error('Please enter a valid age.')
+      return
     }
-    
-    createAnimalMutation.mutate(animalData)
+    createMutation.mutate({ type, name: trimmed, age: parsed })
   }
 
-  const selectedAnimalType = ANIMAL_TYPE_OPTIONS.find(option => option.value === formData.type)
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Link to="/animals">
-          <Button variant="outline" size="small">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Animals
-          </Button>
-        </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Add New Animal</h1>
-      </div>
+    <div className="hf-anim-pop" style={{ maxWidth: '680px', margin: '0 auto' }}>
+      <Hoverable as="button" onClick={() => navigate('/animals')} baseStyle={backBtn} hoverStyle={{ transform: 'scale(1.04)' }}>
+        <span style={{ fontSize: '16px' }}>←</span> Back
+      </Hoverable>
 
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Animal Type Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Animal Type *
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                {ANIMAL_TYPE_OPTIONS.map((option) => (
-                  <label
-                    key={option.value}
-                    className={`
-                      relative flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors
-                      ${formData.type === option.value 
-                        ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' 
-                        : 'border-gray-300'
-                      }
-                    `}
-                  >
-                    <input
-                      type="radio"
-                      name="type"
-                      value={option.value}
-                      checked={formData.type === option.value}
-                      onChange={handleInputChange}
-                      className="sr-only"
-                    />
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">{option.icon}</span>
-                      <div>
-                        <div className="font-medium text-gray-900">{option.label}</div>
-                        <div className="text-sm text-gray-600">{option.labelAr}</div>
-                      </div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-              {errors.type && (
-                <p className="mt-2 text-sm text-red-600">{errors.type}</p>
-              )}
-            </div>
+      <div style={{ background: C.cream, borderRadius: '16px', padding: '28px', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }}>
+        <h1 style={{ fontSize: '30px', marginBottom: '6px' }}>Add a new animal</h1>
+        <p style={{ margin: '0 0 24px', color: C.tan }}>Welcome a new friend to {farm?.name}.</p>
 
-            {/* Animal Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Animal Name *
-              </label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Enter a name for your animal"
-                className={errors.name ? 'border-red-500' : ''}
-              />
-              {errors.name && (
-                <p className="mt-2 text-sm text-red-600">{errors.name}</p>
-              )}
-            </div>
+        <label style={labelStyle}>Animal type</label>
+        <div className="hf-type-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px', marginBottom: '22px' }}>
+          {TYPES.map((t) => (
+            <button key={t} onClick={() => setType(t)} style={choiceStyle(type === t)}>
+              <span style={{ display: 'inline-flex', width: '50px', height: '50px', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
+                <AnimalIcon type={t} size={50} />
+              </span>
+              <span style={{ display: 'block', fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '15px', color: C.brownText }}>{typeInfo(t).label}</span>
+            </button>
+          ))}
+        </div>
 
-            {/* Animal Age */}
-            <div>
-              <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-2">
-                Age (in years) *
-              </label>
-              <Input
-                id="age"
-                name="age"
-                type="number"
-                step="0.25"
-                min="0"
-                max="50"
-                value={formData.age}
-                onChange={handleInputChange}
-                placeholder="e.g., 1.5 for 1 year and 6 months"
-                className={errors.age ? 'border-red-500' : ''}
-              />
-              {errors.age && (
-                <p className="mt-2 text-sm text-red-600">{errors.age}</p>
-              )}
-              <p className="mt-1 text-sm text-gray-600">
-                You can use decimals (e.g., 0.5 for 6 months, 1.25 for 1 year and 3 months)
-              </p>
-            </div>
+        <label htmlFor="an" style={labelStyle}>Name or tag</label>
+        <HfInput id="an" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Whitey" style={{ marginBottom: '18px' }} />
 
-            {/* Preview */}
-            {selectedAnimalType && formData.name && formData.age && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-2">Preview:</h4>
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{selectedAnimalType.icon}</span>
-                  <div>
-                    <p className="font-medium text-gray-900">{formData.name}</p>
-                    <p className="text-sm text-gray-600">
-                      {selectedAnimalType.label} • {formData.age} years old
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+        <label htmlFor="aa" style={labelStyle}>Age (years)</label>
+        <HfInput id="aa" type="number" min="0" step="0.1" value={age} onChange={(e) => setAge(e.target.value)} placeholder="e.g. 1.5" style={{ marginBottom: '10px' }} />
+        <div style={{ background: '#FBF1DD', border: '3px solid #F5E2B8', borderRadius: '16px', padding: '12px 16px', marginBottom: '24px' }}>
+          <p style={{ margin: 0, fontSize: '13.5px', color: '#8A5912' }}>
+            🌙 {typeInfo(type).plural} are eligible for sacrifice at <strong>{minAgeText(type)}</strong> of age.
+          </p>
+        </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end space-x-3 pt-4">
-              <Link to="/animals">
-                <Button type="button" variant="outline">
-                  Cancel
-                </Button>
-              </Link>
-              <Button 
-                type="submit" 
-                disabled={createAnimalMutation.isLoading}
-                className="min-w-[120px]"
-              >
-                {createAnimalMutation.isLoading ? (
-                  <>
-                    <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Add Animal
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </Card>
+        <Hoverable
+          onClick={submit}
+          disabled={createMutation.isLoading}
+          baseStyle={{
+            display: 'flex',
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            background: C.brown,
+            color: '#fff',
+            fontFamily: "'Zilla Slab', serif",
+            fontWeight: 700,
+            fontSize: '16px',
+            padding: '14px',
+            border: 'none',
+            borderRadius: '9999px',
+            boxShadow: '0 2px 4px rgba(107,92,67,0.16)',
+            cursor: 'pointer',
+            opacity: createMutation.isLoading ? 0.7 : 1,
+            transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55),background-color .2s',
+          }}
+          hoverStyle={{ transform: 'scale(1.02)', background: C.brownDark }}
+        >
+          {createMutation.isLoading ? 'Adding…' : 'Add to farm'} <span style={{ fontSize: '18px' }}>→</span>
+        </Hoverable>
       </div>
     </div>
   )
 }
 
-export default AddAnimal 
+export default AddAnimal
