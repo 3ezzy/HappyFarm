@@ -1,6 +1,6 @@
 import React from 'react'
 import classNames from 'classnames'
-import { C, SPECIES_BG } from './colors.js'
+import { C } from './colors.js'
 
 /* ============================================================
    HappyFarm — Eid Al Adha shared design tokens & helpers
@@ -8,7 +8,7 @@ import { C, SPECIES_BG } from './colors.js'
 
 // Re-exported so existing imports of `C` keep working. Prefer Tailwind
 // classes in markup; `C` is for raw values (SVG fills, gradients).
-export { C, SPECIES_BG }
+export { C }
 
 export const TYPES = ['sheep', 'goat', 'cow', 'camel']
 
@@ -24,7 +24,6 @@ export const typeInfo = (t) =>
 
 export const minAge = (t) => typeInfo(t).minAge
 export const minAgeText = (t) => typeInfo(t).minAgeText
-export const typeBgClass = (t) => typeInfo(t).bgClass
 
 export const eligible = (a) => !!a && !a.is_sacrificed && Number(a.age) >= minAge(a.type)
 
@@ -74,29 +73,37 @@ export const initialsOf = (name) =>
    only existed to emulate :hover / :focus for inline styles.
    ------------------------------------------------------------ */
 
-export const cardClass =
-  'rounded-2xl border-2 border-line bg-cream shadow-chip'
+/* Card surface. Callers add their own padding (p-6 or p-7). */
+export const cardClass = 'rounded-2xl bg-cream shadow-ribbon'
 
-export const inputClass =
+const inputClass =
   'block w-full rounded-2xl border-2 border-line-input bg-cream px-3.5 py-2.5 ' +
   'text-[15px] text-brown-text outline-none transition-colors duration-200 ' +
   'focus:border-green'
 
-export const btnBase =
+const btnBase =
   'inline-flex items-center justify-center gap-1.5 rounded-full font-display ' +
   'font-bold cursor-pointer transition-transform duration-200 ease-pop ' +
   'disabled:cursor-not-allowed disabled:opacity-60 enabled:hover:scale-105'
 
-export const btnPrimary = `${btnBase} bg-green text-cream px-4 py-2 shadow-chip`
 export const btnCream = `${btnBase} bg-cream text-brown-text px-4 py-2 shadow-chip`
-export const btnDanger = `${btnBase} bg-red text-white px-4 py-2 shadow-chip`
 
-/* Status pills, shared by the animal list, dashboard and detail screens. */
-const badgeBase = 'rounded-full border-2 px-3 py-[3px] text-xs font-semibold'
+/* Status pills, shared by the animal list, dashboard and detail screens.
+   `lg` is the roomier variant the detail page uses. */
+const badgeBase = 'rounded-full border-2 font-semibold'
 
-export const badgeSacrificed = `${badgeBase} border-line bg-cream-muted text-tan`
-export const badgeActive = `${badgeBase} border-green-line bg-green-badgeBg text-green-badge`
-export const badgeEligible = `${badgeBase} border-yellow-line bg-yellow-badgeBg text-yellow-badge`
+const badgeSize = {
+  sm: 'px-3 py-[3px] text-xs',
+  lg: 'inline-flex items-center gap-1.5 px-3.5 py-[5px] text-[13px]',
+}
+
+const badgeTone = {
+  sacrificed: 'border-line bg-cream-muted text-tan',
+  active: 'border-green-line bg-green-badgeBg text-green-badge',
+  eligible: 'border-yellow-line bg-yellow-badgeBg text-yellow-badge',
+}
+
+export const badge = (tone, size = 'sm') => classNames(badgeBase, badgeSize[size], badgeTone[tone])
 
 export function HfInput({ className, ...props }) {
   return <input {...props} className={classNames(inputClass, className)} />

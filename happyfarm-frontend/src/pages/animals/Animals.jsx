@@ -5,15 +5,7 @@ import { useQuery } from 'react-query'
 import { animalService } from '../../services/api/animals.js'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import {
-  TYPES,
-  typeInfo,
-  ageText,
-  eligible,
-  badgeSacrificed,
-  badgeActive,
-  badgeEligible,
-} from '../../theme/hf.jsx'
+import { TYPES, typeInfo, ageText, eligible, badge, cardClass } from '../../theme/hf.jsx'
 
 const addBtnClass =
   'inline-flex cursor-pointer items-center gap-2 rounded-full border-none bg-brown px-6 py-3 ' +
@@ -79,7 +71,7 @@ const Animals = () => {
               <button
                 key={a.id}
                 onClick={() => navigate(`/animals/${a.id}`)}
-                className="cursor-pointer rounded-2xl border-none bg-cream p-5 text-start shadow-ribbon transition-all duration-200 ease-pop hover:scale-[1.02] hover:shadow-toast"
+                className={classNames(cardClass, 'cursor-pointer border-none p-5 text-start transition-all duration-200 ease-pop hover:scale-[1.02] hover:shadow-toast')}
               >
                 <div className="mb-3.5 flex items-center gap-3.5">
                   <span className={classNames('inline-flex h-[62px] w-[62px] flex-none items-center justify-center rounded-2xl', ti.bgClass)}>
@@ -92,18 +84,18 @@ const Animals = () => {
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   {a.is_sacrificed ? (
-                    <span className={badgeSacrificed}>Sacrificed</span>
+                    <span className={badge('sacrificed')}>Sacrificed</span>
                   ) : (
-                    <span className={badgeActive}>Active</span>
+                    <span className={badge('active')}>Active</span>
                   )}
-                  {eligible(a) && <span className={badgeEligible}>Eligible</span>}
+                  {eligible(a) && <span className={badge('eligible')}>Eligible</span>}
                 </div>
               </button>
             )
           })}
         </div>
       ) : (
-        <div className="rounded-2xl bg-cream px-6 py-14 text-center shadow-ribbon">
+        <div className={classNames(cardClass, 'px-6 py-14 text-center')}>
           <div className="mx-auto mb-3 h-[90px] w-[90px]">
             <AnimalIcon type="sheep" size={90} />
           </div>

@@ -5,9 +5,7 @@ import { farmService } from '../../services/api/farm.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { TYPES, typeInfo } from '../../theme/hf.jsx'
-
-const cardClass = 'rounded-2xl bg-cream p-6 shadow-ribbon'
+import { TYPES, typeInfo, cardClass } from '../../theme/hf.jsx'
 
 const InfoItem = ({ emoji, iconClass, label, value, sub }) => (
   <div className="flex items-center gap-3.5">
@@ -23,7 +21,7 @@ const InfoItem = ({ emoji, iconClass, label, value, sub }) => (
 )
 
 const MiniStat = ({ label, value, valueClass }) => (
-  <div className="rounded-2xl bg-cream p-5 shadow-ribbon">
+  <div className={classNames(cardClass, 'p-5')}>
     <p className="mb-1 text-[13px] font-medium text-tan">{label}</p>
     <div className={classNames('font-display text-[32px] font-bold', valueClass)}>{value}</div>
   </div>
@@ -70,7 +68,7 @@ const Farm = () => {
     <div className="animate-hf-pop">
       <h1 className="mb-[22px] text-[34px]">{farmName}</h1>
 
-      <div className={classNames(cardClass, 'mb-6')}>
+      <div className={classNames(cardClass, 'mb-6 p-6')}>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
           <InfoItem emoji="🏡" iconClass="bg-green-soft" label="Farm name" value={farmName} />
           <InfoItem emoji="👤" iconClass="bg-green-badgeBg" label="Owner" value={userName} sub={userEmail} />
@@ -86,7 +84,7 @@ const Farm = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 wide:grid-cols-2">
-        <div className={cardClass}>
+        <div className={classNames(cardClass, 'p-6')}>
           <h2 className="mb-[18px] text-[22px]">Animals by type</h2>
           <div className="grid grid-cols-2 gap-3 xs:grid-cols-4">
             {TYPES.map((t) => (
@@ -101,7 +99,7 @@ const Farm = () => {
           </div>
         </div>
 
-        <div className={cardClass}>
+        <div className={classNames(cardClass, 'p-6')}>
           <h2 className="mb-[18px] text-[22px]">Care status</h2>
           <div className="flex flex-col gap-3.5">
             <CareRow emoji="🌾" label="Fed in last 24h" value={fed24} valueClass="text-green" />

@@ -31,7 +31,8 @@
     font-family: inherit;
   }
 
-  [dir='rtl'] body {
+  /* Matches whether `dir` lands on <html> or <body>. */
+  [dir='rtl'] {
     @apply font-arabic;
   }
 }
@@ -69,18 +70,6 @@
   .hf-leaf-bg-header::before {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='52' viewBox='0 0 52 52'%3E%3Cg fill='%23ffffff' opacity='0.09'%3E%3Cpath d='M13 7c5 4 5 13 0 17-5-4-5-13 0-17z'/%3E%3Cpath d='M37 28c5 4 5 13 0 17-5-4-5-13 0-17z'/%3E%3C/g%3E%3C/svg%3E");
   }
-}
-
-/* Toast entrance. Kept as raw CSS because the keyframe carries the
-   translateX(-50%) centring transform, which a Tailwind animation
-   utility would fight with. */
-@keyframes hf-toast {
-  0% { opacity: 0; transform: translateX(-50%) translateY(-16px) scale(.9); }
-  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-}
-
-.hf-anim-toast {
-  animation: hf-toast .35s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

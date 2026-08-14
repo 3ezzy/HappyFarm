@@ -7,9 +7,7 @@ import { animalService } from '../../services/api/animals.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { TYPES, typeInfo, ageText, eligible } from '../../theme/hf.jsx'
-
-const cardClass = 'rounded-2xl bg-cream p-6 shadow-ribbon'
+import { TYPES, typeInfo, ageText, eligible, badge, cardClass } from '../../theme/hf.jsx'
 
 const StatCard = ({ value, label, className, valueClass, labelClass }) => (
   <div className={classNames('rounded-2xl p-[22px] shadow-ribbon', className)}>
@@ -88,7 +86,7 @@ const Dashboard = () => {
 
       {/* Flock + quick actions */}
       <div className="grid grid-cols-1 items-start gap-6 wide:grid-cols-[1.4fr_1fr]">
-        <div className={cardClass}>
+        <div className={classNames(cardClass, 'p-6')}>
           <h2 className="mb-[18px] text-[22px]">Your flock</h2>
           <div className="grid grid-cols-2 gap-3.5 xs:grid-cols-4">
             {byType.map((bt) => (
@@ -114,7 +112,7 @@ const Dashboard = () => {
       </div>
 
       {/* Recent animals */}
-      <div className={classNames(cardClass, 'mt-6')}>
+      <div className={classNames(cardClass, 'mt-6 p-6')}>
         <h2 className="mb-1.5 text-[22px]">Recent animals</h2>
         <p className="mb-[18px] text-sm text-tan">Your latest additions to the farm.</p>
         {recent.length === 0 ? (
@@ -139,9 +137,9 @@ const Dashboard = () => {
                     </span>
                   </span>
                   {a.is_sacrificed ? (
-                    <span className="rounded-full border-2 border-line bg-cream-muted px-3 py-[3px] text-xs font-semibold text-tan">Sacrificed</span>
+                    <span className={badge('sacrificed')}>Sacrificed</span>
                   ) : (
-                    <span className="rounded-full border-2 border-green-line bg-green-badgeBg px-3 py-[3px] text-xs font-semibold text-green-badge">Active</span>
+                    <span className={badge('active')}>Active</span>
                   )}
                 </button>
               )

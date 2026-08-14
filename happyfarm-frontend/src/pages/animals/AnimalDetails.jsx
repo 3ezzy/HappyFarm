@@ -6,9 +6,7 @@ import toast from 'react-hot-toast'
 import { animalService } from '../../services/api/animals.js'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { typeInfo, ageText, eligible, minAge, minAgeText, fmt, timeSince } from '../../theme/hf.jsx'
-
-const cardClass = 'rounded-2xl bg-cream p-7 shadow-ribbon'
+import { typeInfo, ageText, eligible, minAge, minAgeText, fmt, timeSince, badge, cardClass } from '../../theme/hf.jsx'
 
 const backBtnClass =
   'mb-5 inline-flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-line bg-cream ' +
@@ -20,8 +18,6 @@ const careBtnClass =
   'font-display text-[15px] font-bold text-white shadow-soft ' +
   'transition-all duration-200 ease-pop enabled:hover:scale-[1.03] ' +
   'disabled:cursor-not-allowed disabled:opacity-70'
-
-const statusPill = 'inline-flex items-center gap-1.5 rounded-full border-2 px-3.5 py-[5px] text-[13px] font-semibold'
 
 const AnimalDetails = () => {
   const { id } = useParams()
@@ -76,7 +72,7 @@ const AnimalDetails = () => {
         <button onClick={() => navigate('/animals')} className={backBtnClass}>
           <span className="text-base">←</span> Back to animals
         </button>
-        <div className={classNames(cardClass, 'text-center')}>
+        <div className={classNames(cardClass, 'p-7 text-center')}>
           <h3 className="mb-2 text-[22px]">Animal not found</h3>
           <p className="text-tan">This animal doesn't exist or you don't have access to it.</p>
         </div>
@@ -99,7 +95,7 @@ const AnimalDetails = () => {
       <div className="grid grid-cols-1 items-start gap-6 wide:grid-cols-[1.6fr_1fr]">
         {/* Main info */}
         <div className="flex flex-col gap-6">
-          <div className={cardClass}>
+          <div className={classNames(cardClass, 'p-7')}>
             <div className="flex flex-wrap items-center gap-[22px]">
               <span className={classNames('inline-flex h-[108px] w-[108px] flex-none items-center justify-center rounded-2xl shadow-[inset_0_0_0_6px_rgba(255,255,255,0.5)]', ti.bgClass)}>
                 <AnimalIcon type={animal.type} size={92} />
@@ -109,9 +105,9 @@ const AnimalDetails = () => {
                 <p className="mb-1 text-lg text-brown">{ti.label} · {ageText(animal.age)} old</p>
                 <p className="mb-3 text-[15px] text-tan">{ti.ar}</p>
                 {animal.is_sacrificed ? (
-                  <span className={classNames(statusPill, 'border-line bg-cream-muted text-tan')}>Sacrificed</span>
+                  <span className={badge('sacrificed', 'lg')}>Sacrificed</span>
                 ) : (
-                  <span className={classNames(statusPill, 'border-green-line bg-green-badgeBg text-green-badge')}>● Active</span>
+                  <span className={badge('active', 'lg')}>● Active</span>
                 )}
               </div>
             </div>
