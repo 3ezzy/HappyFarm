@@ -1,50 +1,27 @@
 import React, { useState } from 'react'
+import classNames from 'classnames'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import toast from 'react-hot-toast'
 import { animalService } from '../../services/api/animals.js'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { C, Hoverable, typeInfo, ageText, eligible, minAge, minAgeText, fmt, timeSince } from '../../theme/hf.jsx'
+import { typeInfo, ageText, eligible, minAge, minAgeText, fmt, timeSince } from '../../theme/hf.jsx'
 
-const card = { background: C.cream, borderRadius: '16px', padding: '28px', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }
+const cardClass = 'rounded-2xl bg-cream p-7 shadow-ribbon'
 
-const backBtn = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '6px',
-  background: C.cream,
-  color: C.brownText,
-  fontFamily: "'Zilla Slab', serif",
-  fontWeight: 700,
-  fontSize: '14px',
-  padding: '8px 18px',
-  border: '2px solid #C9BD9F',
-  borderRadius: '9999px',
-  cursor: 'pointer',
-  marginBottom: '20px',
-  transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55)',
-}
+const backBtnClass =
+  'mb-5 inline-flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-line bg-cream ' +
+  'px-[18px] py-2 font-display text-sm font-bold text-brown-text ' +
+  'transition-transform duration-200 ease-pop hover:scale-[1.04]'
 
-const careBtn = (bg, hoverBg) => ({
-  base: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    background: bg,
-    color: '#fff',
-    fontFamily: "'Zilla Slab', serif",
-    fontWeight: 700,
-    fontSize: '15px',
-    padding: '13px 20px',
-    border: 'none',
-    borderRadius: '9999px',
-    boxShadow: '0 2px 4px rgba(107,92,67,0.16)',
-    cursor: 'pointer',
-    transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55),background-color .2s',
-  },
-  hover: { transform: 'scale(1.03)', background: hoverBg },
-})
+const careBtnClass =
+  'flex cursor-pointer items-center gap-2.5 rounded-full border-none px-5 py-[13px] ' +
+  'font-display text-[15px] font-bold text-white shadow-soft ' +
+  'transition-all duration-200 ease-pop enabled:hover:scale-[1.03] ' +
+  'disabled:cursor-not-allowed disabled:opacity-70'
+
+const statusPill = 'inline-flex items-center gap-1.5 rounded-full border-2 px-3.5 py-[5px] text-[13px] font-semibold'
 
 const AnimalDetails = () => {
   const { id } = useParams()
@@ -87,7 +64,7 @@ const AnimalDetails = () => {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+      <div className="flex justify-center py-12">
         <LoadingSpinner size="large" message="Loading animal…" />
       </div>
     )
@@ -95,13 +72,13 @@ const AnimalDetails = () => {
 
   if (error || !animal) {
     return (
-      <div className="hf-anim-pop">
-        <Hoverable as="button" onClick={() => navigate('/animals')} baseStyle={backBtn} hoverStyle={{ transform: 'scale(1.04)' }}>
-          <span style={{ fontSize: '16px' }}>←</span> Back to animals
-        </Hoverable>
-        <div style={{ ...card, textAlign: 'center' }}>
-          <h3 style={{ fontSize: '22px', marginBottom: '8px' }}>Animal not found</h3>
-          <p style={{ color: C.tan, margin: 0 }}>This animal doesn't exist or you don't have access to it.</p>
+      <div className="animate-hf-pop">
+        <button onClick={() => navigate('/animals')} className={backBtnClass}>
+          <span className="text-base">←</span> Back to animals
+        </button>
+        <div className={classNames(cardClass, 'text-center')}>
+          <h3 className="mb-2 text-[22px]">Animal not found</h3>
+          <p className="text-tan">This animal doesn't exist or you don't have access to it.</p>
         </div>
       </div>
     )
@@ -109,73 +86,73 @@ const AnimalDetails = () => {
 
   const ti = typeInfo(animal.type)
   const elig = eligible(animal)
-  const notEligible = !animal.is_sacrificed && !elig
   const eligMsg = elig
     ? `Eligible for sacrifice (minimum ${minAgeText(animal.type)}).`
     : `Not yet eligible — needs ${(minAge(animal.type) - Number(animal.age)).toFixed(1)} more yr (minimum ${minAgeText(animal.type)}).`
 
-  const feedC = careBtn(C.green, C.greenDark)
-  const groomC = careBtn(C.blue, C.blueDark)
-  const sacC = careBtn(C.brown, C.brownDark)
-
   return (
-    <div className="hf-anim-pop">
-      <Hoverable as="button" onClick={() => navigate('/animals')} baseStyle={backBtn} hoverStyle={{ transform: 'scale(1.04)' }}>
-        <span style={{ fontSize: '16px' }}>←</span> Back to animals
-      </Hoverable>
+    <div className="animate-hf-pop">
+      <button onClick={() => navigate('/animals')} className={backBtnClass}>
+        <span className="text-base">←</span> Back to animals
+      </button>
 
-      <div className="hf-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '24px', alignItems: 'start' }}>
+      <div className="grid grid-cols-1 items-start gap-6 wide:grid-cols-[1.6fr_1fr]">
         {/* Main info */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div style={card}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '22px', flexWrap: 'wrap' }}>
-              <span style={{ display: 'inline-flex', width: '108px', height: '108px', background: ti.bg, borderRadius: '16px', alignItems: 'center', justifyContent: 'center', flex: 'none', boxShadow: 'inset 0 0 0 6px rgba(255,255,255,0.5)' }}>
+        <div className="flex flex-col gap-6">
+          <div className={cardClass}>
+            <div className="flex flex-wrap items-center gap-[22px]">
+              <span className={classNames('inline-flex h-[108px] w-[108px] flex-none items-center justify-center rounded-2xl shadow-[inset_0_0_0_6px_rgba(255,255,255,0.5)]', ti.bgClass)}>
                 <AnimalIcon type={animal.type} size={92} />
               </span>
               <div>
-                <h1 style={{ fontSize: '38px', lineHeight: 1.05, marginBottom: '6px' }}>{animal.name}</h1>
-                <p style={{ margin: '0 0 4px', fontSize: '18px', color: C.brown }}>{ti.label} · {ageText(animal.age)} old</p>
-                <p style={{ margin: '0 0 12px', fontSize: '15px', color: C.tan }}>{ti.ar}</p>
+                <h1 className="mb-1.5 text-[38px] leading-[1.05]">{animal.name}</h1>
+                <p className="mb-1 text-lg text-brown">{ti.label} · {ageText(animal.age)} old</p>
+                <p className="mb-3 text-[15px] text-tan">{ti.ar}</p>
                 {animal.is_sacrificed ? (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: C.tan, background: '#ECE7D2', border: '2px solid #C9BD9F', borderRadius: '9999px', padding: '5px 14px' }}>Sacrificed</span>
+                  <span className={classNames(statusPill, 'border-line bg-cream-muted text-tan')}>Sacrificed</span>
                 ) : (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#2E7A48', background: '#E4F5E9', border: '2px solid #C7E9D2', borderRadius: '9999px', padding: '5px 14px' }}>● Active</span>
+                  <span className={classNames(statusPill, 'border-green-line bg-green-badgeBg text-green-badge')}>● Active</span>
                 )}
               </div>
             </div>
 
-            <div className="hf-care-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '24px' }}>
-              <div style={{ background: '#EAF2FB', borderRadius: '16px', padding: '18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <h4 style={{ fontSize: '15px', color: C.blueDark }}>Last fed</h4><span style={{ fontSize: '18px' }}>🌾</span>
+            <div className="mt-6 grid grid-cols-1 gap-3.5 xs:grid-cols-2">
+              <div className="rounded-2xl bg-blue-soft p-[18px]">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <h4 className="text-[15px] text-blue-dark">Last fed</h4><span className="text-lg">🌾</span>
                 </div>
-                <p style={{ margin: 0, fontSize: '14px', color: C.blueDark, fontWeight: 600 }}>{fmt(animal.fed_at)}</p>
-                {animal.fed_at && <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: '#68A1D7' }}>{timeSince(animal.fed_at)}</p>}
+                <p className="text-sm font-semibold text-blue-dark">{fmt(animal.fed_at)}</p>
+                {animal.fed_at && <p className="mt-[3px] text-[12.5px] text-blue">{timeSince(animal.fed_at)}</p>}
               </div>
-              <div style={{ background: '#E4F5E9', borderRadius: '16px', padding: '18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <h4 style={{ fontSize: '15px', color: '#2E7A48' }}>Last groomed</h4><span style={{ fontSize: '18px' }}>✨</span>
+              <div className="rounded-2xl bg-green-badgeBg p-[18px]">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <h4 className="text-[15px] text-green-badge">Last groomed</h4><span className="text-lg">✨</span>
                 </div>
-                <p style={{ margin: 0, fontSize: '14px', color: '#2E7A48', fontWeight: 600 }}>{fmt(animal.groomed_at)}</p>
-                {animal.groomed_at && <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: '#5Fae7e' }}>{timeSince(animal.groomed_at)}</p>}
+                <p className="text-sm font-semibold text-green-badge">{fmt(animal.groomed_at)}</p>
+                {animal.groomed_at && <p className="mt-[3px] text-[12.5px] text-green-muted">{timeSince(animal.groomed_at)}</p>}
               </div>
             </div>
 
             {animal.is_sacrificed ? (
-              <div style={{ marginTop: '14px', background: '#ECE7D2', borderRadius: '16px', padding: '18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <h4 style={{ fontSize: '15px', color: C.brownText }}>Sacrificed</h4><span style={{ fontSize: '18px' }}>🤲</span>
+              <div className="mt-3.5 rounded-2xl bg-cream-muted p-[18px]">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <h4 className="text-[15px] text-brown-text">Sacrificed</h4><span className="text-lg">🤲</span>
                 </div>
-                <p style={{ margin: 0, fontSize: '14px', color: C.brown, fontWeight: 600 }}>{fmt(animal.sacrificed_at)}</p>
-                <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: C.tan }}>May it be accepted · تقبل الله</p>
+                <p className="text-sm font-semibold text-brown">{fmt(animal.sacrificed_at)}</p>
+                <p className="mt-[3px] text-[12.5px] text-tan">May it be accepted · تقبل الله</p>
               </div>
             ) : (
-              <div style={{ marginTop: '14px', background: C.cream, border: `3px solid ${elig ? '#9BD9C2' : '#F5E2B8'}`, borderRadius: '16px', padding: '18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>{elig ? '🌙' : '⏳'}</span>
+              <div
+                className={classNames(
+                  'mt-3.5 rounded-2xl border-[3px] bg-cream p-[18px]',
+                  elig ? 'border-green-border' : 'border-yellow-line'
+                )}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl">{elig ? '🌙' : '⏳'}</span>
                   <div>
-                    <h4 style={{ fontSize: '15px', color: C.brownText }}>Sacrifice eligibility</h4>
-                    <p style={{ margin: '3px 0 0', fontSize: '14px', color: C.brown }}>{eligMsg}</p>
+                    <h4 className="text-[15px] text-brown-text">Sacrifice eligibility</h4>
+                    <p className="mt-[3px] text-sm text-brown">{eligMsg}</p>
                   </div>
                 </div>
               </div>
@@ -184,33 +161,47 @@ const AnimalDetails = () => {
         </div>
 
         {/* Care actions */}
-        <div style={{ background: C.greenSoft, borderRadius: '16px', padding: '24px', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }}>
-          <h2 style={{ fontSize: '22px', marginBottom: '18px' }}>Care</h2>
+        <div className="rounded-2xl bg-green-soft p-6 shadow-ribbon">
+          <h2 className="mb-[18px] text-[22px]">Care</h2>
           {animal.is_sacrificed ? (
-            <div style={{ textAlign: 'center', padding: '24px 8px' }}>
-              <div style={{ fontSize: '40px', marginBottom: '10px' }}>🤲</div>
-              <p style={{ margin: 0, color: C.brown, fontWeight: 600 }}>This animal has been sacrificed.</p>
-              <p style={{ margin: '6px 0 0', fontSize: '13.5px', color: C.tan }}>No further actions available.</p>
+            <div className="px-2 py-6 text-center">
+              <div className="mb-2.5 text-[40px]">🤲</div>
+              <p className="font-semibold text-brown">This animal has been sacrificed.</p>
+              <p className="mt-1.5 text-[13.5px] text-tan">No further actions available.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <Hoverable onClick={() => feedMutation.mutate()} disabled={feedMutation.isLoading} baseStyle={feedC.base} hoverStyle={feedC.hover}>
-                <span style={{ fontSize: '17px' }}>🌾</span> Feed {animal.name}
-              </Hoverable>
-              <Hoverable onClick={() => groomMutation.mutate()} disabled={groomMutation.isLoading} baseStyle={groomC.base} hoverStyle={groomC.hover}>
-                <span style={{ fontSize: '17px' }}>✨</span> Groom {animal.name}
-              </Hoverable>
-              <div style={{ height: '1px', background: C.border, margin: '6px 0' }} />
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => feedMutation.mutate()}
+                disabled={feedMutation.isLoading}
+                className={classNames(careBtnClass, 'bg-green enabled:hover:bg-green-dark')}
+              >
+                <span className="text-[17px]">🌾</span> Feed {animal.name}
+              </button>
+              <button
+                onClick={() => groomMutation.mutate()}
+                disabled={groomMutation.isLoading}
+                className={classNames(careBtnClass, 'bg-blue enabled:hover:bg-blue-dark')}
+              >
+                <span className="text-[17px]">✨</span> Groom {animal.name}
+              </button>
+              <div className="my-1.5 h-px bg-line" />
               {elig ? (
-                <Hoverable onClick={() => setShowSacrifice(true)} baseStyle={sacC.base} hoverStyle={sacC.hover}>
+                <button
+                  onClick={() => setShowSacrifice(true)}
+                  className={classNames(careBtnClass, 'bg-brown enabled:hover:bg-brown-dark')}
+                >
                   🔪 Sacrifice {animal.name}
-                </Hoverable>
+                </button>
               ) : (
                 <>
-                  <button disabled style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#ECE9DC', color: '#A99E86', fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '15px', padding: '13px 20px', border: 'none', borderRadius: '9999px', cursor: 'not-allowed' }}>
+                  <button
+                    disabled
+                    className="flex cursor-not-allowed items-center gap-2.5 rounded-full border-none bg-disabled px-5 py-[13px] font-display text-[15px] font-bold text-disabled-text"
+                  >
                     Not eligible yet
                   </button>
-                  <p style={{ margin: 0, fontSize: '12.5px', color: C.tan, textAlign: 'center' }}>Must meet the minimum age for sacrifice.</p>
+                  <p className="text-center text-[12.5px] text-tan">Must meet the minimum age for sacrifice.</p>
                 </>
               )}
             </div>
@@ -222,34 +213,33 @@ const AnimalDetails = () => {
       {showSacrifice && (
         <div
           onClick={() => setShowSacrifice(false)}
-          className="hf-anim-fade"
-          style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(58,47,32,0.5)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+          className="fixed inset-0 z-50 flex animate-hf-fade items-center justify-center bg-scrim p-5 backdrop-blur-[3px]"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{ width: '100%', maxWidth: '420px', background: C.cream, borderRadius: '16px', boxShadow: '0 16px 30px -5px rgba(107,92,67,0.26)', overflow: 'hidden', animation: 'hf-modal .4s cubic-bezier(0.68,-0.55,0.265,1.55) both' }}
+            className="w-full max-w-[420px] animate-hf-modal overflow-hidden rounded-2xl bg-cream shadow-card"
           >
-            <div style={{ padding: '28px 28px 8px', textAlign: 'center' }}>
-              <div style={{ width: '56px', height: '56px', margin: '0 auto 14px', background: '#FCE7E5', borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px' }}>⚠️</div>
-              <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>Sacrifice {animal.name}?</h3>
-              <p style={{ margin: '0 24px', fontSize: '15px', color: C.brown, lineHeight: 1.6 }}>This marks the animal as sacrificed and cannot be undone. May it be accepted.</p>
+            <div className="px-7 pb-2 pt-7 text-center">
+              <div className="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-red-soft text-[26px]">⚠️</div>
+              <h3 className="mb-2 text-2xl">Sacrifice {animal.name}?</h3>
+              <p className="mx-6 text-[15px] leading-relaxed text-brown">
+                This marks the animal as sacrificed and cannot be undone. May it be accepted.
+              </p>
             </div>
-            <div style={{ display: 'flex', gap: '12px', padding: '24px 28px' }}>
-              <Hoverable
+            <div className="flex gap-3 px-7 py-6">
+              <button
                 onClick={() => setShowSacrifice(false)}
-                baseStyle={{ flex: 1, background: C.cream, color: C.brownText, fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '15px', padding: '12px', border: '2px solid #C9BD9F', borderRadius: '9999px', cursor: 'pointer', transition: 'transform .15s' }}
-                hoverStyle={{ transform: 'scale(1.03)' }}
+                className="flex-1 cursor-pointer rounded-full border-2 border-line bg-cream p-3 font-display text-[15px] font-bold text-brown-text transition-transform duration-150 hover:scale-[1.03]"
               >
                 Cancel
-              </Hoverable>
-              <Hoverable
+              </button>
+              <button
                 onClick={() => sacrificeMutation.mutate()}
                 disabled={sacrificeMutation.isLoading}
-                baseStyle={{ flex: 1, background: C.red, color: '#fff', fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '15px', padding: '12px', border: 'none', borderRadius: '9999px', cursor: 'pointer', boxShadow: '0 2px 4px rgba(107,92,67,0.16)', transition: 'transform .15s,background-color .2s' }}
-                hoverStyle={{ transform: 'scale(1.03)', background: C.redDark }}
+                className="flex-1 cursor-pointer rounded-full border-none bg-red p-3 font-display text-[15px] font-bold text-white shadow-soft transition-all duration-150 enabled:hover:scale-[1.03] enabled:hover:bg-red-dark disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {sacrificeMutation.isLoading ? 'Confirming…' : 'Confirm'}
-              </Hoverable>
+              </button>
             </div>
           </div>
         </div>

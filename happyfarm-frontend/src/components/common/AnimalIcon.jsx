@@ -1,22 +1,21 @@
 import React from 'react'
+import classNames from 'classnames'
 
 /**
  * HappyFarm animal icon — hand-drawn SVG marks per animal type.
  * Ported from the HappyFarm design system (AnimalIcon.dc.html).
  */
-const AnimalIcon = ({ type = 'sheep', size = 54, style }) => {
+const AnimalIcon = ({ type = 'sheep', size = 54, className, style }) => {
   const common = {
     viewBox: '0 0 100 100',
     width: '100%',
     height: '100%',
     preserveAspectRatio: 'xMidYMid meet',
   }
+  // Size stays inline: it is a caller-supplied value, not a design token.
   const wrap = {
     width: typeof size === 'number' ? `${size}px` : size,
     height: typeof size === 'number' ? `${size}px` : size,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
     ...style,
   }
 
@@ -100,7 +99,11 @@ const AnimalIcon = ({ type = 'sheep', size = 54, style }) => {
     )
   }
 
-  return <div style={wrap}>{svg}</div>
+  return (
+    <div className={classNames('flex items-center justify-center', className)} style={wrap}>
+      {svg}
+    </div>
+  )
 }
 
 export default AnimalIcon

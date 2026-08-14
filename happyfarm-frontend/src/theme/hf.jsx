@@ -1,44 +1,30 @@
-import React, { useState } from 'react'
+import React from 'react'
+import classNames from 'classnames'
+import { C, SPECIES_BG } from './colors.js'
 
 /* ============================================================
    HappyFarm — Eid Al Adha shared design tokens & helpers
    ============================================================ */
 
-export const C = {
-  pageBg: '#E7F4EC',
-  green: '#008160',
-  greenDark: '#00684D',
-  greenSoft: '#E2F4EC',
-  greenSoft2: '#EAF7EF',
-  cream: '#FBFAF1',
-  brown: '#6B5C43',
-  brownText: '#574A30',
-  brownDark: '#51442F',
-  tan: '#8A7B60',
-  yellow: '#E29A2B',
-  sand: '#F3F0E1',
-  border: '#C9BD9F',
-  inputBorder: '#BBAE8C',
-  red: '#D83A3A',
-  redDark: '#B12B2B',
-  blue: '#68A1D7',
-  blueDark: '#2D6895',
-}
+// Re-exported so existing imports of `C` keep working. Prefer Tailwind
+// classes in markup; `C` is for raw values (SVG fills, gradients).
+export { C, SPECIES_BG }
 
 export const TYPES = ['sheep', 'goat', 'cow', 'camel']
 
 export const ANIMAL_META = {
-  sheep: { label: 'Sheep', plural: 'Sheep', ar: 'الضأن (غنم)', bg: '#DCEAF8', minAge: 0.5, minAgeText: '6 months' },
-  goat: { label: 'Goat', plural: 'Goats', ar: 'الماعز', bg: '#D6EBDB', minAge: 1, minAgeText: '1 year' },
-  cow: { label: 'Cow', plural: 'Cows', ar: 'البقر', bg: '#F7E6BE', minAge: 2, minAgeText: '2 years' },
-  camel: { label: 'Camel', plural: 'Camels', ar: 'الإبل', bg: '#FADCC6', minAge: 5, minAgeText: '5 years' },
+  sheep: { label: 'Sheep', plural: 'Sheep', ar: 'الضأن (غنم)', bgClass: 'bg-species-sheep', minAge: 0.5, minAgeText: '6 months' },
+  goat: { label: 'Goat', plural: 'Goats', ar: 'الماعز', bgClass: 'bg-species-goat', minAge: 1, minAgeText: '1 year' },
+  cow: { label: 'Cow', plural: 'Cows', ar: 'البقر', bgClass: 'bg-species-cow', minAge: 2, minAgeText: '2 years' },
+  camel: { label: 'Camel', plural: 'Camels', ar: 'الإبل', bgClass: 'bg-species-camel', minAge: 5, minAgeText: '5 years' },
 }
 
 export const typeInfo = (t) =>
-  ANIMAL_META[t] || { label: t, plural: t, ar: '', bg: C.cream, minAge: 0, minAgeText: '' }
+  ANIMAL_META[t] || { label: t, plural: t, ar: '', bgClass: 'bg-cream', minAge: 0, minAgeText: '' }
 
 export const minAge = (t) => typeInfo(t).minAge
 export const minAgeText = (t) => typeInfo(t).minAgeText
+export const typeBgClass = (t) => typeInfo(t).bgClass
 
 export const eligible = (a) => !!a && !a.is_sacrificed && Number(a.age) >= minAge(a.type)
 
@@ -81,55 +67,39 @@ export const initialsOf = (name) =>
     .toUpperCase()
 
 /* ------------------------------------------------------------
-   Interactive primitives (hover / focus for inline styles)
+   Shared class recipes
+
+   Hover and focus states are plain Tailwind variants now, which is why
+   the old `Hoverable` wrapper and the stateful `HfInput` are gone — they
+   only existed to emulate :hover / :focus for inline styles.
    ------------------------------------------------------------ */
 
-export function Hoverable({ as = 'button', baseStyle, hoverStyle, disabled, children, ...props }) {
-  const Tag = as
-  const [hover, setHover] = useState(false)
-  const style = disabled ? baseStyle : { ...baseStyle, ...(hover ? hoverStyle : null) }
-  return (
-    <Tag
-      style={style}
-      disabled={disabled}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      {...props}
-    >
-      {children}
-    </Tag>
-  )
-}
+export const cardClass =
+  'rounded-2xl border-2 border-line bg-cream shadow-chip'
 
-const inputBase = {
-  display: 'block',
-  width: '100%',
-  border: `2px solid ${C.inputBorder}`,
-  background: C.cream,
-  borderRadius: '16px',
-  padding: '11px 14px',
-  fontSize: '15px',
-  color: C.brownText,
-  outline: 'none',
-  transition: 'border-color .2s',
-}
+export const inputClass =
+  'block w-full rounded-2xl border-2 border-line-input bg-cream px-3.5 py-2.5 ' +
+  'text-[15px] text-brown-text outline-none transition-colors duration-200 ' +
+  'focus:border-green'
 
-export function HfInput({ style, ...props }) {
-  const [focus, setFocus] = useState(false)
-  return (
-    <input
-      {...props}
-      onFocus={(e) => {
-        setFocus(true)
-        props.onFocus && props.onFocus(e)
-      }}
-      onBlur={(e) => {
-        setFocus(false)
-        props.onBlur && props.onBlur(e)
-      }}
-      style={{ ...inputBase, ...style, borderColor: focus ? C.green : C.inputBorder }}
-    />
-  )
+export const btnBase =
+  'inline-flex items-center justify-center gap-1.5 rounded-full font-display ' +
+  'font-bold cursor-pointer transition-transform duration-200 ease-pop ' +
+  'disabled:cursor-not-allowed disabled:opacity-60 enabled:hover:scale-105'
+
+export const btnPrimary = `${btnBase} bg-green text-cream px-4 py-2 shadow-chip`
+export const btnCream = `${btnBase} bg-cream text-brown-text px-4 py-2 shadow-chip`
+export const btnDanger = `${btnBase} bg-red text-white px-4 py-2 shadow-chip`
+
+/* Status pills, shared by the animal list, dashboard and detail screens. */
+const badgeBase = 'rounded-full border-2 px-3 py-[3px] text-xs font-semibold'
+
+export const badgeSacrificed = `${badgeBase} border-line bg-cream-muted text-tan`
+export const badgeActive = `${badgeBase} border-green-line bg-green-badgeBg text-green-badge`
+export const badgeEligible = `${badgeBase} border-yellow-line bg-yellow-badgeBg text-yellow-badge`
+
+export function HfInput({ className, ...props }) {
+  return <input {...props} className={classNames(inputClass, className)} />
 }
 
 /* shared logo mark */

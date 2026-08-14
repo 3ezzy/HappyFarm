@@ -9,7 +9,7 @@ const ProtectedRoute = () => {
   // Show loading while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-pageBg">
         <LoadingSpinner size="large" message="Loading..." />
       </div>
     )

@@ -1,35 +1,38 @@
 import React from 'react'
+import classNames from 'classnames'
 import { useQuery } from 'react-query'
 import { farmService } from '../../services/api/farm.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { C, TYPES, typeInfo } from '../../theme/hf.jsx'
+import { TYPES, typeInfo } from '../../theme/hf.jsx'
 
-const card = { background: C.cream, borderRadius: '16px', padding: '24px', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }
+const cardClass = 'rounded-2xl bg-cream p-6 shadow-ribbon'
 
-const InfoItem = ({ emoji, bg, label, value, sub }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-    <span style={{ display: 'inline-flex', width: '48px', height: '48px', background: bg, borderRadius: '9999px', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>{emoji}</span>
+const InfoItem = ({ emoji, iconClass, label, value, sub }) => (
+  <div className="flex items-center gap-3.5">
+    <span className={classNames('inline-flex h-12 w-12 items-center justify-center rounded-full text-[22px]', iconClass)}>
+      {emoji}
+    </span>
     <div>
-      <p style={{ margin: 0, fontSize: '13px', color: C.tan, fontWeight: 500 }}>{label}</p>
-      <p style={{ margin: '2px 0 0', fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '18px', color: C.brownText }}>{value}</p>
-      {sub && <p style={{ margin: 0, fontSize: '12.5px', color: C.tan }}>{sub}</p>}
+      <p className="text-[13px] font-medium text-tan">{label}</p>
+      <p className="mt-0.5 font-display text-lg font-bold text-brown-text">{value}</p>
+      {sub && <p className="text-[12.5px] text-tan">{sub}</p>}
     </div>
   </div>
 )
 
-const MiniStat = ({ label, value, valueColor }) => (
-  <div style={{ ...card, padding: '20px' }}>
-    <p style={{ margin: '0 0 4px', fontSize: '13px', color: C.tan, fontWeight: 500 }}>{label}</p>
-    <div style={{ fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '32px', color: valueColor }}>{value}</div>
+const MiniStat = ({ label, value, valueClass }) => (
+  <div className="rounded-2xl bg-cream p-5 shadow-ribbon">
+    <p className="mb-1 text-[13px] font-medium text-tan">{label}</p>
+    <div className={classNames('font-display text-[32px] font-bold', valueClass)}>{value}</div>
   </div>
 )
 
-const CareRow = ({ emoji, label, value, color }) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-    <span style={{ fontSize: '14px', color: C.brown, fontWeight: 500 }}>{emoji} {label}</span>
-    <span style={{ fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '18px', color }}>{value}</span>
+const CareRow = ({ emoji, label, value, valueClass }) => (
+  <div className="flex items-center justify-between">
+    <span className="text-sm font-medium text-brown">{emoji} {label}</span>
+    <span className={classNames('font-display text-lg font-bold', valueClass)}>{value}</span>
   </div>
 )
 
@@ -42,7 +45,7 @@ const Farm = () => {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+      <div className="flex justify-center py-12">
         <LoadingSpinner size="large" message="Loading farm…" />
       </div>
     )
@@ -64,47 +67,47 @@ const Farm = () => {
   const farmDays = farm?.created_at ? Math.max(0, Math.floor((Date.now() - new Date(farm.created_at).getTime()) / 86400000)) : 0
 
   return (
-    <div className="hf-anim-pop">
-      <h1 style={{ fontSize: '34px', marginBottom: '22px' }}>{farmName}</h1>
+    <div className="animate-hf-pop">
+      <h1 className="mb-[22px] text-[34px]">{farmName}</h1>
 
-      <div style={{ ...card, marginBottom: '24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '20px' }}>
-          <InfoItem emoji="🏡" bg={C.greenSoft} label="Farm name" value={farmName} />
-          <InfoItem emoji="👤" bg="#E4F5E9" label="Owner" value={userName} sub={userEmail} />
-          <InfoItem emoji="📅" bg="#EAF2FB" label="Farm age" value={`${farmDays} days`} />
+      <div className={classNames(cardClass, 'mb-6')}>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
+          <InfoItem emoji="🏡" iconClass="bg-green-soft" label="Farm name" value={farmName} />
+          <InfoItem emoji="👤" iconClass="bg-green-badgeBg" label="Owner" value={userName} sub={userEmail} />
+          <InfoItem emoji="📅" iconClass="bg-blue-soft" label="Farm age" value={`${farmDays} days`} />
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '20px', marginBottom: '24px' }}>
-        <MiniStat label="Total animals" value={total} valueColor={C.brownText} />
-        <MiniStat label="Active" value={activeCount} valueColor={C.green} />
-        <MiniStat label="Ready for sacrifice" value={readyCount} valueColor={C.yellow} />
-        <MiniStat label="Sacrificed" value={sacrificedCount} valueColor={C.tan} />
+      <div className="mb-6 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-5">
+        <MiniStat label="Total animals" value={total} valueClass="text-brown-text" />
+        <MiniStat label="Active" value={activeCount} valueClass="text-green" />
+        <MiniStat label="Ready for sacrifice" value={readyCount} valueClass="text-yellow" />
+        <MiniStat label="Sacrificed" value={sacrificedCount} valueClass="text-tan" />
       </div>
 
-      <div className="hf-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-        <div style={card}>
-          <h2 style={{ fontSize: '22px', marginBottom: '18px' }}>Animals by type</h2>
-          <div className="hf-type-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px' }}>
+      <div className="grid grid-cols-1 gap-6 wide:grid-cols-2">
+        <div className={cardClass}>
+          <h2 className="mb-[18px] text-[22px]">Animals by type</h2>
+          <div className="grid grid-cols-2 gap-3 xs:grid-cols-4">
             {TYPES.map((t) => (
-              <div key={t} style={{ background: typeInfo(t).bg, borderRadius: '16px', padding: '14px 8px', textAlign: 'center' }}>
-                <div style={{ width: '46px', height: '46px', margin: '0 auto 4px' }}>
+              <div key={t} className={classNames('rounded-2xl px-2 py-3.5 text-center', typeInfo(t).bgClass)}>
+                <div className="mx-auto mb-1 h-[46px] w-[46px]">
                   <AnimalIcon type={t} size={46} />
                 </div>
-                <div style={{ fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '20px', color: C.brownText }}>{byType[t] || 0}</div>
-                <div style={{ fontSize: '12px', color: C.tan }}>{typeInfo(t).label}</div>
+                <div className="font-display text-xl font-bold text-brown-text">{byType[t] || 0}</div>
+                <div className="text-xs text-tan">{typeInfo(t).label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={card}>
-          <h2 style={{ fontSize: '22px', marginBottom: '18px' }}>Care status</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <CareRow emoji="🌾" label="Fed in last 24h" value={fed24} color={C.green} />
-            <CareRow emoji="✨" label="Groomed in last 24h" value={groomed24} color={C.blue} />
-            <CareRow emoji="🌙" label="Eligible for sacrifice" value={readyCount} color={C.yellow} />
-            <CareRow emoji="⏳" label="Not yet eligible" value={notEligibleCount} color={C.tan} />
+        <div className={cardClass}>
+          <h2 className="mb-[18px] text-[22px]">Care status</h2>
+          <div className="flex flex-col gap-3.5">
+            <CareRow emoji="🌾" label="Fed in last 24h" value={fed24} valueClass="text-green" />
+            <CareRow emoji="✨" label="Groomed in last 24h" value={groomed24} valueClass="text-blue" />
+            <CareRow emoji="🌙" label="Eligible for sacrifice" value={readyCount} valueClass="text-yellow" />
+            <CareRow emoji="⏳" label="Not yet eligible" value={notEligibleCount} valueClass="text-tan" />
           </div>
         </div>
       </div>

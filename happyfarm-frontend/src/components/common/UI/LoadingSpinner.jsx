@@ -1,11 +1,11 @@
 import React from 'react'
 import classNames from 'classnames'
 
-const LoadingSpinner = ({ 
-  size = 'medium', 
-  color = 'primary', 
-  className = '', 
-  message = '' 
+const LoadingSpinner = ({
+  size = 'medium',
+  color = 'primary',
+  className = '',
+  message = ''
 }) => {
   const sizeClasses = {
     small: 'h-4 w-4',
@@ -15,8 +15,8 @@ const LoadingSpinner = ({
   }
 
   const colorClasses = {
-    primary: 'border-primary-600',
-    gray: 'border-gray-600',
+    primary: 'border-green',
+    gray: 'border-tan',
     white: 'border-white'
   }
 
@@ -31,7 +31,7 @@ const LoadingSpinner = ({
     <div className="flex flex-col items-center justify-center space-y-2">
       <div className={spinnerClasses}></div>
       {message && (
-        <p className="text-sm text-gray-600 animate-pulse">
+        <p className="animate-pulse text-sm text-tan">
           {message}
         </p>
       )}
@@ -39,4 +39,4 @@ const LoadingSpinner = ({
   )
 }
 
-export default LoadingSpinner 
+export default LoadingSpinner

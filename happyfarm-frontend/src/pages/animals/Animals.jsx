@@ -1,40 +1,30 @@
 import React, { useState } from 'react'
+import classNames from 'classnames'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import { animalService } from '../../services/api/animals.js'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { C, Hoverable, TYPES, typeInfo, ageText, eligible } from '../../theme/hf.jsx'
+import {
+  TYPES,
+  typeInfo,
+  ageText,
+  eligible,
+  badgeSacrificed,
+  badgeActive,
+  badgeEligible,
+} from '../../theme/hf.jsx'
 
-const addBtnBase = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '8px',
-  background: C.brown,
-  color: '#fff',
-  fontFamily: "'Zilla Slab', serif",
-  fontWeight: 700,
-  fontSize: '15px',
-  padding: '12px 24px',
-  border: 'none',
-  borderRadius: '9999px',
-  boxShadow: '0 2px 4px rgba(107,92,67,0.16)',
-  cursor: 'pointer',
-  transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55),background-color .2s',
-}
+const addBtnClass =
+  'inline-flex cursor-pointer items-center gap-2 rounded-full border-none bg-brown px-6 py-3 ' +
+  'font-display text-[15px] font-bold text-white shadow-soft transition-all duration-200 ease-pop ' +
+  'hover:scale-[1.04] hover:bg-brown-dark'
 
-const filterStyle = (active) => ({
-  border: `2px solid ${active ? C.green : C.border}`,
-  cursor: 'pointer',
-  fontFamily: "'Libre Franklin', sans-serif",
-  fontWeight: 600,
-  fontSize: '13.5px',
-  padding: '7px 16px',
-  borderRadius: '9999px',
-  transition: 'all .18s',
-  background: active ? C.green : C.cream,
-  color: active ? '#fff' : C.brown,
-})
+const filterClass = (active) =>
+  classNames(
+    'cursor-pointer rounded-full border-2 px-4 py-[7px] font-sans text-[13.5px] font-semibold transition-all duration-200',
+    active ? 'border-green bg-green text-white' : 'border-line bg-cream text-brown'
+  )
 
 const FILTERS = [
   { key: 'all', label: 'All' },
@@ -61,79 +51,67 @@ const Animals = () => {
   else if (TYPES.includes(filter)) list = list.filter((a) => a.type === filter)
 
   return (
-    <div className="hf-anim-pop">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '22px' }}>
-        <h1 style={{ fontSize: '34px' }}>Your animals</h1>
-        <Hoverable onClick={() => navigate('/animals/add')} baseStyle={addBtnBase} hoverStyle={{ transform: 'scale(1.04)', background: C.brownDark }}>
-          Add animal <span style={{ fontSize: '18px' }}>→</span>
-        </Hoverable>
+    <div className="animate-hf-pop">
+      <div className="mb-[22px] flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-[34px]">Your animals</h1>
+        <button onClick={() => navigate('/animals/add')} className={addBtnClass}>
+          Add animal <span className="text-lg">→</span>
+        </button>
       </div>
 
-      <div style={{ display: 'flex', gap: '9px', flexWrap: 'wrap', marginBottom: '22px' }}>
+      <div className="mb-[22px] flex flex-wrap gap-[9px]">
         {FILTERS.map((f) => (
-          <button key={f.key} onClick={() => setFilter(f.key)} style={filterStyle(filter === f.key)}>
+          <button key={f.key} onClick={() => setFilter(f.key)} className={filterClass(filter === f.key)}>
             {f.label}
           </button>
         ))}
       </div>
 
       {isLoading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+        <div className="flex justify-center py-12">
           <LoadingSpinner size="large" message="Loading animals…" />
         </div>
       ) : list.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: '20px' }}>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5">
           {list.map((a) => {
             const ti = typeInfo(a.type)
             return (
-              <Hoverable
+              <button
                 key={a.id}
                 onClick={() => navigate(`/animals/${a.id}`)}
-                baseStyle={{
-                  textAlign: 'left',
-                  background: C.cream,
-                  border: 'none',
-                  borderRadius: '16px',
-                  padding: '20px',
-                  boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)',
-                  cursor: 'pointer',
-                  transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55),box-shadow .2s',
-                }}
-                hoverStyle={{ transform: 'scale(1.02)', boxShadow: '0 10px 20px -3px rgba(107,92,67,0.22)' }}
+                className="cursor-pointer rounded-2xl border-none bg-cream p-5 text-start shadow-ribbon transition-all duration-200 ease-pop hover:scale-[1.02] hover:shadow-toast"
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
-                  <span style={{ display: 'inline-flex', width: '62px', height: '62px', background: ti.bg, borderRadius: '16px', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+                <div className="mb-3.5 flex items-center gap-3.5">
+                  <span className={classNames('inline-flex h-[62px] w-[62px] flex-none items-center justify-center rounded-2xl', ti.bgClass)}>
                     <AnimalIcon type={a.type} size={54} />
                   </span>
-                  <div style={{ minWidth: 0 }}>
-                    <h3 style={{ fontSize: '20px', lineHeight: 1.2 }}>{a.name}</h3>
-                    <p style={{ margin: '2px 0 0', fontSize: '14px', color: C.tan }}>{ti.label} · {ageText(a.age)}</p>
+                  <div className="min-w-0">
+                    <h3 className="text-xl leading-tight">{a.name}</h3>
+                    <p className="mt-0.5 text-sm text-tan">{ti.label} · {ageText(a.age)}</p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                <div className="flex items-center justify-between gap-2">
                   {a.is_sacrificed ? (
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: C.tan, background: '#ECE7D2', border: '2px solid #C9BD9F', borderRadius: '9999px', padding: '3px 12px' }}>Sacrificed</span>
+                    <span className={badgeSacrificed}>Sacrificed</span>
                   ) : (
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#2E7A48', background: '#E4F5E9', border: '2px solid #C7E9D2', borderRadius: '9999px', padding: '3px 12px' }}>Active</span>
+                    <span className={badgeActive}>Active</span>
                   )}
-                  {eligible(a) && (
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#B8771A', background: '#FBF1DD', border: '2px solid #F5E2B8', borderRadius: '9999px', padding: '3px 12px' }}>Eligible</span>
-                  )}
+                  {eligible(a) && <span className={badgeEligible}>Eligible</span>}
                 </div>
-              </Hoverable>
+              </button>
             )
           })}
         </div>
       ) : (
-        <div style={{ background: C.cream, borderRadius: '16px', padding: '56px 24px', textAlign: 'center', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }}>
-          <div style={{ width: '90px', height: '90px', margin: '0 auto 12px' }}>
+        <div className="rounded-2xl bg-cream px-6 py-14 text-center shadow-ribbon">
+          <div className="mx-auto mb-3 h-[90px] w-[90px]">
             <AnimalIcon type="sheep" size={90} />
           </div>
-          <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>No animals here yet</h3>
-          <p style={{ margin: '0 0 20px', color: C.tan }}>Try another filter, or add your first animal.</p>
-          <Hoverable onClick={() => navigate('/animals/add')} baseStyle={addBtnBase} hoverStyle={{ transform: 'scale(1.04)', background: C.brownDark }}>
-            Add animal <span style={{ fontSize: '18px' }}>→</span>
-          </Hoverable>
+          <h3 className="mb-2 text-2xl">No animals here yet</h3>
+          <p className="mb-5 text-tan">Try another filter, or add your first animal.</p>
+          <button onClick={() => navigate('/animals/add')} className={addBtnClass}>
+            Add animal <span className="text-lg">→</span>
+          </button>
         </div>
       )}
     </div>
