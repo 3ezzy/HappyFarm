@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'

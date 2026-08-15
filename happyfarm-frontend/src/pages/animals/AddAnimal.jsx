@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -8,7 +8,7 @@ import { animalService } from '../../services/api/animals.js'
 import { breedService } from '../../services/api/breeds.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
-import { HfInput, HfSelect, TYPES, speciesBgClass } from '../../theme/hf.jsx'
+import { HfInput, HfSelect, TYPES } from '../../theme/hf.jsx'
 
 const backBtnClass =
   'mb-5 inline-flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-line bg-cream ' +

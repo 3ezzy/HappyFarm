@@ -5,82 +5,50 @@ export const animalService = {
   // Get all animals for the user's farm, optionally filtered by ?search=
   // (partial match against tag or name, handled server-side)
   getAll: async (search) => {
-    try {
-      const response = await apiClient.get(ANIMAL_ENDPOINTS.LIST, {
-        params: search ? { search } : undefined,
-      })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.get(ANIMAL_ENDPOINTS.LIST, {
+      params: search ? { search } : undefined,
+    })
+    return response.data
   },
 
   // Get specific animal by ID
   getById: async (id) => {
-    try {
-      const response = await apiClient.get(ANIMAL_ENDPOINTS.DETAILS(id))
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.get(ANIMAL_ENDPOINTS.DETAILS(id))
+    return response.data
   },
 
   // Create new animal
   create: async (animalData) => {
-    try {
-      const response = await apiClient.post(ANIMAL_ENDPOINTS.CREATE, animalData)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.post(ANIMAL_ENDPOINTS.CREATE, animalData)
+    return response.data
   },
 
   // Feed an animal
   feed: async (id) => {
-    try {
-      const response = await apiClient.post(ANIMAL_ENDPOINTS.FEED(id))
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.post(ANIMAL_ENDPOINTS.FEED(id))
+    return response.data
   },
 
   // Groom an animal
   groom: async (id) => {
-    try {
-      const response = await apiClient.post(ANIMAL_ENDPOINTS.GROOM(id))
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.post(ANIMAL_ENDPOINTS.GROOM(id))
+    return response.data
   },
 
   // Sacrifice an animal
   sacrifice: async (id) => {
-    try {
-      const response = await apiClient.post(ANIMAL_ENDPOINTS.SACRIFICE(id))
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.post(ANIMAL_ENDPOINTS.SACRIFICE(id))
+    return response.data
   },
 
   // Weight history
   getWeights: async (id) => {
-    try {
-      const response = await apiClient.get(ANIMAL_ENDPOINTS.WEIGHTS(id))
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.get(ANIMAL_ENDPOINTS.WEIGHTS(id))
+    return response.data
   },
 
   addWeight: async (id, weightData) => {
-    try {
-      const response = await apiClient.post(ANIMAL_ENDPOINTS.WEIGHTS(id), weightData)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.post(ANIMAL_ENDPOINTS.WEIGHTS(id), weightData)
+    return response.data
   }
 }

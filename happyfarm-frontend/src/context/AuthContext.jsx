@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react'
+import { createContext, useContext, useReducer, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { authService } from '../services/api/auth.js'
-import { getUserData, getFarmData, isAuthenticated, clearAllData } from '../services/auth/tokenService.js'
+import { getUserData, getFarmData, isAuthenticated } from '../services/auth/tokenService.js'
 import toast from 'react-hot-toast'
 
 // Initial state
