@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import classNames from 'classnames'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { C, HfInput, LeafMark } from '../../theme/hf.jsx'
@@ -20,6 +21,7 @@ const tabClass = (active) =>
   )
 
 const AuthScreen = ({ mode }) => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { login, register, isLoading, error } = useAuth()
   const isLogin = mode === 'login'
@@ -63,13 +65,13 @@ const AuthScreen = ({ mode }) => {
             </span>
             <span className="font-display text-3xl font-bold text-brown-text">HappyFarm</span>
           </div>
-          <p className="mt-3 text-[15px] text-brown">Eid Mubarak 🌙 — tend your flock with care.</p>
+          <p className="mt-3 text-[15px] text-brown">{t('auth.tagline')}</p>
         </div>
 
         <div className="animate-hf-pop rounded-2xl bg-cream p-7 shadow-card">
           <div className="mb-[22px] flex rounded-full bg-green-soft2 p-1">
-            <button onClick={() => navigate('/login')} className={tabClass(isLogin)}>Log in</button>
-            <button onClick={() => navigate('/register')} className={tabClass(!isLogin)}>Register</button>
+            <button onClick={() => navigate('/login')} className={tabClass(isLogin)}>{t('auth.login')}</button>
+            <button onClick={() => navigate('/register')} className={tabClass(!isLogin)}>{t('auth.register')}</button>
           </div>
 
           {error && (
@@ -80,7 +82,7 @@ const AuthScreen = ({ mode }) => {
 
           {isLogin ? (
             <div>
-              <label htmlFor="le" className={labelClass}>Email</label>
+              <label htmlFor="le" className={labelClass}>{t('auth.email')}</label>
               <HfInput
                 id="le"
                 type="email"
@@ -89,7 +91,7 @@ const AuthScreen = ({ mode }) => {
                 placeholder="you@example.com"
                 className="mb-4"
               />
-              <label htmlFor="lp" className={labelClass}>Password</label>
+              <label htmlFor="lp" className={labelClass}>{t('auth.password')}</label>
               <HfInput
                 id="lp"
                 type="password"
@@ -100,15 +102,15 @@ const AuthScreen = ({ mode }) => {
                 className="mb-[22px]"
               />
               <button onClick={doLogin} disabled={isLoading} className={submitClass}>
-                {isLoading ? 'Logging in…' : 'Log in'} <span className="text-lg">→</span>
+                {isLoading ? t('auth.loggingIn') : t('auth.login')} <span className="text-lg rtl:rotate-180">→</span>
               </button>
               <p className="mt-4 text-center text-[13px] text-tan">
-                Demo — try <strong className="text-brown-text">ali@example.com</strong>
+                {t('auth.demoHintPrefix')} <strong className="text-brown-text">ali@example.com</strong>
               </p>
             </div>
           ) : (
             <div>
-              <label htmlFor="rn" className={labelClass}>Full name</label>
+              <label htmlFor="rn" className={labelClass}>{t('auth.fullName')}</label>
               <HfInput
                 id="rn"
                 type="text"
@@ -117,7 +119,7 @@ const AuthScreen = ({ mode }) => {
                 placeholder="Ali Eid"
                 className="mb-4"
               />
-              <label htmlFor="re" className={labelClass}>Email</label>
+              <label htmlFor="re" className={labelClass}>{t('auth.email')}</label>
               <HfInput
                 id="re"
                 type="email"
@@ -126,7 +128,7 @@ const AuthScreen = ({ mode }) => {
                 placeholder="you@example.com"
                 className="mb-4"
               />
-              <label htmlFor="rp" className={labelClass}>Password</label>
+              <label htmlFor="rp" className={labelClass}>{t('auth.password')}</label>
               <HfInput
                 id="rp"
                 type="password"
@@ -137,10 +139,10 @@ const AuthScreen = ({ mode }) => {
                 className="mb-[22px]"
               />
               <button onClick={doRegister} disabled={isLoading} className={submitClass}>
-                {isLoading ? 'Creating…' : 'Create farm'} <span className="text-lg">→</span>
+                {isLoading ? t('auth.creating') : t('auth.createFarmCta')} <span className="text-lg rtl:rotate-180">→</span>
               </button>
               <p className="mt-4 text-center text-[13px] text-tan">
-                Your farm is created automatically. 🌾
+                {t('auth.farmAutoCreated')}
               </p>
             </div>
           )}

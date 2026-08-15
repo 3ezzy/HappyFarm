@@ -1,16 +1,18 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import LoadingSpinner from '../common/UI/LoadingSpinner.jsx'
 
 const ProtectedRoute = () => {
+  const { t } = useTranslation()
   const { isAuthenticated, isLoading } = useAuth()
 
   // Show loading while checking authentication
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-pageBg">
-        <LoadingSpinner size="large" message="Loading..." />
+        <LoadingSpinner size="large" message={t('common.loading')} />
       </div>
     )
   }

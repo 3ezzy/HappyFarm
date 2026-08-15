@@ -1,11 +1,12 @@
 import React from 'react'
 import classNames from 'classnames'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from 'react-query'
 import { farmService } from '../../services/api/farm.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { TYPES, typeInfo, cardClass } from '../../theme/hf.jsx'
+import { TYPES, speciesBgClass, cardClass } from '../../theme/hf.jsx'
 
 const InfoItem = ({ emoji, iconClass, label, value, sub }) => (
   <div className="flex items-center gap-3.5">
@@ -35,6 +36,7 @@ const CareRow = ({ emoji, label, value, valueClass }) => (
 )
 
 const Farm = () => {
+  const { t } = useTranslation()
   const { farm: farmCtx, user } = useAuth()
   const { data: farm, isLoading } = useQuery('farm-details', farmService.getDetails, {
     refetchOnWindowFocus: true,
@@ -44,7 +46,7 @@ const Farm = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <LoadingSpinner size="large" message="Loading farm…" />
+        <LoadingSpinner size="large" message={t('common.loading')} />
       </div>
     )
   }
@@ -70,42 +72,42 @@ const Farm = () => {
 
       <div className={classNames(cardClass, 'mb-6 p-6')}>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
-          <InfoItem emoji="🏡" iconClass="bg-green-soft" label="Farm name" value={farmName} />
-          <InfoItem emoji="👤" iconClass="bg-green-badgeBg" label="Owner" value={userName} sub={userEmail} />
-          <InfoItem emoji="📅" iconClass="bg-blue-soft" label="Farm age" value={`${farmDays} days`} />
+          <InfoItem emoji="🏡" iconClass="bg-green-soft" label={t('farm.farmName')} value={farmName} />
+          <InfoItem emoji="👤" iconClass="bg-green-badgeBg" label={t('farm.owner')} value={userName} sub={userEmail} />
+          <InfoItem emoji="📅" iconClass="bg-blue-soft" label={t('farm.farmAge')} value={t('farm.days', { count: farmDays })} />
         </div>
       </div>
 
       <div className="mb-6 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-5">
-        <MiniStat label="Total animals" value={total} valueClass="text-brown-text" />
-        <MiniStat label="Active" value={activeCount} valueClass="text-green" />
-        <MiniStat label="Ready for sacrifice" value={readyCount} valueClass="text-yellow" />
-        <MiniStat label="Sacrificed" value={sacrificedCount} valueClass="text-tan" />
+        <MiniStat label={t('farm.totalAnimals')} value={total} valueClass="text-brown-text" />
+        <MiniStat label={t('farm.active')} value={activeCount} valueClass="text-green" />
+        <MiniStat label={t('farm.readyForSacrifice')} value={readyCount} valueClass="text-yellow" />
+        <MiniStat label={t('farm.sacrificed')} value={sacrificedCount} valueClass="text-tan" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 wide:grid-cols-2">
         <div className={classNames(cardClass, 'p-6')}>
-          <h2 className="mb-[18px] text-[22px]">Animals by type</h2>
+          <h2 className="mb-[18px] text-[22px]">{t('farm.animalsByType')}</h2>
           <div className="grid grid-cols-2 gap-3 xs:grid-cols-4">
-            {TYPES.map((t) => (
-              <div key={t} className={classNames('rounded-2xl px-2 py-3.5 text-center', typeInfo(t).bgClass)}>
+            {TYPES.map((type) => (
+              <div key={type} className={classNames('rounded-2xl px-2 py-3.5 text-center', speciesBgClass(type))}>
                 <div className="mx-auto mb-1 h-[46px] w-[46px]">
-                  <AnimalIcon type={t} size={46} />
+                  <AnimalIcon type={type} size={46} />
                 </div>
-                <div className="font-display text-xl font-bold text-brown-text">{byType[t] || 0}</div>
-                <div className="text-xs text-tan">{typeInfo(t).label}</div>
+                <div className="font-display text-xl font-bold text-brown-text">{byType[type] || 0}</div>
+                <div className="text-xs text-tan">{t(`species.${type}.label`)}</div>
               </div>
             ))}
           </div>
         </div>
 
         <div className={classNames(cardClass, 'p-6')}>
-          <h2 className="mb-[18px] text-[22px]">Care status</h2>
+          <h2 className="mb-[18px] text-[22px]">{t('farm.careStatus')}</h2>
           <div className="flex flex-col gap-3.5">
-            <CareRow emoji="🌾" label="Fed in last 24h" value={fed24} valueClass="text-green" />
-            <CareRow emoji="✨" label="Groomed in last 24h" value={groomed24} valueClass="text-blue" />
-            <CareRow emoji="🌙" label="Eligible for sacrifice" value={readyCount} valueClass="text-yellow" />
-            <CareRow emoji="⏳" label="Not yet eligible" value={notEligibleCount} valueClass="text-tan" />
+            <CareRow emoji="🌾" label={t('farm.fedLast24h')} value={fed24} valueClass="text-green" />
+            <CareRow emoji="✨" label={t('farm.groomedLast24h')} value={groomed24} valueClass="text-blue" />
+            <CareRow emoji="🌙" label={t('farm.eligibleForSacrifice')} value={readyCount} valueClass="text-yellow" />
+            <CareRow emoji="⏳" label={t('farm.notYetEligible')} value={notEligibleCount} valueClass="text-tan" />
           </div>
         </div>
       </div>

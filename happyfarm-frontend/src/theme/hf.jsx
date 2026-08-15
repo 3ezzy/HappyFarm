@@ -3,7 +3,7 @@ import classNames from 'classnames'
 import { C } from './colors.js'
 
 /* ============================================================
-   HappyFarm — Eid Al Adha shared design tokens & helpers
+   HappyFarm — shared design tokens & helpers
    ============================================================ */
 
 // Re-exported so existing imports of `C` keep working. Prefer Tailwind
@@ -12,49 +12,79 @@ export { C }
 
 export const TYPES = ['sheep', 'goat', 'cow', 'camel']
 
-export const ANIMAL_META = {
-  sheep: { label: 'Sheep', plural: 'Sheep', ar: 'الضأن (غنم)', bgClass: 'bg-species-sheep', minAge: 0.5, minAgeText: '6 months' },
-  goat: { label: 'Goat', plural: 'Goats', ar: 'الماعز', bgClass: 'bg-species-goat', minAge: 1, minAgeText: '1 year' },
-  cow: { label: 'Cow', plural: 'Cows', ar: 'البقر', bgClass: 'bg-species-cow', minAge: 2, minAgeText: '2 years' },
-  camel: { label: 'Camel', plural: 'Camels', ar: 'الإبل', bgClass: 'bg-species-camel', minAge: 5, minAgeText: '5 years' },
+/**
+ * Species → background tint class. Labels, plural forms and sacrifice-age
+ * text live in the i18n catalogs (species.*, minAge.*) — this is presentation
+ * only, not duplicated business logic. Eligibility itself comes from the
+ * API (`animal.is_eligible`); nothing here computes it.
+ */
+const SPECIES_BG_CLASS = {
+  sheep: 'bg-species-sheep',
+  goat: 'bg-species-goat',
+  cow: 'bg-species-cow',
+  camel: 'bg-species-camel',
 }
 
-export const typeInfo = (t) =>
-  ANIMAL_META[t] || { label: t, plural: t, ar: '', bgClass: 'bg-cream', minAge: 0, minAgeText: '' }
-
-export const minAge = (t) => typeInfo(t).minAge
-export const minAgeText = (t) => typeInfo(t).minAgeText
-
-export const eligible = (a) => !!a && !a.is_sacrificed && Number(a.age) >= minAge(a.type)
-
-export const ageText = (age) => {
-  const n = Number(age)
-  if (n < 1) return Math.round(n * 12) + ' mo'
-  return n + (n === 1 ? ' yr' : ' yrs')
-}
+export const speciesBgClass = (type) => SPECIES_BG_CLASS[type] || 'bg-cream'
 
 const toMs = (ts) => (ts ? new Date(ts).getTime() : null)
 
-export const timeSince = (ts) => {
+/**
+ * Age as a translated, correctly-pluralized string (months under a year,
+ * otherwise years to 1 decimal place). `t` is the translation function
+ * from useTranslation() — this is a plain helper, not a hook, since it's
+ * also called from places that already have `t` in scope.
+ */
+export const ageText = (age, t) => {
+  const n = Number(age)
+  if (age === null || age === undefined || Number.isNaN(n)) {
+    return t('common.notRecorded')
+  }
+  if (n < 1) {
+    return t('age.months', { count: Math.round(n * 12) })
+  }
+  return t('age.years', { count: Math.round(n * 10) / 10 })
+}
+
+export const timeSince = (ts, t) => {
   const ms = toMs(ts)
-  if (!ms) return 'Never'
+  if (!ms) return t('common.never')
   const diff = Date.now() - ms
   const h = Math.floor(diff / 3600000)
   const d = Math.floor(h / 24)
-  if (d > 0) return d + (d > 1 ? ' days ago' : ' day ago')
-  if (h > 0) return h + (h > 1 ? ' hours ago' : ' hour ago')
-  return 'Just now'
+  if (d > 0) return t('time.daysAgo', { count: d })
+  if (h > 0) return t('time.hoursAgo', { count: h })
+  return t('time.justNow')
 }
 
-export const fmt = (ts) => {
+/** Date + time (fed_at/groomed_at/sacrificed_at timestamps). */
+export const fmt = (ts, language, t) => {
   const ms = toMs(ts)
-  if (!ms) return 'Never'
-  return new Date(ms).toLocaleString('en-US', {
+  if (!ms) return t('common.never')
+  return new Intl.DateTimeFormat(language, {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-  })
+    numberingSystem: 'latn',
+  }).format(ms)
+}
+
+/**
+ * Date-only fields (date_of_birth, date_of_purchase, exit_date) come back
+ * as plain 'YYYY-MM-DD' strings. `new Date('YYYY-MM-DD')` parses as UTC
+ * midnight, which can display as the previous day in timezones behind
+ * UTC — build the Date from local components instead.
+ */
+export const fmtDate = (dateStr, language) => {
+  if (!dateStr) return null
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Intl.DateTimeFormat(language, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    numberingSystem: 'latn',
+  }).format(new Date(y, m - 1, d))
 }
 
 export const initialsOf = (name) =>
@@ -67,13 +97,9 @@ export const initialsOf = (name) =>
 
 /* ------------------------------------------------------------
    Shared class recipes
-
-   Hover and focus states are plain Tailwind variants now, which is why
-   the old `Hoverable` wrapper and the stateful `HfInput` are gone — they
-   only existed to emulate :hover / :focus for inline styles.
    ------------------------------------------------------------ */
 
-/* Card surface. Callers add their own padding (p-6 or p-7). */
+/** Card surface. Callers add their own padding (p-6 or p-7). */
 export const cardClass = 'rounded-2xl bg-cream shadow-ribbon'
 
 const inputClass =
@@ -107,6 +133,14 @@ export const badge = (tone, size = 'sm') => classNames(badgeBase, badgeSize[size
 
 export function HfInput({ className, ...props }) {
   return <input {...props} className={classNames(inputClass, className)} />
+}
+
+export function HfSelect({ className, children, ...props }) {
+  return (
+    <select {...props} className={classNames(inputClass, 'appearance-none', className)}>
+      {children}
+    </select>
+  )
 }
 
 /* shared logo mark */
