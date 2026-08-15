@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AnimalController;
+use App\Http\Controllers\Api\BreedController;
 use App\Http\Controllers\Api\FarmController;
+use App\Http\Controllers\Api\WeightController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,4 +44,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/animals/{id}/feed', [AnimalController::class, 'feed']);
     Route::post('/animals/{id}/groom', [AnimalController::class, 'groom']);
     Route::post('/animals/{id}/sacrifice', [AnimalController::class, 'sacrifice']);
-}); 
+    Route::get('/animals/{id}/weights', [WeightController::class, 'index']);
+    Route::post('/animals/{id}/weights', [WeightController::class, 'store']);
+
+    // Breeds lookup (for the animal form's breed dropdown)
+    Route::get('/breeds', [BreedController::class, 'index']);
+});

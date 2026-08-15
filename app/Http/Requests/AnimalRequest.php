@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AnimalRequest extends FormRequest
 {
@@ -22,10 +23,33 @@ class AnimalRequest extends FormRequest
      */
     public function rules(): array
     {
+        $farmId = $this->user()?->farm?->id;
+
         return [
             'type' => 'required|string|in:sheep,goat,cow,camel',
             'name' => 'required|string|max:255|min:1',
-            'age' => 'required|numeric|min:0|max:50',
+            'tag' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('animals', 'tag')->where(fn ($q) => $q->where('farm_id', $farmId)),
+            ],
+            'breed_id' => 'nullable|integer|exists:breeds,id',
+            'sex' => 'nullable|in:male,female',
+            'age' => 'nullable|numeric|min:0|max:50',
+            'date_of_birth' => 'nullable|date|before_or_equal:today',
+            'date_of_purchase' => 'nullable|date|before_or_equal:today',
+            'origin' => 'nullable|in:born,purchased',
+            'dam_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('animals', 'id')->where(fn ($q) => $q->where('farm_id', $farmId)),
+            ],
+            'sire_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('animals', 'id')->where(fn ($q) => $q->where('farm_id', $farmId)),
+            ],
         ];
     }
 
@@ -40,10 +64,13 @@ class AnimalRequest extends FormRequest
             'name.required' => 'The animal name field is required.',
             'name.min' => 'The animal name must have at least 1 character.',
             'name.max' => 'The animal name may not be greater than 255 characters.',
-            'age.required' => 'The animal age field is required.',
+            'tag.unique' => 'You already have an animal with this tag.',
+            'breed_id.exists' => 'Please select a valid breed.',
             'age.numeric' => 'The animal age must be a number.',
             'age.min' => 'The animal age must be at least 0.',
             'age.max' => 'The animal age may not be greater than 50 years.',
+            'dam_id.exists' => 'The selected mother is not one of your animals.',
+            'sire_id.exists' => 'The selected father is not one of your animals.',
         ];
     }
 
@@ -56,6 +83,10 @@ class AnimalRequest extends FormRequest
             'type' => 'animal type',
             'name' => 'animal name',
             'age' => 'animal age',
+            'date_of_birth' => 'date of birth',
+            'date_of_purchase' => 'date of purchase',
+            'dam_id' => 'mother',
+            'sire_id' => 'father',
         ];
     }
 
@@ -65,21 +96,8 @@ class AnimalRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            // Additional custom validation logic can be added here
-            if ($this->has('age') && $this->has('type')) {
-                $age = (float) $this->input('age');
-                $type = $this->input('type');
-                
-                // Validate sacrifice eligibility age minimums
-                $minAges = [
-                    'sheep' => 0.5,  // 6 months
-                    'goat' => 1,     // 1 year
-                    'cow' => 2,      // 2 years
-                    'camel' => 5,    // 5 years
-                ];
-                
-                // Note: This is just informational - we allow adding young animals
-                // but they won't be eligible for sacrifice until they reach proper age
+            if (!$this->filled('age') && !$this->filled('date_of_birth')) {
+                $validator->errors()->add('age', 'Either age or date of birth is required.');
             }
         });
     }

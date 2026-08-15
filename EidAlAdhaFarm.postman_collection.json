@@ -179,6 +179,26 @@
           }
         },
         {
+          "name": "Search Animals (by tag or name)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals?search=whitey",
+              "host": ["{{base_url}}"],
+              "path": ["animals"],
+              "query": [
+                { "key": "search", "value": "whitey" }
+              ]
+            }
+          }
+        },
+        {
           "name": "Add Animal - Sheep",
           "request": {
             "method": "POST",
@@ -304,6 +324,31 @@
           }
         },
         {
+          "name": "Add Animal - Full Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"sheep\",\n  \"name\": \"Nour\",\n  \"tag\": \"S-001\",\n  \"breed_id\": 1,\n  \"sex\": \"female\",\n  \"date_of_birth\": \"2024-01-15\",\n  \"date_of_purchase\": \"2024-06-01\",\n  \"origin\": \"purchased\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/animals",
+              "host": ["{{base_url}}"],
+              "path": ["animals"]
+            }
+          }
+        },
+        {
           "name": "Get Animal Details",
           "request": {
             "method": "GET",
@@ -389,6 +434,95 @@
           }
         }
       ]
+    },
+    {
+      "name": "Weight History",
+      "item": [
+        {
+          "name": "List Weight History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals/1/weights",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "weights"]
+            }
+          }
+        },
+        {
+          "name": "Record a Weight",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weight_kg\": 42.5,\n  \"measured_at\": \"2026-08-10\",\n  \"notes\": \"monthly check\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/animals/1/weights",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "weights"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Breeds",
+      "item": [
+        {
+          "name": "List All Breeds",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/breeds",
+              "host": ["{{base_url}}"],
+              "path": ["breeds"]
+            }
+          }
+        },
+        {
+          "name": "List Breeds by Species",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/breeds?species=sheep",
+              "host": ["{{base_url}}"],
+              "path": ["breeds"],
+              "query": [
+                { "key": "species", "value": "sheep" }
+              ]
+            }
+          }
+        }
+      ]
     }
   ]
-} 
+}

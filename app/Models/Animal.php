@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -9,15 +10,45 @@ class Animal extends Model
 {
     use HasFactory;
 
+    /**
+     * Minimum age, in years, for sacrifice eligibility per species. Single
+     * source of truth — the frontend previously kept its own copy of these
+     * numbers in ANIMAL_META; that copy should read is_eligible/age from the
+     * API instead of re-declaring the thresholds.
+     */
+    public const MIN_AGES = [
+        'sheep' => 0.5,
+        'goat' => 1,
+        'cow' => 2,
+        'camel' => 5,
+    ];
+
+    public const MIN_AGE_TEXT = [
+        'sheep' => '6 months',
+        'goat' => '1 year',
+        'cow' => '2 years',
+        'camel' => '5 years',
+    ];
+
     protected $fillable = [
         'farm_id',
         'type',
         'name',
+        'tag',
+        'breed_id',
+        'sex',
         'age',
+        'date_of_birth',
+        'date_of_purchase',
+        'origin',
+        'dam_id',
+        'sire_id',
         'fed_at',
         'groomed_at',
         'sacrificed_at',
         'is_sacrificed',
+        'exit_date',
+        'exit_reason',
     ];
 
     protected $casts = [
@@ -25,15 +56,70 @@ class Animal extends Model
         'groomed_at' => 'datetime',
         'sacrificed_at' => 'datetime',
         'is_sacrificed' => 'boolean',
-        'age' => 'decimal:2',
+        'date_of_birth' => 'date',
+        'date_of_purchase' => 'date',
+        'exit_date' => 'date',
     ];
 
     /**
-     * Get the farm that owns the animal.
+     * `age` has no backing column — it's derived from date_of_birth (see the
+     * accessor/mutator below) — so it must be appended explicitly to show up
+     * on $animal->toArray()/toJson().
      */
+    protected $appends = ['age'];
+
     public function farm()
     {
         return $this->belongsTo(Farm::class);
+    }
+
+    public function breed()
+    {
+        return $this->belongsTo(Breed::class);
+    }
+
+    public function dam()
+    {
+        return $this->belongsTo(Animal::class, 'dam_id');
+    }
+
+    public function sire()
+    {
+        return $this->belongsTo(Animal::class, 'sire_id');
+    }
+
+    public function weights()
+    {
+        return $this->hasMany(Weight::class);
+    }
+
+    /**
+     * Age in years, computed from date_of_birth. Replaces the old stored
+     * `age` decimal, which was only ever correct on the day it was entered.
+     */
+    public function getAgeAttribute(): ?float
+    {
+        if (!$this->date_of_birth) {
+            return null;
+        }
+
+        return round($this->date_of_birth->diffInDays(Carbon::now()) / 365.25, 2);
+    }
+
+    /**
+     * Lets callers keep writing `age` (AnimalController, seeders, existing
+     * tests) without knowing date_of_birth exists. Converts years back into
+     * a birth date; does not touch $this->attributes['age'] itself, so
+     * nothing tries to persist a non-existent `age` column.
+     */
+    public function setAgeAttribute($value): void
+    {
+        if ($value === null || $value === '') {
+            return;
+        }
+
+        $days = (int) round(((float) $value) * 365.25);
+        $this->attributes['date_of_birth'] = Carbon::now()->subDays($days)->toDateString();
     }
 
     /**
@@ -53,16 +139,13 @@ class Animal extends Model
     /**
      * Check if animal is eligible for sacrifice based on age requirements
      */
-    public function isEligibleForSacrifice()
+    public function isEligibleForSacrifice(): bool
     {
-        $minAges = [
-            'sheep' => 0.5,  // 6 months
-            'goat' => 1,     // 1 year
-            'cow' => 2,      // 2 years
-            'camel' => 5,    // 5 years
-        ];
+        if ($this->age === null) {
+            return false;
+        }
 
-        return $this->age >= ($minAges[$this->type] ?? 0);
+        return $this->age >= (self::MIN_AGES[$this->type] ?? 0);
     }
 
     /**

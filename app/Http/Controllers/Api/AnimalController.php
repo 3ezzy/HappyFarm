@@ -11,31 +11,34 @@ use Carbon\Carbon;
 class AnimalController extends Controller
 {
     /**
-     * Display a listing of the user's animals.
+     * Display a listing of the user's animals. Supports ?search= against
+     * tag and name (case-insensitive partial match) for the quick-search
+     * requirement — LOWER()+LIKE rather than ILIKE so it behaves the same
+     * whether the app is running against Postgres (dev/prod) or SQLite
+     * (the test suite).
      */
     public function index(Request $request)
     {
         $user = $request->user();
         $farm = $user->farm;
-        
+
         if (!$farm) {
             return response()->json(['error' => 'No farm found for user'], 404);
         }
 
-        $animals = $farm->animals()->get();
+        $query = $farm->animals()->with('breed');
 
-        return response()->json($animals->map(function ($animal) {
-            return [
-                'id' => $animal->id,
-                'type' => $animal->type,
-                'name' => $animal->name,
-                'age' => $animal->age,
-                'fed_at' => $animal->fed_at?->toISOString(),
-                'groomed_at' => $animal->groomed_at?->toISOString(),
-                'sacrificed_at' => $animal->sacrificed_at?->toISOString(),
-                'is_sacrificed' => $animal->is_sacrificed,
-            ];
-        }));
+        if ($search = trim((string) $request->query('search'))) {
+            $needle = '%' . strtolower($search) . '%';
+            $query->where(function ($q) use ($needle) {
+                $q->whereRaw('LOWER(tag) LIKE ?', [$needle])
+                    ->orWhereRaw('LOWER(name) LIKE ?', [$needle]);
+            });
+        }
+
+        $animals = $query->get();
+
+        return response()->json($animals->map(fn ($animal) => $this->present($animal)));
     }
 
     /**
@@ -44,31 +47,46 @@ class AnimalController extends Controller
     public function store(AnimalRequest $request)
     {
         // Validation is automatically handled by AnimalRequest
-        
+
         $user = $request->user();
         $farm = $user->farm;
-        
+
         if (!$farm) {
             return response()->json(['error' => 'No farm found for user'], 404);
         }
 
-        $animal = Animal::create([
+        $payload = [
             'farm_id' => $farm->id,
             'type' => $request->type,
             'name' => $request->name,
-            'age' => $request->age,
-        ]);
+            'tag' => $request->tag,
+            'breed_id' => $request->breed_id,
+            'sex' => $request->sex,
+            'date_of_purchase' => $request->date_of_purchase,
+            'origin' => $request->origin,
+            'dam_id' => $request->dam_id,
+            'sire_id' => $request->sire_id,
+        ];
 
-        return response()->json([
-            'id' => $animal->id,
-            'type' => $animal->type,
-            'name' => $animal->name,
-            'age' => $animal->age,
-            'fed_at' => null,
-            'groomed_at' => null,
-            'sacrificed_at' => null,
-            'is_sacrificed' => false,
-        ], 201);
+        // Only one of age/date_of_birth is passed to Animal::create(). Both
+        // ultimately write date_of_birth (age via a mutator); passing both
+        // keys risks whichever runs second silently overwriting the other,
+        // including overwriting a real date with null.
+        if ($request->filled('date_of_birth')) {
+            $payload['date_of_birth'] = $request->date_of_birth;
+        } elseif ($request->filled('age')) {
+            $payload['age'] = $request->age;
+        }
+
+        $animal = Animal::create($payload);
+
+        // Animal::create() returns the in-memory model as filled, which
+        // doesn't reflect DB-level column defaults (is_sacrificed=false)
+        // that were never explicitly assigned. Reload so present() reports
+        // what's actually in the database.
+        $animal->refresh();
+
+        return response()->json($this->present($animal), 201);
     }
 
     /**
@@ -76,25 +94,13 @@ class AnimalController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $user = $request->user();
-        $animal = Animal::whereHas('farm', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->find($id);
+        $animal = $this->findOwnedAnimal($request, $id, with: ['breed']);
 
         if (!$animal) {
             return response()->json(['error' => 'Animal not found'], 404);
         }
 
-        return response()->json([
-            'id' => $animal->id,
-            'type' => $animal->type,
-            'name' => $animal->name,
-            'age' => $animal->age,
-            'fed_at' => $animal->fed_at?->toISOString(),
-            'groomed_at' => $animal->groomed_at?->toISOString(),
-            'sacrificed_at' => $animal->sacrificed_at?->toISOString(),
-            'is_sacrificed' => $animal->is_sacrificed,
-        ]);
+        return response()->json($this->present($animal));
     }
 
     /**
@@ -102,10 +108,7 @@ class AnimalController extends Controller
      */
     public function feed(Request $request, $id)
     {
-        $user = $request->user();
-        $animal = Animal::whereHas('farm', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->find($id);
+        $animal = $this->findOwnedAnimal($request, $id);
 
         if (!$animal) {
             return response()->json(['error' => 'Animal not found'], 404);
@@ -130,10 +133,7 @@ class AnimalController extends Controller
      */
     public function groom(Request $request, $id)
     {
-        $user = $request->user();
-        $animal = Animal::whereHas('farm', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->find($id);
+        $animal = $this->findOwnedAnimal($request, $id);
 
         if (!$animal) {
             return response()->json(['error' => 'Animal not found'], 404);
@@ -158,10 +158,7 @@ class AnimalController extends Controller
      */
     public function sacrifice(Request $request, $id)
     {
-        $user = $request->user();
-        $animal = Animal::whereHas('farm', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->find($id);
+        $animal = $this->findOwnedAnimal($request, $id);
 
         if (!$animal) {
             return response()->json(['error' => 'Animal not found'], 404);
@@ -178,14 +175,71 @@ class AnimalController extends Controller
             ], 400);
         }
 
+        $now = Carbon::now();
+
+        // exit_date/exit_reason generalize sacrificed_at to also cover
+        // death and sale (added to the schema this phase, not yet exposed
+        // through a dedicated endpoint). Set alongside sacrificed_at so the
+        // two never drift while sacrifice() is the only path that writes
+        // either of them.
         $animal->update([
-            'sacrificed_at' => Carbon::now(),
+            'sacrificed_at' => $now,
+            'exit_date' => $now->toDateString(),
+            'exit_reason' => 'sacrifice',
         ]);
 
         return response()->json([
             'id' => $animal->id,
             'sacrificed_at' => $animal->sacrificed_at->toISOString(),
             'is_sacrificed' => true,
+            'exit_date' => $animal->exit_date->toDateString(),
+            'exit_reason' => $animal->exit_reason,
         ]);
     }
-} 
+
+    /**
+     * Find an animal by id, scoped to the authenticated user's farm.
+     */
+    private function findOwnedAnimal(Request $request, $id, array $with = []): ?Animal
+    {
+        $user = $request->user();
+
+        return Animal::with($with)
+            ->whereHas('farm', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->find($id);
+    }
+
+    /**
+     * Shape an Animal for API responses. All fields from the original
+     * contract (id, type, name, age, fed_at, groomed_at, sacrificed_at,
+     * is_sacrificed) are unchanged; everything else is additive.
+     */
+    private function present(Animal $animal): array
+    {
+        return [
+            'id' => $animal->id,
+            'type' => $animal->type,
+            'name' => $animal->name,
+            'tag' => $animal->tag,
+            'breed_id' => $animal->breed_id,
+            'breed' => $animal->breed?->name,
+            'sex' => $animal->sex,
+            'age' => $animal->age,
+            'date_of_birth' => $animal->date_of_birth?->toDateString(),
+            'date_of_purchase' => $animal->date_of_purchase?->toDateString(),
+            'origin' => $animal->origin,
+            'dam_id' => $animal->dam_id,
+            'sire_id' => $animal->sire_id,
+            'fed_at' => $animal->fed_at?->toISOString(),
+            'groomed_at' => $animal->groomed_at?->toISOString(),
+            'sacrificed_at' => $animal->sacrificed_at?->toISOString(),
+            'is_sacrificed' => $animal->is_sacrificed,
+            'exit_date' => $animal->exit_date?->toDateString(),
+            'exit_reason' => $animal->exit_reason,
+            'is_eligible' => $animal->isEligibleForSacrifice(),
+            'min_age_text' => Animal::MIN_AGE_TEXT[$animal->type] ?? null,
+        ];
+    }
+}
