@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AlertController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AnimalController;
 use App\Http\Controllers\Api\BirthController;
@@ -74,4 +75,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/animals/{id}/health-records', [HealthRecordController::class, 'store']);
     Route::put('/health-records/{id}', [HealthRecordController::class, 'update']);
     Route::delete('/health-records/{id}', [HealthRecordController::class, 'destroy']);
+
+    // Alerts (computed at read time, no scheduler)
+    Route::get('/alerts', [AlertController::class, 'index']);
+    Route::post('/alerts/dismiss', [AlertController::class, 'dismiss']);
 });
