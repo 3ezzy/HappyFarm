@@ -1,4 +1,3 @@
-import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext.jsx'
 
@@ -26,14 +25,14 @@ function App() {
   // Show loading spinner while initializing auth
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#E7F4EC' }}>
+      <div className="flex min-h-screen items-center justify-center bg-pageBg">
         <LoadingSpinner size="large" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#E7F4EC' }}>
+    <div className="min-h-screen bg-pageBg">
       <Routes>
         {/* Public Routes */}
         <Route 

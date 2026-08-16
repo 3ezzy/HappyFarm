@@ -4,21 +4,13 @@ import { FARM_ENDPOINTS } from '../../constants/apiEndpoints.js'
 export const farmService = {
   // Get farm details
   getDetails: async () => {
-    try {
-      const response = await apiClient.get(FARM_ENDPOINTS.DETAILS)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.get(FARM_ENDPOINTS.DETAILS)
+    return response.data
   },
 
   // Get farm statistics
   getStatistics: async () => {
-    try {
-      const response = await apiClient.get(FARM_ENDPOINTS.STATISTICS)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.get(FARM_ENDPOINTS.STATISTICS)
+    return response.data
   }
-} 
+}

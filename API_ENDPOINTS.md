@@ -150,6 +150,7 @@ GET /api/farm/statistics
 ### List Animals
 ```http
 GET /api/animals
+GET /api/animals?search=nour   # partial match against tag or name (quick search)
 ```
 
 **Response (200):**
@@ -159,20 +160,37 @@ GET /api/animals
     "id": 1,
     "type": "sheep",
     "name": "Whitey",
+    "tag": "S-001",
+    "breed_id": 3,
+    "breed": "Sardi",
+    "sex": "female",
     "age": 1.5,
+    "date_of_birth": "2024-02-24",
+    "date_of_purchase": null,
+    "origin": "born",
+    "dam_id": null,
+    "sire_id": null,
     "fed_at": "2025-06-24T10:00:00.000000Z",
     "groomed_at": null,
     "sacrificed_at": null,
-    "is_sacrificed": false
+    "is_sacrificed": false,
+    "exit_date": null,
+    "exit_reason": null,
+    "is_eligible": true,
+    "min_age_text": "6 months"
   }
 ]
 ```
+
+`age`, `is_eligible` and `min_age_text` are computed by the server from
+`date_of_birth` and the animal's `type` — never store or derive them
+client-side.
 
 ### Add Animal
 ```http
 POST /api/animals
 ```
-**Request Body:**
+**Request Body (minimum — unchanged from before):**
 ```json
 {
   "type": "sheep",
@@ -181,40 +199,39 @@ POST /api/animals
 }
 ```
 
-**Valid Types:** `sheep`, `goat`, `cow`, `camel`
-
-**Response (201):**
+**Request Body (full profile — all fields below `name` are optional):**
 ```json
 {
-  "id": 2,
   "type": "sheep",
-  "name": "Whitey", 
-  "age": 1.0,
-  "fed_at": null,
-  "groomed_at": null,
-  "sacrificed_at": null,
-  "is_sacrificed": false
+  "name": "Whitey",
+  "tag": "S-001",
+  "breed_id": 3,
+  "sex": "female",
+  "date_of_birth": "2024-02-24",
+  "date_of_purchase": "2024-08-01",
+  "origin": "purchased",
+  "dam_id": 12,
+  "sire_id": 7
 }
 ```
+
+Exactly one of `age` or `date_of_birth` must be supplied — `age` is
+converted to a birth date server-side and is kept only for backward
+compatibility with existing clients. `tag` is unique per farm (not
+globally). `dam_id`/`sire_id` must reference an animal on the same farm.
+
+**Valid Types:** `sheep`, `goat`, `cow`, `camel`
+**Valid Sex:** `male`, `female`
+**Valid Origin:** `born`, `purchased`
+
+**Response (201):** same shape as the list endpoint's items.
 
 ### Get Animal Details
 ```http
 GET /api/animals/{id}
 ```
 
-**Response (200):**
-```json
-{
-  "id": 1,
-  "type": "sheep",
-  "name": "Whitey",
-  "age": 1.5,
-  "fed_at": "2025-06-24T10:00:00.000000Z",
-  "groomed_at": "2025-06-24T12:00:00.000000Z",
-  "sacrificed_at": null,
-  "is_sacrificed": false
-}
-```
+**Response (200):** same shape as the list endpoint's items.
 
 ### Feed Animal
 ```http
@@ -252,9 +269,15 @@ POST /api/animals/{id}/sacrifice
 {
   "id": 1,
   "sacrificed_at": "2025-06-24T20:58:38.000000Z",
-  "is_sacrificed": true
+  "is_sacrificed": true,
+  "exit_date": "2025-06-24",
+  "exit_reason": "sacrifice"
 }
 ```
+
+`exit_date`/`exit_reason` generalize `sacrificed_at` to also cover death
+and sale in a future phase; `sacrifice` is currently the only path that
+sets them.
 
 **Error Response (400) - Age Validation:**
 ```json
@@ -262,6 +285,59 @@ POST /api/animals/{id}/sacrifice
   "error": "Sheep must be at least 6 months old for sacrifice."
 }
 ```
+
+---
+
+## Weight History Endpoints
+*All endpoints require `Authorization: Bearer {token}` header. Animals are scoped to the caller's farm.*
+
+### List Weight History
+```http
+GET /api/animals/{id}/weights
+```
+
+**Response (200)** — newest first:
+```json
+[
+  { "id": 2, "weight_kg": 42.5, "measured_at": "2026-08-10", "notes": null },
+  { "id": 1, "weight_kg": 40.0, "measured_at": "2026-08-01", "notes": "monthly check" }
+]
+```
+
+### Record a Weight
+```http
+POST /api/animals/{id}/weights
+```
+**Request Body:**
+```json
+{
+  "weight_kg": 42.5,
+  "measured_at": "2026-08-10",
+  "notes": "monthly check"
+}
+```
+`notes` is optional. **Response (201):** the created entry, same shape as above.
+
+---
+
+## Breeds Endpoint
+*Requires `Authorization: Bearer {token}` header.*
+
+```http
+GET /api/breeds
+GET /api/breeds?species=sheep
+```
+
+**Response (200):**
+```json
+[
+  { "id": 1, "species": "sheep", "name": "Sardi" },
+  { "id": 2, "species": "sheep", "name": "D'man" }
+]
+```
+
+Used to populate the breed dropdown on the animal form. The seeded list is
+a small starting set, not exhaustive.
 
 ---
 
@@ -314,6 +390,8 @@ Controllers are properly organized in the `Api` namespace:
 app/Http/Controllers/Api/
 ├── AuthController.php    # Authentication endpoints
 ├── AnimalController.php  # Animal management
+├── BreedController.php   # Breed lookup
+├── WeightController.php  # Weight history
 └── FarmController.php    # Farm statistics & details
 ```
 

@@ -5,38 +5,30 @@ import { saveToken, saveUserData, saveFarmData, clearAllData } from '../auth/tok
 export const authService = {
   // Register new user
   register: async (userData) => {
-    try {
-      const response = await apiClient.post(AUTH_ENDPOINTS.REGISTER, userData)
-      
-      // Save token and user data on successful registration
-      if (response.data.token) {
-        saveToken(response.data.token)
-        saveUserData(response.data.user)
-        saveFarmData(response.data.farm)
-      }
-      
-      return response.data
-    } catch (error) {
-      throw error
+    const response = await apiClient.post(AUTH_ENDPOINTS.REGISTER, userData)
+
+    // Save token and user data on successful registration
+    if (response.data.token) {
+      saveToken(response.data.token)
+      saveUserData(response.data.user)
+      saveFarmData(response.data.farm)
     }
+
+    return response.data
   },
 
   // Login user
   login: async (credentials) => {
-    try {
-      const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, credentials)
-      
-      // Save token and user data on successful login
-      if (response.data.token) {
-        saveToken(response.data.token)
-        saveUserData(response.data.user)
-        saveFarmData(response.data.farm)
-      }
-      
-      return response.data
-    } catch (error) {
-      throw error
+    const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, credentials)
+
+    // Save token and user data on successful login
+    if (response.data.token) {
+      saveToken(response.data.token)
+      saveUserData(response.data.user)
+      saveFarmData(response.data.farm)
     }
+
+    return response.data
   },
 
   // Logout user
@@ -54,24 +46,16 @@ export const authService = {
 
   // Get current user info
   getCurrentUser: async () => {
-    try {
-      const response = await apiClient.get(AUTH_ENDPOINTS.USER)
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const response = await apiClient.get(AUTH_ENDPOINTS.USER)
+    return response.data
   },
 
   // Refresh user data
   refreshUserData: async () => {
-    try {
-      const response = await apiClient.get(AUTH_ENDPOINTS.USER)
-      if (response.data) {
-        saveUserData(response.data)
-      }
-      return response.data
-    } catch (error) {
-      throw error
+    const response = await apiClient.get(AUTH_ENDPOINTS.USER)
+    if (response.data) {
+      saveUserData(response.data)
     }
+    return response.data
   }
-} 
+}

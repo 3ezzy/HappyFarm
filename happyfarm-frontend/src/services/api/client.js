@@ -2,6 +2,10 @@ import axios from 'axios'
 import { API_BASE_URL } from '../../constants/apiEndpoints.js'
 import { getToken, removeToken } from '../auth/tokenService.js'
 import toast from 'react-hot-toast'
+// Not a React component, so no useTranslation() — call the i18next
+// instance's t() directly. Safe outside render: i18n.init() runs
+// synchronously in src/i18n/index.js before this module is used.
+import i18n from '../../i18n/index.js'
 
 // Create axios instance
 const apiClient = axios.create({
@@ -41,38 +45,41 @@ apiClient.interceptors.response.use(
         case 401:
           // Unauthorized - remove token and redirect to login
           removeToken()
-          toast.error('Session expired. Please login again.')
+          toast.error(i18n.t('errors.sessionExpired'))
           window.location.href = '/login'
           break
-          
+
         case 403:
-          toast.error('You do not have permission to perform this action.')
+          toast.error(i18n.t('errors.noPermission'))
           break
-          
+
         case 404:
-          toast.error('Resource not found.')
+          toast.error(i18n.t('errors.notFound'))
           break
-          
+
         case 422:
           // Validation errors - let the component handle these
           break
-          
+
         case 500:
-          toast.error('Server error. Please try again later.')
+          toast.error(i18n.t('errors.serverError'))
           break
-          
+
         default:
           if (data?.error) {
+            // Server-supplied message (e.g. sacrifice eligibility) — this
+            // one genuinely can't be localized client-side; see the phase-1
+            // notes on backend-derived text vs. frontend i18n.
             toast.error(data.error)
           } else {
-            toast.error('An unexpected error occurred.')
+            toast.error(i18n.t('errors.unexpected'))
           }
       }
     } else if (error.request) {
       // Network error
-      toast.error('Network error. Please check your connection.')
+      toast.error(i18n.t('errors.network'))
     } else {
-      toast.error('An unexpected error occurred.')
+      toast.error(i18n.t('errors.unexpected'))
     }
     
     return Promise.reject(error)

@@ -1,34 +1,26 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
+import classNames from 'classnames'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { farmService } from '../../services/api/farm.js'
-import { C, Hoverable, initialsOf } from '../../theme/hf.jsx'
-
-const card = { background: C.cream, borderRadius: '16px', padding: '28px', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }
+import { initialsOf } from '../../theme/hf.jsx'
 
 const Toggle = ({ on, onClick }) => (
   <button
     onClick={onClick}
-    style={{
-      width: '46px',
-      height: '26px',
-      borderRadius: '9999px',
-      border: 'none',
-      padding: '3px',
-      cursor: 'pointer',
-      display: 'inline-flex',
-      alignItems: 'center',
-      transition: 'background-color .2s',
-      background: on ? C.green : '#D9E8D2',
-      justifyContent: on ? 'flex-end' : 'flex-start',
-    }}
+    className={classNames(
+      'inline-flex h-[26px] w-[46px] cursor-pointer items-center rounded-full border-none p-[3px] transition-colors duration-200',
+      on ? 'justify-end bg-green' : 'justify-start bg-toggleOff'
+    )}
   >
-    <span style={{ display: 'block', width: '20px', height: '20px', borderRadius: '9999px', background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.2)' }} />
+    <span className="block h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
   </button>
 )
 
 const Profile = () => {
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { user, farm, logout } = useAuth()
   const [reminders, setReminders] = useState(true)
@@ -38,7 +30,7 @@ const Profile = () => {
 
   const createdAt = farmDetails?.created_at
   const memberSince = createdAt
-    ? new Date(createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    ? new Intl.DateTimeFormat(i18n.language, { month: 'long', year: 'numeric', numberingSystem: 'latn' }).format(new Date(createdAt))
     : '—'
 
   const handleLogout = async () => {
@@ -47,64 +39,49 @@ const Profile = () => {
   }
 
   return (
-    <div className="hf-anim-pop" style={{ maxWidth: '680px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '34px', marginBottom: '22px' }}>Profile</h1>
+    <div className="mx-auto max-w-[680px] animate-hf-pop">
+      <h1 className="mb-[22px] text-[34px]">{t('profile.title')}</h1>
 
-      <div style={{ ...card, marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-          <span style={{ display: 'inline-flex', width: '72px', height: '72px', alignItems: 'center', justifyContent: 'center', background: C.green, color: '#fff', borderRadius: '9999px', fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '26px', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }}>
+      <div className="mb-6 rounded-2xl bg-cream p-7 shadow-ribbon">
+        <div className="flex items-center gap-[18px]">
+          <span className="inline-flex h-[72px] w-[72px] items-center justify-center rounded-full bg-green font-display text-[26px] font-bold text-white shadow-ribbon">
             {initialsOf(user?.name)}
           </span>
           <div>
-            <h2 style={{ fontSize: '26px' }}>{user?.name}</h2>
-            <p style={{ margin: '4px 0 0', color: C.tan }}>{user?.email}</p>
+            <h2 className="text-[26px]">{user?.name}</h2>
+            <p className="mt-1 text-tan">{user?.email}</p>
           </div>
         </div>
-        <div className="hf-care-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '24px' }}>
-          <div style={{ background: C.greenSoft, borderRadius: '16px', padding: '16px' }}>
-            <p style={{ margin: 0, fontSize: '13px', color: C.tan, fontWeight: 500 }}>Farm</p>
-            <p style={{ margin: '3px 0 0', fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '16px', color: C.brownText }}>{farm?.name}</p>
+        <div className="mt-6 grid grid-cols-1 gap-3.5 xs:grid-cols-2">
+          <div className="rounded-2xl bg-green-soft p-4">
+            <p className="text-[13px] font-medium text-tan">{t('profile.farm')}</p>
+            <p className="mt-[3px] font-display text-base font-bold text-brown-text">{farm?.name}</p>
           </div>
-          <div style={{ background: C.greenSoft, borderRadius: '16px', padding: '16px' }}>
-            <p style={{ margin: 0, fontSize: '13px', color: C.tan, fontWeight: 500 }}>Member since</p>
-            <p style={{ margin: '3px 0 0', fontFamily: "'Zilla Slab', serif", fontWeight: 700, fontSize: '16px', color: C.brownText }}>{memberSince}</p>
+          <div className="rounded-2xl bg-green-soft p-4">
+            <p className="text-[13px] font-medium text-tan">{t('profile.memberSince')}</p>
+            <p className="mt-[3px] font-display text-base font-bold text-brown-text">{memberSince}</p>
           </div>
         </div>
       </div>
 
-      <div style={{ ...card, padding: '24px', marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '22px', marginBottom: '16px' }}>Preferences</h2>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #ECE7D2' }}>
-          <span style={{ fontSize: '15px', color: C.brown }}>Care reminders</span>
+      <div className="mb-6 rounded-2xl bg-cream p-6 shadow-ribbon">
+        <h2 className="mb-4 text-[22px]">{t('profile.preferences')}</h2>
+        <div className="flex items-center justify-between border-b border-cream-muted py-2.5">
+          <span className="text-[15px] text-brown">{t('profile.careReminders')}</span>
           <Toggle on={reminders} onClick={() => setReminders((v) => !v)} />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0' }}>
-          <span style={{ fontSize: '15px', color: C.brown }}>Eid greetings</span>
+        <div className="flex items-center justify-between py-2.5">
+          <span className="text-[15px] text-brown">{t('profile.eidGreetings')}</span>
           <Toggle on={greetings} onClick={() => setGreetings((v) => !v)} />
         </div>
       </div>
 
-      <Hoverable
+      <button
         onClick={handleLogout}
-        baseStyle={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          background: C.cream,
-          color: C.redDark,
-          fontFamily: "'Zilla Slab', serif",
-          fontWeight: 700,
-          fontSize: '15px',
-          padding: '12px 24px',
-          border: '2px solid #F6CFCB',
-          borderRadius: '9999px',
-          cursor: 'pointer',
-          transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55),background-color .2s',
-        }}
-        hoverStyle={{ transform: 'scale(1.03)', background: '#FCE7E5' }}
+        className="inline-flex cursor-pointer items-center gap-2 rounded-full border-2 border-red-line bg-cream px-6 py-3 font-display text-[15px] font-bold text-red-dark transition-all duration-200 ease-pop hover:scale-[1.03] hover:bg-red-soft"
       >
-        Log out
-      </Hoverable>
+        {t('profile.logOut')}
+      </button>
     </div>
   )
 }

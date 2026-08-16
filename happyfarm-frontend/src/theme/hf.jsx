@@ -1,75 +1,89 @@
-import React, { useState } from 'react'
+import classNames from 'classnames'
+import { C } from './colors.js'
 
 /* ============================================================
-   HappyFarm — Eid Al Adha shared design tokens & helpers
+   HappyFarm — shared design tokens & helpers
    ============================================================ */
 
-export const C = {
-  pageBg: '#E7F4EC',
-  green: '#008160',
-  greenDark: '#00684D',
-  greenSoft: '#E2F4EC',
-  greenSoft2: '#EAF7EF',
-  cream: '#FBFAF1',
-  brown: '#6B5C43',
-  brownText: '#574A30',
-  brownDark: '#51442F',
-  tan: '#8A7B60',
-  yellow: '#E29A2B',
-  sand: '#F3F0E1',
-  border: '#C9BD9F',
-  inputBorder: '#BBAE8C',
-  red: '#D83A3A',
-  redDark: '#B12B2B',
-  blue: '#68A1D7',
-  blueDark: '#2D6895',
-}
+// Re-exported so existing imports of `C` keep working. Prefer Tailwind
+// classes in markup; `C` is for raw values (SVG fills, gradients).
+export { C }
 
 export const TYPES = ['sheep', 'goat', 'cow', 'camel']
 
-export const ANIMAL_META = {
-  sheep: { label: 'Sheep', plural: 'Sheep', ar: 'الضأن (غنم)', bg: '#DCEAF8', minAge: 0.5, minAgeText: '6 months' },
-  goat: { label: 'Goat', plural: 'Goats', ar: 'الماعز', bg: '#D6EBDB', minAge: 1, minAgeText: '1 year' },
-  cow: { label: 'Cow', plural: 'Cows', ar: 'البقر', bg: '#F7E6BE', minAge: 2, minAgeText: '2 years' },
-  camel: { label: 'Camel', plural: 'Camels', ar: 'الإبل', bg: '#FADCC6', minAge: 5, minAgeText: '5 years' },
+/**
+ * Species → background tint class. Labels, plural forms and sacrifice-age
+ * text live in the i18n catalogs (species.*, minAge.*) — this is presentation
+ * only, not duplicated business logic. Eligibility itself comes from the
+ * API (`animal.is_eligible`); nothing here computes it.
+ */
+const SPECIES_BG_CLASS = {
+  sheep: 'bg-species-sheep',
+  goat: 'bg-species-goat',
+  cow: 'bg-species-cow',
+  camel: 'bg-species-camel',
 }
 
-export const typeInfo = (t) =>
-  ANIMAL_META[t] || { label: t, plural: t, ar: '', bg: C.cream, minAge: 0, minAgeText: '' }
-
-export const minAge = (t) => typeInfo(t).minAge
-export const minAgeText = (t) => typeInfo(t).minAgeText
-
-export const eligible = (a) => !!a && !a.is_sacrificed && Number(a.age) >= minAge(a.type)
-
-export const ageText = (age) => {
-  const n = Number(age)
-  if (n < 1) return Math.round(n * 12) + ' mo'
-  return n + (n === 1 ? ' yr' : ' yrs')
-}
+export const speciesBgClass = (type) => SPECIES_BG_CLASS[type] || 'bg-cream'
 
 const toMs = (ts) => (ts ? new Date(ts).getTime() : null)
 
-export const timeSince = (ts) => {
+/**
+ * Age as a translated, correctly-pluralized string (months under a year,
+ * otherwise years to 1 decimal place). `t` is the translation function
+ * from useTranslation() — this is a plain helper, not a hook, since it's
+ * also called from places that already have `t` in scope.
+ */
+export const ageText = (age, t) => {
+  const n = Number(age)
+  if (age === null || age === undefined || Number.isNaN(n)) {
+    return t('common.notRecorded')
+  }
+  if (n < 1) {
+    return t('age.months', { count: Math.round(n * 12) })
+  }
+  return t('age.years', { count: Math.round(n * 10) / 10 })
+}
+
+export const timeSince = (ts, t) => {
   const ms = toMs(ts)
-  if (!ms) return 'Never'
+  if (!ms) return t('common.never')
   const diff = Date.now() - ms
   const h = Math.floor(diff / 3600000)
   const d = Math.floor(h / 24)
-  if (d > 0) return d + (d > 1 ? ' days ago' : ' day ago')
-  if (h > 0) return h + (h > 1 ? ' hours ago' : ' hour ago')
-  return 'Just now'
+  if (d > 0) return t('time.daysAgo', { count: d })
+  if (h > 0) return t('time.hoursAgo', { count: h })
+  return t('time.justNow')
 }
 
-export const fmt = (ts) => {
+/** Date + time (fed_at/groomed_at/sacrificed_at timestamps). */
+export const fmt = (ts, language, t) => {
   const ms = toMs(ts)
-  if (!ms) return 'Never'
-  return new Date(ms).toLocaleString('en-US', {
+  if (!ms) return t('common.never')
+  return new Intl.DateTimeFormat(language, {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-  })
+    numberingSystem: 'latn',
+  }).format(ms)
+}
+
+/**
+ * Date-only fields (date_of_birth, date_of_purchase, exit_date) come back
+ * as plain 'YYYY-MM-DD' strings. `new Date('YYYY-MM-DD')` parses as UTC
+ * midnight, which can display as the previous day in timezones behind
+ * UTC — build the Date from local components instead.
+ */
+export const fmtDate = (dateStr, language) => {
+  if (!dateStr) return null
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Intl.DateTimeFormat(language, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    numberingSystem: 'latn',
+  }).format(new Date(y, m - 1, d))
 }
 
 export const initialsOf = (name) =>
@@ -81,54 +95,50 @@ export const initialsOf = (name) =>
     .toUpperCase()
 
 /* ------------------------------------------------------------
-   Interactive primitives (hover / focus for inline styles)
+   Shared class recipes
    ------------------------------------------------------------ */
 
-export function Hoverable({ as = 'button', baseStyle, hoverStyle, disabled, children, ...props }) {
-  const Tag = as
-  const [hover, setHover] = useState(false)
-  const style = disabled ? baseStyle : { ...baseStyle, ...(hover ? hoverStyle : null) }
+/** Card surface. Callers add their own padding (p-6 or p-7). */
+export const cardClass = 'rounded-2xl bg-cream shadow-ribbon'
+
+const inputClass =
+  'block w-full rounded-2xl border-2 border-line-input bg-cream px-3.5 py-2.5 ' +
+  'text-[15px] text-brown-text outline-none transition-colors duration-200 ' +
+  'focus:border-green'
+
+const btnBase =
+  'inline-flex items-center justify-center gap-1.5 rounded-full font-display ' +
+  'font-bold cursor-pointer transition-transform duration-200 ease-pop ' +
+  'disabled:cursor-not-allowed disabled:opacity-60 enabled:hover:scale-105'
+
+export const btnCream = `${btnBase} bg-cream text-brown-text px-4 py-2 shadow-chip`
+
+/* Status pills, shared by the animal list, dashboard and detail screens.
+   `lg` is the roomier variant the detail page uses. */
+const badgeBase = 'rounded-full border-2 font-semibold'
+
+const badgeSize = {
+  sm: 'px-3 py-[3px] text-xs',
+  lg: 'inline-flex items-center gap-1.5 px-3.5 py-[5px] text-[13px]',
+}
+
+const badgeTone = {
+  sacrificed: 'border-line bg-cream-muted text-tan',
+  active: 'border-green-line bg-green-badgeBg text-green-badge',
+  eligible: 'border-yellow-line bg-yellow-badgeBg text-yellow-badge',
+}
+
+export const badge = (tone, size = 'sm') => classNames(badgeBase, badgeSize[size], badgeTone[tone])
+
+export function HfInput({ className, ...props }) {
+  return <input {...props} className={classNames(inputClass, className)} />
+}
+
+export function HfSelect({ className, children, ...props }) {
   return (
-    <Tag
-      style={style}
-      disabled={disabled}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      {...props}
-    >
+    <select {...props} className={classNames(inputClass, 'appearance-none', className)}>
       {children}
-    </Tag>
-  )
-}
-
-const inputBase = {
-  display: 'block',
-  width: '100%',
-  border: `2px solid ${C.inputBorder}`,
-  background: C.cream,
-  borderRadius: '16px',
-  padding: '11px 14px',
-  fontSize: '15px',
-  color: C.brownText,
-  outline: 'none',
-  transition: 'border-color .2s',
-}
-
-export function HfInput({ style, ...props }) {
-  const [focus, setFocus] = useState(false)
-  return (
-    <input
-      {...props}
-      onFocus={(e) => {
-        setFocus(true)
-        props.onFocus && props.onFocus(e)
-      }}
-      onBlur={(e) => {
-        setFocus(false)
-        props.onBlur && props.onBlur(e)
-      }}
-      style={{ ...inputBase, ...style, borderColor: focus ? C.green : C.inputBorder }}
-    />
+    </select>
   )
 }
 

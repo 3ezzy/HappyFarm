@@ -1,40 +1,25 @@
-import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { C, Hoverable, LeafMark } from '../theme/hf.jsx'
+import { C, LeafMark } from '../theme/hf.jsx'
 
 const NotFound = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   return (
-    <div className="hf-leaf-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.pageBg, padding: '24px' }}>
-      <div style={{ position: 'relative', textAlign: 'center' }}>
-        <span style={{ display: 'inline-flex', width: '56px', height: '56px', alignItems: 'center', justifyContent: 'center', background: C.green, borderRadius: '16px', marginBottom: '16px', boxShadow: '0 4px 10px -1px rgba(107,92,67,0.20)' }}>
-          <LeafMark size={30} color="#BEE6D5" />
+    <div className="hf-leaf-bg flex min-h-screen items-center justify-center bg-pageBg p-6">
+      <div className="relative text-center">
+        <span className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-green shadow-ribbon">
+          <LeafMark size={30} color={C.leafPale} />
         </span>
-        <h1 style={{ fontSize: '64px', marginBottom: '4px' }}>404</h1>
-        <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>Page not found</h2>
-        <p style={{ color: C.tan, margin: '0 0 24px' }}>This pasture seems to be empty.</p>
-        <Hoverable
+        <h1 className="mb-1 text-[64px]">{t('notFound.title')}</h1>
+        <h2 className="mb-2 text-2xl">{t('notFound.subtitle')}</h2>
+        <p className="mb-6 text-tan">{t('notFound.body')}</p>
+        <button
           onClick={() => navigate('/')}
-          baseStyle={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: C.brown,
-            color: '#fff',
-            fontFamily: "'Zilla Slab', serif",
-            fontWeight: 700,
-            fontSize: '15px',
-            padding: '12px 24px',
-            border: 'none',
-            borderRadius: '9999px',
-            boxShadow: '0 2px 4px rgba(107,92,67,0.16)',
-            cursor: 'pointer',
-            transition: 'transform .2s cubic-bezier(0.68,-0.55,0.265,1.55),background-color .2s',
-          }}
-          hoverStyle={{ transform: 'scale(1.03)', background: C.brownDark }}
+          className="inline-flex cursor-pointer items-center gap-2 rounded-full border-none bg-brown px-6 py-3 font-display text-[15px] font-bold text-white shadow-soft transition-all duration-200 ease-pop hover:scale-[1.03] hover:bg-brown-dark"
         >
-          Go home <span style={{ fontSize: '18px' }}>→</span>
-        </Hoverable>
+          {t('notFound.goHome')} <span className="text-lg rtl:rotate-180">→</span>
+        </button>
       </div>
     </div>
   )

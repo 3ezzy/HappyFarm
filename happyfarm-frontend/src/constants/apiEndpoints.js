@@ -22,7 +22,13 @@ export const ANIMAL_ENDPOINTS = {
   DETAILS: (id) => `/animals/${id}`,
   FEED: (id) => `/animals/${id}/feed`,
   GROOM: (id) => `/animals/${id}/groom`,
-  SACRIFICE: (id) => `/animals/${id}/sacrifice`
+  SACRIFICE: (id) => `/animals/${id}/sacrifice`,
+  WEIGHTS: (id) => `/animals/${id}/weights`
+}
+
+// Breed lookup endpoint
+export const BREED_ENDPOINTS = {
+  LIST: '/breeds'
 }
 
 // Complete endpoint URLs

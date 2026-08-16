@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react'
+import { createContext, useContext, useReducer, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { authService } from '../services/api/auth.js'
-import { getUserData, getFarmData, isAuthenticated, clearAllData } from '../services/auth/tokenService.js'
+import { getUserData, getFarmData, isAuthenticated } from '../services/auth/tokenService.js'
 import toast from 'react-hot-toast'
 
 // Initial state
@@ -63,6 +64,7 @@ const AuthContext = createContext()
 
 // AuthProvider component
 export const AuthProvider = ({ children }) => {
+  const { t } = useTranslation()
   const [state, dispatch] = useReducer(authReducer, initialState)
 
   // Initialize auth state on app start
@@ -106,10 +108,10 @@ export const AuthProvider = ({ children }) => {
         payload: { user: data.user, farm: data.farm }
       })
       
-      toast.success(`Welcome back, ${data.user.name}!`)
+      toast.success(t('auth.welcomeBackToast', { name: data.user.name }))
       return data
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Login failed'
+      const errorMessage = error.response?.data?.error || t('errors.unexpected')
       dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage })
       throw error
     }
@@ -128,10 +130,10 @@ export const AuthProvider = ({ children }) => {
         payload: { user: data.user, farm: data.farm }
       })
       
-      toast.success(`Welcome to HappyFarm, ${data.user.name}!`)
+      toast.success(t('auth.welcomeNewToast', { name: data.user.name }))
       return data
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Registration failed'
+      const errorMessage = error.response?.data?.error || t('errors.unexpected')
       dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: errorMessage })
       throw error
     }
@@ -142,7 +144,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await authService.logout()
       dispatch({ type: AUTH_ACTIONS.LOGOUT })
-      toast.success('Logged out successfully')
+      toast.success(t('auth.loggedOutToast'))
     } catch (error) {
       // Even if logout fails, clear local state
       dispatch({ type: AUTH_ACTIONS.LOGOUT })
