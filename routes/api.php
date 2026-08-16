@@ -46,6 +46,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/animals/{id}/sacrifice', [AnimalController::class, 'sacrifice']);
     Route::get('/animals/{id}/weights', [WeightController::class, 'index']);
     Route::post('/animals/{id}/weights', [WeightController::class, 'store']);
+    Route::put('/weights/{id}', [WeightController::class, 'update']);
+    Route::delete('/weights/{id}', [WeightController::class, 'destroy']);
 
     // Breeds lookup (for the animal form's breed dropdown)
     Route::get('/breeds', [BreedController::class, 'index']);
