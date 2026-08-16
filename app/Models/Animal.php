@@ -49,6 +49,7 @@ class Animal extends Model
         'is_sacrificed',
         'exit_date',
         'exit_reason',
+        'birth_id',
     ];
 
     protected $casts = [

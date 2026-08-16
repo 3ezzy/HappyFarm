@@ -26,7 +26,7 @@ class AnimalController extends Controller
             return response()->json(['error' => 'No farm found for user'], 404);
         }
 
-        $query = $farm->animals()->with('breed');
+        $query = $farm->animals()->with(['breed', 'breedingCycles.birth', 'healthRecords']);
 
         if ($search = trim((string) $request->query('search'))) {
             $needle = '%' . strtolower($search) . '%';
@@ -94,7 +94,7 @@ class AnimalController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $animal = $this->findOwnedAnimal($request, $id, with: ['breed']);
+        $animal = $this->findOwnedAnimal($request, $id, with: ['breed', 'breedingCycles.birth', 'healthRecords']);
 
         if (!$animal) {
             return response()->json(['error' => 'Animal not found'], 404);
@@ -232,6 +232,7 @@ class AnimalController extends Controller
             'origin' => $animal->origin,
             'dam_id' => $animal->dam_id,
             'sire_id' => $animal->sire_id,
+            'birth_id' => $animal->birth_id,
             'fed_at' => $animal->fed_at?->toISOString(),
             'groomed_at' => $animal->groomed_at?->toISOString(),
             'sacrificed_at' => $animal->sacrificed_at?->toISOString(),
@@ -240,6 +241,13 @@ class AnimalController extends Controller
             'exit_reason' => $animal->exit_reason,
             'is_eligible' => $animal->isEligibleForSacrifice(),
             'min_age_text' => Animal::MIN_AGE_TEXT[$animal->type] ?? null,
+            'breeding_status' => $animal->breeding_status,
+            'active_withdrawal' => $animal->active_withdrawal ? [
+                'health_record_id' => $animal->active_withdrawal->id,
+                'kind' => $animal->active_withdrawal->kind,
+                'product' => $animal->active_withdrawal->product,
+                'withdrawal_until' => $animal->active_withdrawal->withdrawal_until->toDateString(),
+            ] : null,
         ];
     }
 }
