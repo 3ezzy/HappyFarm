@@ -219,6 +219,40 @@ class BreedingCycleTest extends TestCase
         $this->assertDatabaseMissing('breeding_cycles', ['id' => $cycle->id]);
     }
 
+    /**
+     * Regression test: hasOpenCycle() used to check whereDoesntHave('birth'),
+     * which found "no birth" again the moment a birth's log entry was
+     * deleted — even though this dam already gave birth — and incorrectly
+     * blocked her from being bred again. It now checks birthed_on, which
+     * survives the birth record's deletion.
+     */
+    public function test_can_start_a_new_cycle_after_a_previous_births_log_entry_is_deleted()
+    {
+        [$user, $farm] = $this->farmOwner();
+        $dam = $this->dam($farm);
+        $cycle = BreedingCycle::create([
+            'animal_id' => $dam->id,
+            'method' => 'natural',
+            'bred_on' => now()->subDays(200),
+            'pregnancy_result' => 'pregnant',
+        ]);
+
+        $birth = $this->actingAs($user, 'sanctum')->postJson("/api/animals/{$dam->id}/births", [
+            'breeding_cycle_id' => $cycle->id,
+            'born_on' => now()->subDays(190)->toDateString(),
+            'offspring_total' => 1,
+            'offspring_alive' => 1,
+            'offspring' => [['name' => 'Lamb 1', 'sex' => 'female']],
+        ])->json();
+
+        $this->actingAs($user, 'sanctum')->deleteJson("/api/births/{$birth['id']}")->assertStatus(200);
+
+        $this->actingAs($user, 'sanctum')->postJson("/api/animals/{$dam->id}/breeding-cycles", [
+            'method' => 'ai',
+            'bred_on' => now()->toDateString(),
+        ])->assertStatus(201);
+    }
+
     public function test_another_farm_cannot_access_this_farms_cycles()
     {
         [$owner, $farm] = $this->farmOwner();

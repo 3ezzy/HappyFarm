@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Animal;
 use App\Models\Birth;
+use App\Models\BreedingCycle;
 use App\Models\Farm;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -200,6 +201,93 @@ class BirthTest extends TestCase
         ])->assertStatus(200)->assertJson(['offspring_total' => 1]);
 
         $this->assertDatabaseCount('animals', 2); // dam + the one lamb, unchanged
+    }
+
+    /**
+     * Regression test for the bug reported after Phase 2 review: deleting a
+     * birth's log entry used to make BreedingCycle::status fall back to
+     * `pregnancy_result` (still 'pregnant', since recording a birth never
+     * changes that column) and re-open lambing_due — even though the
+     * animals it produced, correctly, were never touched. See the
+     * `birthed_on` column and Birth::boot() for the fix.
+     */
+    public function test_deleting_a_birth_does_not_revert_the_cycle_to_pregnant_or_recreate_lambing_due()
+    {
+        [$user, $farm] = $this->farmOwner();
+        $dam = Animal::create([
+            'farm_id' => $farm->id,
+            'type' => 'sheep',
+            'name' => 'Nour',
+            'sex' => 'female',
+            'age' => 3,
+        ]);
+
+        // 1. Create a breeding cycle, already confirmed pregnant and well
+        //    past the gestation window — an unresolved cycle here would
+        //    generate an overdue lambing_due alert.
+        $cycle = BreedingCycle::create([
+            'animal_id' => $dam->id,
+            'method' => 'natural',
+            'bred_on' => now()->subDays(200),
+            'pregnancy_result' => 'pregnant',
+        ]);
+
+        // 2. Record a birth with offspring through the real endpoint.
+        $birth = $this->actingAs($user, 'sanctum')->postJson("/api/animals/{$dam->id}/births", [
+            'breeding_cycle_id' => $cycle->id,
+            'born_on' => now()->subDays(10)->toDateString(),
+            'offspring_total' => 2,
+            'offspring_alive' => 2,
+            'offspring' => [
+                ['name' => 'Lamb 1', 'sex' => 'female'],
+                ['name' => 'Lamb 2', 'sex' => 'male'],
+            ],
+        ])->assertStatus(201)->json();
+
+        $lambIds = collect($birth['animals'])->pluck('id')->all();
+        $this->assertCount(2, $lambIds);
+
+        // 3. The cycle is no longer "pregnant" and produces no lambing_due
+        //    (or any other breeding) alert while the birth record exists.
+        $cycle->refresh();
+        $this->assertSame('lambed', $cycle->status);
+        $this->assertNotNull($cycle->birthed_on);
+
+        $dam->refresh();
+        $this->assertSame('nursing', $dam->breeding_status);
+
+        $alertsWithBirth = $this->actingAs($user, 'sanctum')->getJson('/api/alerts')->json();
+        $this->assertEmpty(array_filter($alertsWithBirth, fn ($a) => $a['animal_id'] === $dam->id));
+
+        // 4. Delete the birth.
+        $this->actingAs($user, 'sanctum')->deleteJson("/api/births/{$birth['id']}")->assertStatus(200);
+        $this->assertDatabaseMissing('births', ['id' => $birth['id']]);
+
+        // 5. Every offspring animal still exists.
+        foreach ($lambIds as $id) {
+            $this->assertDatabaseHas('animals', ['id' => $id]);
+        }
+
+        // 6. Their birth_id is now null, but nothing else about them changed.
+        foreach ($lambIds as $id) {
+            $this->assertDatabaseHas('animals', ['id' => $id, 'birth_id' => null, 'dam_id' => $dam->id]);
+        }
+
+        // 7. The cycle does NOT fall back to pregnant/open — birthed_on
+        //    survives the birth's deletion, so status stays 'lambed' and
+        //    the dam stays 'nursing', never reverting to 'pregnant'.
+        $cycle->refresh();
+        $this->assertSame('lambed', $cycle->status);
+        $this->assertNotNull($cycle->birthed_on);
+        $this->assertSame('pregnant', $cycle->pregnancy_result); // untouched, and no longer the source of truth
+
+        $dam->refresh();
+        $this->assertSame('nursing', $dam->breeding_status);
+
+        // 8. No duplicate/stale alert (lambing_due or otherwise) is
+        //    generated for this dam after the birth record is gone.
+        $alertsAfterDelete = $this->actingAs($user, 'sanctum')->getJson('/api/alerts')->json();
+        $this->assertEmpty(array_filter($alertsAfterDelete, fn ($a) => $a['animal_id'] === $dam->id));
     }
 
     public function test_another_farm_cannot_record_a_birth_for_this_farms_animal()

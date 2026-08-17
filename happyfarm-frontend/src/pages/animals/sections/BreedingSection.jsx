@@ -145,8 +145,11 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
     weanMutation.mutate({ id: cycleId, payload: { weaned_on: weanedOn } })
   }
 
-  const openCycle = cycles.find((c) => !c.birth_id && (c.pregnancy_result === 'pending' || c.pregnancy_result === 'pregnant'))
-  const nursingCycle = cycles.find((c) => c.birth_id && !c.weaned_on)
+  // Keyed off c.status (backend-derived from birthed_on, not birth_id) so
+  // this stays correct even after a cycle's birth log entry is deleted —
+  // birth_id goes null then, but status correctly stays 'lambed'.
+  const openCycle = cycles.find((c) => c.status !== 'lambed' && (c.pregnancy_result === 'pending' || c.pregnancy_result === 'pregnant'))
+  const nursingCycle = cycles.find((c) => c.status === 'lambed' && !c.weaned_on)
   const birthTerm = t('breeding.birthEventTerm', { context: animal.type })
 
   /**
@@ -156,7 +159,7 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
    * that distinction is only meaningful for cycles that are done.
    */
   const cycleBadgeLabel = (c) => {
-    if (c.birth_id) {
+    if (c.status === 'lambed') {
       return t(`breeding.status.${c.weaned_on ? 'available' : 'nursing'}`)
     }
     if (c.pregnancy_result === 'pending') {

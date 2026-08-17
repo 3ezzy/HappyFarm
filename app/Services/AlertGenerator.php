@@ -46,7 +46,7 @@ class AlertGenerator
         $cycles = $animal->breedingCycles;
 
         $openCycle = $cycles->first(
-            fn (BreedingCycle $c) => !$c->birth && in_array($c->pregnancy_result, ['pending', 'pregnant'])
+            fn (BreedingCycle $c) => $c->birthed_on === null && in_array($c->pregnancy_result, ['pending', 'pregnant'])
         );
 
         if ($openCycle && $openCycle->pregnancy_result === 'pending' && $this->isDue($openCycle->expected_check_on)) {
@@ -61,12 +61,15 @@ class AlertGenerator
             ]);
         }
 
-        $nursingCycle = $cycles->first(fn (BreedingCycle $c) => $c->birth && !$c->weaned_on);
+        $nursingCycle = $cycles->first(fn (BreedingCycle $c) => $c->birthed_on !== null && !$c->weaned_on);
 
         if ($nursingCycle && $this->isDue($nursingCycle->expected_weaning_on)) {
             $alerts[] = $this->build('weaning_due', $animal, $nursingCycle->expected_weaning_on, [
                 'cycle_id' => $nursingCycle->id,
-                'birth_id' => $nursingCycle->birth->id,
+                // Nullable: the birth log entry itself may have been
+                // deleted (see BreedingCycle::birthed_on) — this is purely
+                // informational, the alert's key is cycle_id-based below.
+                'birth_id' => $nursingCycle->birth?->id,
             ]);
         }
 
@@ -100,15 +103,17 @@ class AlertGenerator
      * with no weaning yet deliberately returns null here even though it's
      * not "open" either by BreedingCycleController's definition — she's
      * nursing, and weaning_due (above) is the relevant alert until weaning
-     * is actually recorded.
+     * is actually recorded. Reads `birthed_on` rather than the `birth`
+     * relation so a cycle that's already been weaned stays closed even if
+     * its birth's log entry is later deleted.
      */
     private function cycleEndDate(BreedingCycle $cycle): ?Carbon
     {
-        if ($cycle->birth && $cycle->weaned_on) {
+        if ($cycle->birthed_on !== null && $cycle->weaned_on) {
             return $cycle->weaned_on;
         }
 
-        if (!$cycle->birth && in_array($cycle->pregnancy_result, ['not_pregnant', 'aborted'])) {
+        if ($cycle->birthed_on === null && in_array($cycle->pregnancy_result, ['not_pregnant', 'aborted'])) {
             return $cycle->pregnancy_check_on;
         }
 
@@ -162,8 +167,12 @@ class AlertGenerator
 
     private function key(string $type, Animal $animal, array $extra): string
     {
+        // weaning_due used to key off birth_id, which stops existing the
+        // moment its birth's log entry is deleted — cycle_id is stable for
+        // the lifetime of the cycle regardless, and a cycle can only ever
+        // have one birth, so it identifies the same occurrence just as
+        // uniquely.
         return match ($type) {
-            'weaning_due' => "weaning_due:{$extra['birth_id']}",
             'health_due' => "health_due:{$extra['health_record_id']}",
             'reinsemination_due' => "reinsemination_due:{$animal->id}:{$extra['cycle_id']}",
             default => "{$type}:{$extra['cycle_id']}",

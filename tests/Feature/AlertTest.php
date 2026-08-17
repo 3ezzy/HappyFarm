@@ -166,6 +166,49 @@ class AlertTest extends TestCase
         $response->assertJsonMissing(['type' => 'reinsemination_due']);
     }
 
+    /**
+     * Regression test: weaning_due used to key off the birth's own id
+     * (`weaning_due:{birth_id}`), which stopped existing the moment that
+     * birth's log entry was deleted — the cycle then looked "pregnant"
+     * again instead of "nursing" and the alert silently misfired. Now it's
+     * keyed off cycle_id and driven by BreedingCycle::birthed_on, both of
+     * which survive the birth record being deleted.
+     */
+    public function test_weaning_due_still_fires_correctly_after_the_birth_record_is_deleted()
+    {
+        [$user, $farm] = $this->farmOwner();
+        $dam = $this->dam($farm);
+        $cycle = BreedingCycle::create([
+            'animal_id' => $dam->id,
+            'method' => 'natural',
+            'bred_on' => Carbon::today()->subDays(300),
+            'pregnancy_result' => 'pregnant',
+        ]);
+        $birth = Birth::create([
+            'breeding_cycle_id' => $cycle->id,
+            'dam_id' => $dam->id,
+            'born_on' => Carbon::today()->subDays(BreedingCycle::SPECIES_RULES['sheep']['weaning_days'] + 1),
+            'offspring_total' => 1,
+            'offspring_alive' => 1,
+        ]);
+
+        $cycle->refresh();
+        $this->assertNotNull($cycle->birthed_on); // Birth::boot() synced it on create
+
+        $birth->delete();
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/alerts');
+        $response->assertJsonFragment(['type' => 'weaning_due', 'animal_id' => $dam->id]);
+
+        $key = collect($response->json())->firstWhere('type', 'weaning_due')['key'];
+        $this->assertSame("weaning_due:{$cycle->id}", $key);
+
+        $this->actingAs($user, 'sanctum')->postJson('/api/alerts/dismiss', ['key' => $key])->assertStatus(200);
+
+        $after = $this->actingAs($user, 'sanctum')->getJson('/api/alerts')->json();
+        $this->assertEmpty(array_filter($after, fn ($a) => $a['animal_id'] === $dam->id));
+    }
+
     public function test_health_due_uses_the_most_recent_record_of_its_kind()
     {
         [$user, $farm] = $this->farmOwner();

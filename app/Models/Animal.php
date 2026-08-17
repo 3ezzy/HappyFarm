@@ -158,24 +158,24 @@ class Animal extends Model
      * dam's most recent breeding cycle — never stored, so it can't drift
      * from the records it's computed from.
      *
-     * Uses the already-loaded `breedingCycles.birth` relation when present
-     * (the case when listing many animals at once, e.g. farm statistics)
-     * to avoid firing one query per animal; falls back to a direct query
-     * for a single lazily-loaded model (e.g. the animal detail page).
+     * Uses the already-loaded `breedingCycles` relation when present (the
+     * case when listing many animals at once, e.g. farm statistics) to
+     * avoid firing one query per animal; falls back to a direct query for
+     * a single lazily-loaded model (e.g. the animal detail page). Reads
+     * `birthed_on` rather than the cycle's `birth` relation, so this stays
+     * correct even after that birth's log entry has been deleted.
      */
     public function getBreedingStatusAttribute(): string
     {
         $cycle = $this->relationLoaded('breedingCycles')
             ? $this->breedingCycles->sortByDesc('bred_on')->first()
-            : $this->breedingCycles()->with('birth')->latest('bred_on')->first();
+            : $this->breedingCycles()->latest('bred_on')->first();
 
         if (!$cycle) {
             return 'not_bred';
         }
 
-        $birth = $cycle->relationLoaded('birth') ? $cycle->getRelation('birth') : $cycle->birth;
-
-        if ($birth) {
+        if ($cycle->birthed_on !== null) {
             return $cycle->weaned_on ? 'available' : 'nursing';
         }
 

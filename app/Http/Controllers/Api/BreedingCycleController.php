@@ -154,16 +154,19 @@ class BreedingCycleController extends Controller
     }
 
     /**
-     * An "open" cycle has no linked birth and hasn't been resolved to
-     * not_pregnant/aborted — starting a second cycle while one is open
-     * would make "the current cycle" ambiguous everywhere else that reads
-     * breeding_status.
+     * An "open" cycle hasn't resulted in a birth yet and hasn't been
+     * resolved to not_pregnant/aborted — starting a second cycle while one
+     * is open would make "the current cycle" ambiguous everywhere else
+     * that reads breeding_status. Checks `birthed_on` rather than
+     * whereDoesntHave('birth'): the latter would treat a cycle whose birth
+     * log entry was later deleted as "open" again, incorrectly blocking a
+     * genuinely available dam from being bred.
      */
     private function hasOpenCycle(Animal $dam): bool
     {
         return $dam->breedingCycles()
             ->whereIn('pregnancy_result', ['pending', 'pregnant'])
-            ->whereDoesntHave('birth')
+            ->whereNull('birthed_on')
             ->exists();
     }
 
@@ -193,6 +196,7 @@ class BreedingCycleController extends Controller
             'pregnancy_check_on' => $cycle->pregnancy_check_on?->toDateString(),
             'pregnancy_result' => $cycle->pregnancy_result,
             'weaned_on' => $cycle->weaned_on?->toDateString(),
+            'birthed_on' => $cycle->birthed_on?->toDateString(),
             'notes' => $cycle->notes,
             'status' => $cycle->status,
             'expected_check_on' => $cycle->expected_check_on?->toDateString(),

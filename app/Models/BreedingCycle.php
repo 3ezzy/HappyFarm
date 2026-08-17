@@ -32,6 +32,7 @@ class BreedingCycle extends Model
         'pregnancy_check_on',
         'pregnancy_result',
         'weaned_on',
+        'birthed_on',
         'notes',
     ];
 
@@ -39,6 +40,7 @@ class BreedingCycle extends Model
         'bred_on' => 'date',
         'pregnancy_check_on' => 'date',
         'weaned_on' => 'date',
+        'birthed_on' => 'date',
     ];
 
     public function dam()
@@ -91,25 +93,24 @@ class BreedingCycle extends Model
 
     public function getExpectedWeaningOnAttribute(): ?Carbon
     {
-        $birth = $this->relationLoaded('birth') ? $this->getRelation('birth') : $this->birth;
-
-        if (!$birth) {
+        if (!$this->birthed_on) {
             return null;
         }
 
-        return $birth->born_on->copy()->addDays($this->rules()['weaning_days']);
+        return $this->birthed_on->copy()->addDays($this->rules()['weaning_days']);
     }
 
     /**
-     * bred → pregnant/not_pregnant/aborted → lambed. A linked birth always
-     * wins regardless of pregnancy_result, since recording a birth is
-     * itself proof of pregnancy even if a check was never logged.
+     * bred → pregnant/not_pregnant/aborted → lambed. `birthed_on` being set
+     * always wins over `pregnancy_result`, since a birth is itself proof of
+     * pregnancy even if a check was never logged — and it's read from this
+     * column rather than the `birth` relation specifically so that
+     * deleting the birth's log entry (see Birth::destroy) can never make
+     * this cycle look like it's still awaiting one.
      */
     public function getStatusAttribute(): string
     {
-        $birth = $this->relationLoaded('birth') ? $this->getRelation('birth') : $this->birth;
-
-        if ($birth) {
+        if ($this->birthed_on !== null) {
             return 'lambed';
         }
 
