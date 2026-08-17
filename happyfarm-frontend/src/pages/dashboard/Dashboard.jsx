@@ -7,6 +7,7 @@ import { animalService } from '../../services/api/animals.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
+import AlertsPanel from '../../components/alerts/AlertsPanel.jsx'
 import { TYPES, speciesBgClass, ageText, badge, cardClass } from '../../theme/hf.jsx'
 
 const StatCard = ({ value, label, className, valueClass, labelClass }) => (
@@ -53,6 +54,12 @@ const Dashboard = () => {
     stats.sacrifice_status?.not_yet_eligible ?? animals.filter((a) => !a.is_sacrificed && !a.is_eligible).length
   const sacrificedCount = stats.sacrifice_status?.already_sacrificed ?? animals.filter((a) => a.is_sacrificed).length
 
+  // breeding_status is backend-derived per animal (see Animal::breeding_status)
+  // — there's no dedicated statistics field for it yet, so this aggregates
+  // the same way the type/eligibility fallbacks above already do.
+  const pregnantCount = animals.filter((a) => !a.is_sacrificed && a.breeding_status === 'pregnant').length
+  const nursingCount = animals.filter((a) => !a.is_sacrificed && a.breeding_status === 'nursing').length
+
   const byType = TYPES.map((type) => ({
     type,
     label: t(`species.${type}.label`),
@@ -82,12 +89,19 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Alerts — computed on open, no scheduler behind this */}
+      <div className="mb-6">
+        <AlertsPanel />
+      </div>
+
       {/* Stat cards */}
       <div className="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
         <StatCard value={total} label={t('dashboard.totalAnimals')} className="bg-cream" valueClass="text-brown-text" labelClass="text-tan" />
         <StatCard value={readyCount} label={t('dashboard.readyForSacrifice')} className="bg-green" valueClass="text-white" labelClass="text-green-pale" />
         <StatCard value={notEligibleCount} label={t('dashboard.notYetEligible')} className="bg-yellow" valueClass="text-brown-text" labelClass="text-yellow-text" />
         <StatCard value={sacrificedCount} label={t('dashboard.alreadySacrificed')} className="bg-tan" valueClass="text-white" labelClass="text-cream-muted" />
+        <StatCard value={pregnantCount} label={t('dashboard.pregnant')} className="bg-blue" valueClass="text-white" labelClass="text-blue-soft" />
+        <StatCard value={nursingCount} label={t('dashboard.nursing')} className="bg-green-soft" valueClass="text-brown-text" labelClass="text-tan" />
       </div>
 
       {/* Flock + quick actions */}

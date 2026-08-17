@@ -40,11 +40,15 @@ const Animals = () => {
     { key: 'all', label: t('animals.filters.all') },
     { key: 'active', label: t('animals.filters.active') },
     { key: 'sacrificed', label: t('animals.filters.sacrificed') },
+    { key: 'pregnant', label: t('animals.filters.pregnant') },
+    { key: 'nursing', label: t('animals.filters.nursing') },
+    { key: 'available', label: t('animals.filters.available') },
     { key: 'sheep', label: t('animals.filters.sheep') },
     { key: 'goat', label: t('animals.filters.goats') },
     { key: 'cow', label: t('animals.filters.cows') },
     { key: 'camel', label: t('animals.filters.camels') },
   ]
+  const BREEDING_FILTERS = ['pregnant', 'nursing', 'available']
 
   const { data: animals = [], isLoading } = useQuery(
     ['animals', debouncedSearch],
@@ -55,6 +59,7 @@ const Animals = () => {
   let list = animals.slice()
   if (filter === 'active') list = list.filter((a) => !a.is_sacrificed)
   else if (filter === 'sacrificed') list = list.filter((a) => a.is_sacrificed)
+  else if (BREEDING_FILTERS.includes(filter)) list = list.filter((a) => a.breeding_status === filter)
   else if (TYPES.includes(filter)) list = list.filter((a) => a.type === filter)
 
   const emptyMessage = debouncedSearch ? t('animals.noneMatchSearch') : t('animals.noneFound')
