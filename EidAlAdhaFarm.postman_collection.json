@@ -479,6 +479,412 @@
               "path": ["animals", "1", "weights"]
             }
           }
+        },
+        {
+          "name": "Update a Weight",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weight_kg\": 43.0,\n  \"measured_at\": \"2026-08-10\",\n  \"notes\": \"corrected reading\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/weights/1",
+              "host": ["{{base_url}}"],
+              "path": ["weights", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete a Weight",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/weights/1",
+              "host": ["{{base_url}}"],
+              "path": ["weights", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Breeding Cycles",
+      "item": [
+        {
+          "name": "List a Dam's Breeding Cycles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals/1/breeding-cycles",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "breeding-cycles"]
+            }
+          }
+        },
+        {
+          "name": "Start a Breeding Cycle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sire_id\": 2,\n  \"method\": \"natural\",\n  \"bred_on\": \"2026-01-01\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/animals/1/breeding-cycles",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "breeding-cycles"]
+            }
+          }
+        },
+        {
+          "name": "Edit a Breeding Cycle",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sire_id\": 2,\n  \"method\": \"ai\",\n  \"bred_on\": \"2026-01-02\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/breeding-cycles/1",
+              "host": ["{{base_url}}"],
+              "path": ["breeding-cycles", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete a Breeding Cycle",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/breeding-cycles/1",
+              "host": ["{{base_url}}"],
+              "path": ["breeding-cycles", "1"]
+            }
+          }
+        },
+        {
+          "name": "Record a Pregnancy Check",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"result\": \"pregnant\",\n  \"checked_on\": \"2026-02-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/breeding-cycles/1/pregnancy-check",
+              "host": ["{{base_url}}"],
+              "path": ["breeding-cycles", "1", "pregnancy-check"]
+            }
+          }
+        },
+        {
+          "name": "Record a Weaning",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weaned_on\": \"2026-07-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/breeding-cycles/1/wean",
+              "host": ["{{base_url}}"],
+              "path": ["breeding-cycles", "1", "wean"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Births",
+      "item": [
+        {
+          "name": "List a Dam's Births",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals/1/births",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "births"]
+            }
+          }
+        },
+        {
+          "name": "Record a Birth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"breeding_cycle_id\": 1,\n  \"sire_id\": 2,\n  \"born_on\": \"2026-06-01\",\n  \"offspring_total\": 2,\n  \"offspring_alive\": 2,\n  \"difficulty\": \"easy\",\n  \"offspring\": [\n    { \"name\": \"Lamb A\", \"sex\": \"female\", \"birth_weight_kg\": 3.2 },\n    { \"name\": \"Lamb B\", \"sex\": \"male\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/animals/1/births",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "births"]
+            }
+          }
+        },
+        {
+          "name": "Edit a Birth",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"born_on\": \"2026-06-01\",\n  \"offspring_total\": 2,\n  \"offspring_alive\": 2,\n  \"difficulty\": \"assisted\",\n  \"notes\": \"corrected difficulty\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/births/1",
+              "host": ["{{base_url}}"],
+              "path": ["births", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete a Birth",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/births/1",
+              "host": ["{{base_url}}"],
+              "path": ["births", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Records",
+      "item": [
+        {
+          "name": "List an Animal's Health Records",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/animals/1/health-records",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "health-records"]
+            }
+          }
+        },
+        {
+          "name": "Add a Health Record",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kind\": \"antibiotic\",\n  \"product\": \"Oxytetracycline\",\n  \"dose\": \"10ml\",\n  \"administered_on\": \"2026-08-10\",\n  \"next_due_on\": \"2026-09-10\",\n  \"withdrawal_until\": \"2026-08-25\",\n  \"cost\": 45.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/animals/1/health-records",
+              "host": ["{{base_url}}"],
+              "path": ["animals", "1", "health-records"]
+            }
+          }
+        },
+        {
+          "name": "Edit a Health Record",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kind\": \"antibiotic\",\n  \"product\": \"Oxytetracycline\",\n  \"dose\": \"12ml\",\n  \"administered_on\": \"2026-08-10\",\n  \"withdrawal_until\": \"2026-08-25\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/health-records/1",
+              "host": ["{{base_url}}"],
+              "path": ["health-records", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete a Health Record",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/health-records/1",
+              "host": ["{{base_url}}"],
+              "path": ["health-records", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "item": [
+        {
+          "name": "List Current Alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alerts",
+              "host": ["{{base_url}}"],
+              "path": ["alerts"]
+            }
+          }
+        },
+        {
+          "name": "Dismiss an Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"breeding_check_due:1\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/alerts/dismiss",
+              "host": ["{{base_url}}"],
+              "path": ["alerts", "dismiss"]
+            }
+          }
         }
       ]
     },
