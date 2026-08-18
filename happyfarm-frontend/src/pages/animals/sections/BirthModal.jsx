@@ -122,7 +122,7 @@ const BirthModal = ({ dam, initialCycleId, onClose }) => {
       return
     }
     if (offspring.some((row) => !row.name.trim() || !row.sex)) {
-      toast.error(t('births.offspringCountMismatch', { count: alive }))
+      toast.error(t('births.offspringDetailsRequired'))
       return
     }
 

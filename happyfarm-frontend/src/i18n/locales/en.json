@@ -360,6 +360,9 @@
     "deleted": "Birth record deleted.",
     "viewAnimal": "View",
     "offspringCountMismatch": "Add exactly {{count}} offspring to match \"born alive\".",
+    "offspringDetailsRequired": "Please enter a name and sex for every offspring.",
+    "aliveExceedsTotal": "Born alive cannot exceed total born.",
+    "offspringCountsRequired": "Please enter valid offspring counts.",
     "bornOnRequired": "Please enter a valid birth date.",
     "loadError": "Could not load births."
   },

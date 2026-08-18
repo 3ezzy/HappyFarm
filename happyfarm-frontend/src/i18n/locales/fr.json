@@ -360,6 +360,9 @@
     "deleted": "Enregistrement de naissance supprimé.",
     "viewAnimal": "Voir",
     "offspringCountMismatch": "Ajoutez exactement {{count}} petit(s) pour correspondre à « nés vivants ».",
+    "offspringDetailsRequired": "Veuillez indiquer un nom et un sexe pour chaque petit.",
+    "aliveExceedsTotal": "Le nombre de nés vivants ne peut pas dépasser le nombre total de naissances.",
+    "offspringCountsRequired": "Veuillez saisir des effectifs valides.",
     "bornOnRequired": "Veuillez saisir une date de naissance valide.",
     "loadError": "Impossible de charger les naissances."
   },
