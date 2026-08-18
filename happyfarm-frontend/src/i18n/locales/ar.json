@@ -380,6 +380,9 @@
     "deleted": "تم حذف سجل الولادة.",
     "viewAnimal": "عرض",
     "offspringCountMismatch": "أضف {{count}} من المواليد ليطابق عدد \"المواليد الأحياء\".",
+    "offspringDetailsRequired": "يرجى إدخال اسم وجنس لكل مولود.",
+    "aliveExceedsTotal": "لا يمكن أن يتجاوز عدد المواليد الأحياء إجمالي عدد المواليد.",
+    "offspringCountsRequired": "يرجى إدخال أعداد مواليد صحيحة.",
     "bornOnRequired": "يرجى إدخال تاريخ ولادة صحيح.",
     "loadError": "تعذّر تحميل الولادات."
   },

@@ -41,6 +41,30 @@ const EditBirthForm = ({ birth, cycles, sires, onSave, onCancel, isSaving }) => 
     ? cycles
     : [...cycles, ...(birth.breeding_cycle_id ? [{ id: birth.breeding_cycle_id, bred_on: '', sire_name: null }] : [])]
 
+  const submit = () => {
+    const totalNum = parseInt(total, 10)
+    const aliveNum = parseInt(alive, 10)
+
+    if (Number.isNaN(totalNum) || totalNum < 0 || Number.isNaN(aliveNum) || aliveNum < 0) {
+      toast.error(t('births.offspringCountsRequired'))
+      return
+    }
+    if (aliveNum > totalNum) {
+      toast.error(t('births.aliveExceedsTotal'))
+      return
+    }
+
+    onSave({
+      breeding_cycle_id: cycleId || undefined,
+      sire_id: sireId || undefined,
+      born_on: bornOn,
+      offspring_total: totalNum,
+      offspring_alive: aliveNum,
+      difficulty: difficulty || undefined,
+      notes: notes.trim() || undefined,
+    })
+  }
+
   return (
     <div className="mt-3 grid grid-cols-1 gap-3 rounded-xl bg-sand p-4 xs:grid-cols-3">
       <div>
@@ -89,15 +113,7 @@ const EditBirthForm = ({ birth, cycles, sires, onSave, onCancel, isSaving }) => 
       </div>
       <div className="flex gap-2 xs:col-span-3">
         <button
-          onClick={() => onSave({
-            breeding_cycle_id: cycleId || undefined,
-            sire_id: sireId || undefined,
-            born_on: bornOn,
-            offspring_total: parseInt(total, 10),
-            offspring_alive: parseInt(alive, 10),
-            difficulty: difficulty || undefined,
-            notes: notes.trim() || undefined,
-          })}
+          onClick={submit}
           disabled={isSaving}
           className={actionBtnClass}
         >
