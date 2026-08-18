@@ -1,5 +1,5 @@
 import apiClient from './client.js'
-import { ANIMAL_ENDPOINTS } from '../../constants/apiEndpoints.js'
+import { ANIMAL_ENDPOINTS, WEIGHT_ENDPOINTS } from '../../constants/apiEndpoints.js'
 
 export const animalService = {
   // Get all animals for the user's farm, optionally filtered by ?search=
@@ -49,6 +49,16 @@ export const animalService = {
 
   addWeight: async (id, weightData) => {
     const response = await apiClient.post(ANIMAL_ENDPOINTS.WEIGHTS(id), weightData)
+    return response.data
+  },
+
+  updateWeight: async (weightId, weightData) => {
+    const response = await apiClient.put(WEIGHT_ENDPOINTS.UPDATE(weightId), weightData)
+    return response.data
+  },
+
+  deleteWeight: async (weightId) => {
+    const response = await apiClient.delete(WEIGHT_ENDPOINTS.DELETE(weightId))
     return response.data
   }
 }

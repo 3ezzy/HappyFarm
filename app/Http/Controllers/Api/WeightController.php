@@ -47,6 +47,44 @@ class WeightController extends Controller
         return response()->json($this->present($weight), 201);
     }
 
+    /**
+     * Update a weight entry.
+     */
+    public function update(Request $request, $id)
+    {
+        $weight = $this->findOwnedWeight($request, $id);
+
+        if (!$weight) {
+            return response()->json(['error' => 'Weight record not found'], 404);
+        }
+
+        $validated = $request->validate([
+            'weight_kg' => 'required|numeric|min:0|max:9999.99',
+            'measured_at' => 'required|date|before_or_equal:today',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $weight->update($validated);
+
+        return response()->json($this->present($weight));
+    }
+
+    /**
+     * Delete a weight entry.
+     */
+    public function destroy(Request $request, $id)
+    {
+        $weight = $this->findOwnedWeight($request, $id);
+
+        if (!$weight) {
+            return response()->json(['error' => 'Weight record not found'], 404);
+        }
+
+        $weight->delete();
+
+        return response()->json(['message' => 'Weight record deleted']);
+    }
+
     private function findOwnedAnimal(Request $request, $animalId): ?Animal
     {
         $user = $request->user();
@@ -54,6 +92,15 @@ class WeightController extends Controller
         return Animal::whereHas('farm', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })->find($animalId);
+    }
+
+    private function findOwnedWeight(Request $request, $id): ?Weight
+    {
+        $user = $request->user();
+
+        return Weight::whereHas('animal.farm', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->find($id);
     }
 
     /**

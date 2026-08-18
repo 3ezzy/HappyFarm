@@ -7,7 +7,12 @@ import toast from 'react-hot-toast'
 import { animalService } from '../../services/api/animals.js'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { HfInput, speciesBgClass, ageText, fmt, fmtDate, timeSince, badge, cardClass } from '../../theme/hf.jsx'
+import { speciesBgClass, ageText, fmt, fmtDate, timeSince, badge, cardClass } from '../../theme/hf.jsx'
+import BreedingSection from './sections/BreedingSection.jsx'
+import BirthsSection from './sections/BirthsSection.jsx'
+import BirthModal from './sections/BirthModal.jsx'
+import HealthRecordsSection from './sections/HealthRecordsSection.jsx'
+import WeightHistorySection from './sections/WeightHistorySection.jsx'
 
 const backBtnClass =
   'mb-5 inline-flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-line bg-cream ' +
@@ -39,9 +44,7 @@ const AnimalDetails = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [showSacrifice, setShowSacrifice] = useState(false)
-  const [weightKg, setWeightKg] = useState('')
-  const [measuredAt, setMeasuredAt] = useState(new Date().toISOString().slice(0, 10))
-  const [weightNotes, setWeightNotes] = useState('')
+  const [birthModal, setBirthModal] = useState(null) // { cycleId } | null
 
   const { data: animal, isLoading, error } = useQuery(['animal', id], () => animalService.getById(id), {
     refetchOnWindowFocus: true,
@@ -56,11 +59,6 @@ const AnimalDetails = () => {
     ['animal', animal?.sire_id],
     () => animalService.getById(animal.sire_id),
     { enabled: !!animal?.sire_id }
-  )
-  const { data: weights = [] } = useQuery(
-    ['weights', id],
-    () => animalService.getWeights(id),
-    { enabled: !!animal }
   )
 
   const invalidateAll = () =>
@@ -91,23 +89,6 @@ const AnimalDetails = () => {
     },
     onError: () => setShowSacrifice(false),
   })
-  const addWeightMutation = useMutation((payload) => animalService.addWeight(id, payload), {
-    onSuccess: async () => {
-      await queryClient.invalidateQueries(['weights', id])
-      setWeightKg('')
-      setWeightNotes('')
-    },
-  })
-
-  const submitWeight = () => {
-    const parsed = parseFloat(weightKg)
-    if (Number.isNaN(parsed) || parsed < 0 || !measuredAt) {
-      toast.error(t('animalDetails.weights.weightRequired'))
-      return
-    }
-    addWeightMutation.mutate({ weight_kg: parsed, measured_at: measuredAt, notes: weightNotes.trim() || undefined })
-  }
-
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -232,48 +213,49 @@ const AnimalDetails = () => {
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Weight history */}
-          <div className={classNames(cardClass, 'p-7')}>
-            <h2 className="mb-[18px] text-[22px]">{t('animalDetails.weights.title')}</h2>
-
-            {weights.length === 0 ? (
-              <p className="mb-4 text-sm text-tan">{t('animalDetails.weights.empty')}</p>
-            ) : (
-              <div className="mb-5 flex flex-col gap-2">
-                {weights.map((w) => (
-                  <div key={w.id} className="flex items-center justify-between gap-3 rounded-xl bg-green-soft2 px-4 py-2.5">
-                    <span className="font-display text-base font-bold text-brown-text">{w.weight_kg} kg</span>
-                    <span className="text-sm text-tan">{fmtDate(w.measured_at, i18n.language)}</span>
-                    {w.notes && <span className="min-w-0 flex-1 truncate text-end text-[12.5px] text-tan">{w.notes}</span>}
+            {/* Withdrawal warning — surfaces animal.active_withdrawal, which
+                is already the most conservative currently-active record;
+                nothing here re-derives that. */}
+            {animal.active_withdrawal && (
+              <div className="mt-3.5 rounded-2xl border-[3px] border-red-line bg-red-soft p-[18px]">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl">⚠️</span>
+                  <div>
+                    <h4 className="text-[15px] text-brown-text">{t('animalDetails.withdrawal.title')}</h4>
+                    <p className="mt-[3px] text-sm text-brown">
+                      {animal.active_withdrawal.product
+                        ? t('animalDetails.withdrawal.bodyWithProduct', {
+                            product: animal.active_withdrawal.product,
+                            date: fmtDate(animal.active_withdrawal.withdrawal_until, i18n.language),
+                          })
+                        : t('animalDetails.withdrawal.bodyNoProduct', {
+                            date: fmtDate(animal.active_withdrawal.withdrawal_until, i18n.language),
+                          })}
+                    </p>
                   </div>
-                ))}
+                </div>
               </div>
             )}
-
-            <div className="grid grid-cols-2 gap-3 xs:grid-cols-[1fr_1fr_2fr_auto] xs:items-end">
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.weights.weightKg')}</label>
-                <HfInput type="number" min="0" step="0.1" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.weights.date')}</label>
-                <HfInput type="date" value={measuredAt} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setMeasuredAt(e.target.value)} />
-              </div>
-              <div className="col-span-2 xs:col-span-1">
-                <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.weights.notes')}</label>
-                <HfInput type="text" value={weightNotes} onChange={(e) => setWeightNotes(e.target.value)} placeholder={t('animalDetails.weights.notesPlaceholder')} />
-              </div>
-              <button
-                onClick={submitWeight}
-                disabled={addWeightMutation.isLoading}
-                className="col-span-2 h-[46px] cursor-pointer rounded-2xl border-none bg-green px-5 font-display text-sm font-bold text-white shadow-chip transition-transform duration-200 ease-pop enabled:hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-70 xs:col-span-1"
-              >
-                {addWeightMutation.isLoading ? t('animalDetails.weights.saving') : t('animalDetails.weights.save')}
-              </button>
-            </div>
           </div>
+
+          {animal.sex === 'female' && (
+            <BreedingSection
+              animal={animal}
+              onRecordBirth={(cycle) => setBirthModal({ cycleId: cycle.id })}
+            />
+          )}
+
+          {animal.sex === 'female' && (
+            <BirthsSection
+              dam={animal}
+              onRecordBirth={() => setBirthModal({ cycleId: undefined })}
+            />
+          )}
+
+          <HealthRecordsSection animalId={id} />
+
+          <WeightHistorySection animalId={id} />
         </div>
 
         {/* Care actions */}
@@ -359,6 +341,14 @@ const AnimalDetails = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {birthModal && (
+        <BirthModal
+          dam={animal}
+          initialCycleId={birthModal.cycleId}
+          onClose={() => setBirthModal(null)}
+        />
       )}
     </div>
   )

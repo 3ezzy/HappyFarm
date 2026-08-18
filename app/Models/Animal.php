@@ -49,6 +49,7 @@ class Animal extends Model
         'is_sacrificed',
         'exit_date',
         'exit_reason',
+        'birth_id',
     ];
 
     protected $casts = [
@@ -94,6 +95,36 @@ class Animal extends Model
     }
 
     /**
+     * Cycles where this animal is the dam.
+     */
+    public function breedingCycles()
+    {
+        return $this->hasMany(BreedingCycle::class, 'animal_id');
+    }
+
+    /**
+     * Births where this animal is the dam.
+     */
+    public function births()
+    {
+        return $this->hasMany(Birth::class, 'dam_id');
+    }
+
+    public function healthRecords()
+    {
+        return $this->hasMany(HealthRecord::class);
+    }
+
+    /**
+     * The birth that created this animal, if it's a lamb/kid/calf born
+     * on the farm rather than purchased or entered independently.
+     */
+    public function birth()
+    {
+        return $this->belongsTo(Birth::class);
+    }
+
+    /**
      * Age in years, computed from date_of_birth. Replaces the old stored
      * `age` decimal, which was only ever correct on the day it was entered.
      */
@@ -120,6 +151,58 @@ class Animal extends Model
 
         $days = (int) round(((float) $value) * 365.25);
         $this->attributes['date_of_birth'] = Carbon::now()->subDays($days)->toDateString();
+    }
+
+    /**
+     * not_bred | bred | pregnant | nursing | available, derived from this
+     * dam's most recent breeding cycle — never stored, so it can't drift
+     * from the records it's computed from.
+     *
+     * Uses the already-loaded `breedingCycles` relation when present (the
+     * case when listing many animals at once, e.g. farm statistics) to
+     * avoid firing one query per animal; falls back to a direct query for
+     * a single lazily-loaded model (e.g. the animal detail page). Reads
+     * `birthed_on` rather than the cycle's `birth` relation, so this stays
+     * correct even after that birth's log entry has been deleted.
+     */
+    public function getBreedingStatusAttribute(): string
+    {
+        $cycle = $this->relationLoaded('breedingCycles')
+            ? $this->breedingCycles->sortByDesc('bred_on')->first()
+            : $this->breedingCycles()->latest('bred_on')->first();
+
+        if (!$cycle) {
+            return 'not_bred';
+        }
+
+        if ($cycle->birthed_on !== null) {
+            return $cycle->weaned_on ? 'available' : 'nursing';
+        }
+
+        return match ($cycle->pregnancy_result) {
+            'pregnant' => 'pregnant',
+            'not_pregnant', 'aborted' => 'available',
+            default => 'bred',
+        };
+    }
+
+    /**
+     * The health record currently imposing a meat/milk withdrawal period
+     * on this animal, if any — the most conservative one (latest
+     * withdrawal_until) when more than one is active. Null once expired;
+     * see AnimalController::sacrifice() for how this surfaces as a warning,
+     * never a block, on sacrifice.
+     */
+    public function getActiveWithdrawalAttribute(): ?HealthRecord
+    {
+        $records = $this->relationLoaded('healthRecords')
+            ? $this->healthRecords
+            : $this->healthRecords()->whereNotNull('withdrawal_until')->get();
+
+        return $records
+            ->filter(fn (HealthRecord $r) => $r->isWithdrawalActive())
+            ->sortByDesc('withdrawal_until')
+            ->first();
     }
 
     /**
