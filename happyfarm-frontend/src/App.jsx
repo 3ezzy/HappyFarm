@@ -15,6 +15,7 @@ import Dashboard from './pages/dashboard/Dashboard.jsx'
 import Animals from './pages/animals/Animals.jsx'
 import AnimalDetails from './pages/animals/AnimalDetails.jsx'
 import AddAnimal from './pages/animals/AddAnimal.jsx'
+import EditAnimal from './pages/animals/EditAnimal.jsx'
 import Farm from './pages/farm/Farm.jsx'
 import Profile from './pages/profile/Profile.jsx'
 import NotFound from './pages/NotFound.jsx'
@@ -56,6 +57,7 @@ function App() {
             {/* Animal Management Routes */}
             <Route path="animals" element={<Animals />} />
             <Route path="animals/add" element={<AddAnimal />} />
+            <Route path="animals/:id/edit" element={<EditAnimal />} />
             <Route path="animals/:id" element={<AnimalDetails />} />
             
             {/* Farm Management Routes */}

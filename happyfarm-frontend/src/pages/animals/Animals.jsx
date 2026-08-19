@@ -43,6 +43,7 @@ const Animals = () => {
     { key: 'pregnant', label: t('animals.filters.pregnant') },
     { key: 'nursing', label: t('animals.filters.nursing') },
     { key: 'available', label: t('animals.filters.available') },
+    { key: 'archived', label: t('animals.filters.archived') },
     { key: 'sheep', label: t('animals.filters.sheep') },
     { key: 'goat', label: t('animals.filters.goats') },
     { key: 'cow', label: t('animals.filters.cows') },
@@ -50,9 +51,14 @@ const Animals = () => {
   ]
   const BREEDING_FILTERS = ['pregnant', 'nursing', 'available']
 
+  // Archived animals are excluded by the backend's default query entirely
+  // (not just a client-side filter) — selecting this filter re-fetches
+  // with ?archived=1 instead of filtering an already-fetched list.
+  const showingArchived = filter === 'archived'
+
   const { data: animals = [], isLoading } = useQuery(
-    ['animals', debouncedSearch],
-    () => animalService.getAll(debouncedSearch || undefined),
+    ['animals', debouncedSearch, showingArchived],
+    () => animalService.getAll({ search: debouncedSearch || undefined, archived: showingArchived }),
     { refetchOnWindowFocus: true, refetchInterval: 30000 }
   )
 
@@ -61,6 +67,8 @@ const Animals = () => {
   else if (filter === 'sacrificed') list = list.filter((a) => a.is_sacrificed)
   else if (BREEDING_FILTERS.includes(filter)) list = list.filter((a) => a.breeding_status === filter)
   else if (TYPES.includes(filter)) list = list.filter((a) => a.type === filter)
+  // 'archived' needs no client-side filtering — the query itself already
+  // returned only archived animals.
 
   const emptyMessage = debouncedSearch ? t('animals.noneMatchSearch') : t('animals.noneFound')
 
@@ -111,7 +119,9 @@ const Animals = () => {
                 </div>
               </div>
               <div className="flex items-center justify-between gap-2">
-                {a.is_sacrificed ? (
+                {a.is_archived ? (
+                  <span className={badge('sacrificed')}>{t('animals.filters.archived')}</span>
+                ) : a.is_sacrificed ? (
                   <span className={badge('sacrificed')}>{t('animals.filters.sacrificed')}</span>
                 ) : (
                   <span className={badge('active')}>{t('animals.filters.active')}</span>

@@ -116,7 +116,8 @@
       "camels": "Camels",
       "pregnant": "Pregnant",
       "nursing": "Nursing",
-      "available": "Available"
+      "available": "Available",
+      "archived": "Archived"
     },
     "noneFound": "No animals here yet",
     "noneMatchSearch": "No animals match your search.",
@@ -150,6 +151,25 @@
     "fedToast": "{{name}} has been fed! 🌾",
     "groomedToast": "{{name}} has been groomed! ✨",
     "sacrificedToast": "{{name}} — may it be accepted. 🤲",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete {{name}}?",
+    "deleteConfirmBody": "If {{name}} has no recorded history, this removes them permanently. Otherwise, they'll be archived and can be restored anytime.",
+    "deletedToast": "{{name}} was deleted.",
+    "archivedToast": "{{name}} was archived. You can restore them anytime.",
+    "archivedBannerTitle": "Archived",
+    "archivedBannerBody": "This animal is archived and hidden from your active list.",
+    "restore": "Restore",
+    "restoring": "Restoring…",
+    "restoredToast": "{{name}} was restored. 🌿",
+    "recordExit": "Record death or sale",
+    "recordExitSubmit": "Record",
+    "recordExitSubmitting": "Recording…",
+    "exitDateRequired": "Please choose a valid, non-future date.",
+    "exitedToast": "{{name}}'s exit was recorded.",
+    "exitedPanelTitle": "Exited",
+    "exitedCareMsg": "This animal has left the flock.",
+    "exitedCareSub": "No further care actions available.",
     "withdrawal": {
       "title": "Withdrawal period active",
       "bodyWithProduct": "{{product}} — avoid sacrifice or using meat/milk until {{date}}.",
@@ -228,6 +248,14 @@
     "nameRequired": "Please give your animal a name.",
     "ageRequired": "Please enter a valid age or date of birth.",
     "createdToast": "{{name}} joined the farm! 🌿"
+  },
+  "editAnimal": {
+    "title": "Edit {{name}}",
+    "speciesLocked": "Species can't be changed once this animal has breeding history.",
+    "sexLocked": "Sex can't be changed once this animal has breeding history.",
+    "submit": "Save changes",
+    "submitting": "Saving…",
+    "updatedToast": "{{name}} was updated. 🌿"
   },
   "notFound": {
     "title": "404",

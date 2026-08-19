@@ -7,7 +7,8 @@ import toast from 'react-hot-toast'
 import { animalService } from '../../services/api/animals.js'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { speciesBgClass, ageText, fmt, fmtDate, timeSince, badge, cardClass } from '../../theme/hf.jsx'
+import ConfirmModal from '../../components/common/UI/ConfirmModal.jsx'
+import { speciesBgClass, ageText, fmt, fmtDate, timeSince, badge, cardClass, HfInput, HfSelect } from '../../theme/hf.jsx'
 import BreedingSection from './sections/BreedingSection.jsx'
 import BirthsSection from './sections/BirthsSection.jsx'
 import BirthModal from './sections/BirthModal.jsx'
@@ -15,9 +16,17 @@ import HealthRecordsSection from './sections/HealthRecordsSection.jsx'
 import WeightHistorySection from './sections/WeightHistorySection.jsx'
 
 const backBtnClass =
-  'mb-5 inline-flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-line bg-cream ' +
+  'inline-flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-line bg-cream ' +
   'px-[18px] py-2 font-display text-sm font-bold text-brown-text ' +
   'transition-transform duration-200 ease-pop hover:scale-[1.04]'
+
+const ghostBtnClass =
+  'cursor-pointer rounded-full border-2 border-line bg-cream px-4 py-2 font-display text-[13.5px] font-bold ' +
+  'text-brown-text transition-transform duration-200 ease-pop hover:scale-[1.03]'
+
+const dangerGhostBtnClass =
+  'cursor-pointer rounded-full border-2 border-red-line bg-cream px-4 py-2 font-display text-[13.5px] font-bold ' +
+  'text-red-dark transition-transform duration-200 ease-pop hover:scale-[1.03] hover:bg-red-soft'
 
 const careBtnClass =
   'flex cursor-pointer items-center gap-2.5 rounded-full border-none px-5 py-[13px] ' +
@@ -44,6 +53,10 @@ const AnimalDetails = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [showSacrifice, setShowSacrifice] = useState(false)
+  const [showDelete, setShowDelete] = useState(false)
+  const [showExitForm, setShowExitForm] = useState(false)
+  const [exitReason, setExitReason] = useState('death')
+  const [exitDate, setExitDate] = useState(new Date().toISOString().slice(0, 10))
   const [birthModal, setBirthModal] = useState(null) // { cycleId } | null
 
   const { data: animal, isLoading, error } = useQuery(['animal', id], () => animalService.getById(id), {
@@ -89,6 +102,52 @@ const AnimalDetails = () => {
     },
     onError: () => setShowSacrifice(false),
   })
+
+  // Archives the animal if it has any history, otherwise deletes it
+  // permanently — action tells us which, so the page reacts correctly
+  // either way instead of guessing.
+  const deleteMutation = useMutation(() => animalService.remove(id), {
+    onSuccess: async (data) => {
+      setShowDelete(false)
+      await Promise.all([
+        queryClient.invalidateQueries('animals'),
+        queryClient.invalidateQueries('farm-details'),
+        queryClient.invalidateQueries('farm-statistics'),
+      ])
+      if (data.action === 'archived') {
+        await queryClient.invalidateQueries(['animal', id])
+        toast.success(t('animalDetails.archivedToast', { name: animal?.name }))
+      } else {
+        toast.success(t('animalDetails.deletedToast', { name: animal?.name }))
+        navigate('/animals')
+      }
+    },
+    onError: () => setShowDelete(false),
+  })
+
+  const restoreMutation = useMutation(() => animalService.restore(id), {
+    onSuccess: async () => {
+      await invalidateAll()
+      toast.success(t('animalDetails.restoredToast', { name: animal?.name }))
+    },
+  })
+
+  const exitMutation = useMutation(() => animalService.recordExit(id, { reason: exitReason, exitDate }), {
+    onSuccess: async () => {
+      setShowExitForm(false)
+      await invalidateAll()
+      toast.success(t('animalDetails.exitedToast', { name: animal?.name }))
+    },
+  })
+
+  const submitExit = () => {
+    if (!exitDate) {
+      toast.error(t('animalDetails.exitDateRequired'))
+      return
+    }
+    exitMutation.mutate()
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -100,7 +159,7 @@ const AnimalDetails = () => {
   if (error || !animal) {
     return (
       <div className="animate-hf-pop">
-        <button onClick={() => navigate('/animals')} className={backBtnClass}>
+        <button onClick={() => navigate('/animals')} className={classNames(backBtnClass, 'mb-5')}>
           <span className="text-base rtl:rotate-180">←</span> {t('common.backToAnimals')}
         </button>
         <div className={classNames(cardClass, 'p-7 text-center')}>
@@ -124,9 +183,21 @@ const AnimalDetails = () => {
 
   return (
     <div className="animate-hf-pop">
-      <button onClick={() => navigate('/animals')} className={backBtnClass}>
-        <span className="text-base rtl:rotate-180">←</span> {t('common.backToAnimals')}
-      </button>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <button onClick={() => navigate('/animals')} className={backBtnClass}>
+          <span className="text-base rtl:rotate-180">←</span> {t('common.backToAnimals')}
+        </button>
+        {!animal.is_archived && (
+          <div className="flex gap-2.5">
+            <button onClick={() => navigate(`/animals/${id}/edit`)} className={ghostBtnClass}>
+              {t('animalDetails.edit')}
+            </button>
+            <button onClick={() => setShowDelete(true)} className={dangerGhostBtnClass}>
+              {t('animalDetails.delete')}
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 items-start gap-6 wide:grid-cols-[1.6fr_1fr]">
         {/* Main info */}
@@ -139,7 +210,9 @@ const AnimalDetails = () => {
               <div>
                 <h1 className="mb-1.5 text-[38px] leading-[1.05]">{animal.name}</h1>
                 <p className="mb-3 text-lg text-brown">{t('animalDetails.ageLine', { type: speciesLabel, age: ageText(animal.age, t) })}</p>
-                {animal.is_sacrificed ? (
+                {animal.is_archived ? (
+                  <span className={badge('sacrificed', 'lg')}>{t('animals.filters.archived')}</span>
+                ) : animal.is_sacrificed ? (
                   <span className={badge('sacrificed', 'lg')}>{t('animalDetails.sacrificed')}</span>
                 ) : (
                   <span className={badge('active', 'lg')}>{t('animalDetails.active')}</span>
@@ -184,7 +257,26 @@ const AnimalDetails = () => {
               </div>
             </div>
 
-            {animal.is_sacrificed ? (
+            {animal.is_archived ? (
+              <div className="mt-3.5 rounded-2xl border-[3px] border-line bg-cream-muted p-[18px]">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">🗄️</span>
+                    <div>
+                      <h4 className="text-[15px] text-brown-text">{t('animalDetails.archivedBannerTitle')}</h4>
+                      <p className="mt-[3px] text-sm text-brown">{t('animalDetails.archivedBannerBody')}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => restoreMutation.mutate()}
+                    disabled={restoreMutation.isLoading}
+                    className="cursor-pointer rounded-full border-none bg-green px-5 py-2.5 font-display text-sm font-bold text-white shadow-chip transition-transform duration-200 ease-pop enabled:hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {restoreMutation.isLoading ? t('animalDetails.restoring') : t('animalDetails.restore')}
+                  </button>
+                </div>
+              </div>
+            ) : animal.is_sacrificed ? (
               <div className="mt-3.5 rounded-2xl bg-cream-muted p-[18px]">
                 <div className="mb-1.5 flex items-center justify-between">
                   <h4 className="text-[15px] text-brown-text">{t('animalDetails.sacrificedPanelTitle')}</h4><span className="text-lg">🤲</span>
@@ -196,6 +288,16 @@ const AnimalDetails = () => {
                   </p>
                 )}
                 <p className="mt-[3px] text-[12.5px] text-tan">{t('animalDetails.sacrificedNote')}</p>
+              </div>
+            ) : animal.exit_reason ? (
+              <div className="mt-3.5 rounded-2xl bg-cream-muted p-[18px]">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <h4 className="text-[15px] text-brown-text">{t('animalDetails.exitedPanelTitle')}</h4><span className="text-lg">📋</span>
+                </div>
+                <p className="text-sm font-semibold text-brown">{fmtDate(animal.exit_date, i18n.language)}</p>
+                <p className="mt-[3px] text-[12.5px] text-tan">
+                  {t('animalDetails.exit.reason')}: {t(`animalDetails.exit.${animal.exit_reason}`)}
+                </p>
               </div>
             ) : (
               <div
@@ -261,11 +363,22 @@ const AnimalDetails = () => {
         {/* Care actions */}
         <div className="rounded-2xl bg-green-soft p-6 shadow-ribbon">
           <h2 className="mb-[18px] text-[22px]">{t('animalDetails.care')}</h2>
-          {animal.is_sacrificed ? (
+          {animal.is_archived ? (
+            <div className="px-2 py-6 text-center">
+              <div className="mb-2.5 text-[40px]">🗄️</div>
+              <p className="font-semibold text-brown">{t('animalDetails.archivedBannerBody')}</p>
+            </div>
+          ) : animal.is_sacrificed ? (
             <div className="px-2 py-6 text-center">
               <div className="mb-2.5 text-[40px]">🤲</div>
               <p className="font-semibold text-brown">{t('animalDetails.sacrificedCareMsg')}</p>
               <p className="mt-1.5 text-[13.5px] text-tan">{t('animalDetails.sacrificedCareSub')}</p>
+            </div>
+          ) : animal.exit_reason ? (
+            <div className="px-2 py-6 text-center">
+              <div className="mb-2.5 text-[40px]">📋</div>
+              <p className="font-semibold text-brown">{t('animalDetails.exitedCareMsg')}</p>
+              <p className="mt-1.5 text-[13.5px] text-tan">{t('animalDetails.exitedCareSub')}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
@@ -301,6 +414,44 @@ const AnimalDetails = () => {
                   </button>
                   <p className="text-center text-[12.5px] text-tan">{t('animalDetails.notEligibleHint')}</p>
                 </>
+              )}
+
+              <div className="my-1.5 h-px bg-line" />
+              {showExitForm ? (
+                <div className="rounded-2xl bg-cream p-4">
+                  <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.exit.reason')}</label>
+                  <HfSelect value={exitReason} onChange={(e) => setExitReason(e.target.value)} className="mb-3">
+                    <option value="death">{t('animalDetails.exit.death')}</option>
+                    <option value="sale">{t('animalDetails.exit.sale')}</option>
+                  </HfSelect>
+                  <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.exit.date')}</label>
+                  <HfInput
+                    type="date"
+                    value={exitDate}
+                    max={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => setExitDate(e.target.value)}
+                    className="mb-3"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={submitExit}
+                      disabled={exitMutation.isLoading}
+                      className="flex-1 cursor-pointer rounded-full border-none bg-tan px-4 py-2.5 font-display text-sm font-bold text-white shadow-chip transition-transform duration-200 ease-pop enabled:hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {exitMutation.isLoading ? t('animalDetails.recordExitSubmitting') : t('animalDetails.recordExitSubmit')}
+                    </button>
+                    <button onClick={() => setShowExitForm(false)} className={ghostBtnClass}>
+                      {t('common.cancel')}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowExitForm(true)}
+                  className="text-center text-[13px] font-semibold text-tan underline decoration-dotted underline-offset-2"
+                >
+                  {t('animalDetails.recordExit')}
+                </button>
               )}
             </div>
           )}
@@ -348,6 +499,16 @@ const AnimalDetails = () => {
           dam={animal}
           initialCycleId={birthModal.cycleId}
           onClose={() => setBirthModal(null)}
+        />
+      )}
+
+      {showDelete && (
+        <ConfirmModal
+          title={t('animalDetails.deleteConfirmTitle', { name: animal.name })}
+          body={t('animalDetails.deleteConfirmBody', { name: animal.name })}
+          isConfirming={deleteMutation.isLoading}
+          onCancel={() => setShowDelete(false)}
+          onConfirm={() => deleteMutation.mutate()}
         />
       )}
     </div>

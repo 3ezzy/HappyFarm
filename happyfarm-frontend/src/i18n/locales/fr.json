@@ -116,7 +116,8 @@
       "camels": "Chameaux",
       "pregnant": "Gestantes",
       "nursing": "Allaitantes",
-      "available": "Disponibles"
+      "available": "Disponibles",
+      "archived": "Archivés"
     },
     "noneFound": "Aucun animal ici",
     "noneMatchSearch": "Aucun animal ne correspond à votre recherche.",
@@ -150,6 +151,25 @@
     "fedToast": "{{name}} a été nourri. 🌾",
     "groomedToast": "{{name}} a été toiletté. ✨",
     "sacrificedToast": "{{name}} — puisse-t-il être accepté. 🤲",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteConfirmTitle": "Supprimer {{name}} ?",
+    "deleteConfirmBody": "Si {{name}} n'a aucun historique enregistré, il/elle sera supprimé(e) définitivement. Sinon, il/elle sera archivé(e) et pourra être restauré(e) à tout moment.",
+    "deletedToast": "{{name}} a été supprimé(e).",
+    "archivedToast": "{{name}} a été archivé(e). Vous pouvez le/la restaurer à tout moment.",
+    "archivedBannerTitle": "Archivé",
+    "archivedBannerBody": "Cet animal est archivé et masqué de votre liste active.",
+    "restore": "Restaurer",
+    "restoring": "Restauration…",
+    "restoredToast": "{{name}} a été restauré(e). 🌿",
+    "recordExit": "Enregistrer un décès ou une vente",
+    "recordExitSubmit": "Enregistrer",
+    "recordExitSubmitting": "Enregistrement…",
+    "exitDateRequired": "Veuillez choisir une date valide et non future.",
+    "exitedToast": "La sortie de {{name}} a été enregistrée.",
+    "exitedPanelTitle": "Sorti",
+    "exitedCareMsg": "Cet animal a quitté le troupeau.",
+    "exitedCareSub": "Aucune autre action de soin disponible.",
     "withdrawal": {
       "title": "Délai d'attente en cours",
       "bodyWithProduct": "{{product}} — éviter le sacrifice ou l'usage de la viande/du lait jusqu'au {{date}}.",
@@ -228,6 +248,14 @@
     "nameRequired": "Veuillez donner un nom à votre animal.",
     "ageRequired": "Veuillez indiquer un âge ou une date de naissance valide.",
     "createdToast": "{{name}} a rejoint la ferme ! 🌿"
+  },
+  "editAnimal": {
+    "title": "Modifier {{name}}",
+    "speciesLocked": "L'espèce ne peut plus être modifiée une fois que cet animal a un historique de reproduction.",
+    "sexLocked": "Le sexe ne peut plus être modifié une fois que cet animal a un historique de reproduction.",
+    "submit": "Enregistrer les modifications",
+    "submitting": "Enregistrement…",
+    "updatedToast": "{{name}} a été mis(e) à jour. 🌿"
   },
   "notFound": {
     "title": "404",

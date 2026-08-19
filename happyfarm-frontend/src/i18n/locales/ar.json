@@ -120,7 +120,8 @@
       "camels": "الإبل",
       "pregnant": "حوامل",
       "nursing": "مرضعات",
-      "available": "متاحة"
+      "available": "متاحة",
+      "archived": "مؤرشفة"
     },
     "noneFound": "لا توجد حيوانات هنا",
     "noneMatchSearch": "لا توجد حيوانات مطابقة لبحثك.",
@@ -154,6 +155,25 @@
     "fedToast": "🌾 تم إطعام {{name}}",
     "groomedToast": "✨ تمت العناية بـ {{name}}",
     "sacrificedToast": "🤲 {{name}} — تقبل الله",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "deleteConfirmTitle": "حذف {{name}}؟",
+    "deleteConfirmBody": "إذا لم يكن لدى {{name}} أي سجل تاريخي، فسيتم حذفه نهائيًا. وإلا، سيتم أرشفته ويمكن استعادته في أي وقت.",
+    "deletedToast": "تم حذف {{name}}.",
+    "archivedToast": "تمت أرشفة {{name}}. يمكنك استعادته في أي وقت.",
+    "archivedBannerTitle": "مؤرشف",
+    "archivedBannerBody": "هذا الحيوان مؤرشف ومخفي من قائمتك النشطة.",
+    "restore": "استعادة",
+    "restoring": "جارٍ الاستعادة…",
+    "restoredToast": "تمت استعادة {{name}}. 🌿",
+    "recordExit": "تسجيل نفوق أو بيع",
+    "recordExitSubmit": "تسجيل",
+    "recordExitSubmitting": "جارٍ التسجيل…",
+    "exitDateRequired": "يرجى اختيار تاريخ صحيح وغير مستقبلي.",
+    "exitedToast": "تم تسجيل خروج {{name}}.",
+    "exitedPanelTitle": "خرج من القطيع",
+    "exitedCareMsg": "غادر هذا الحيوان القطيع.",
+    "exitedCareSub": "لا توجد إجراءات رعاية إضافية متاحة.",
     "withdrawal": {
       "title": "فترة سحب سارية",
       "bodyWithProduct": "{{product}} — تجنّب الأضحية أو استخدام اللحم/الحليب حتى {{date}}.",
@@ -232,6 +252,14 @@
     "nameRequired": "يرجى إدخال اسم للحيوان.",
     "ageRequired": "يرجى إدخال عمر أو تاريخ ميلاد صحيح.",
     "createdToast": "انضم {{name}} إلى المزرعة! 🌿"
+  },
+  "editAnimal": {
+    "title": "تعديل {{name}}",
+    "speciesLocked": "لا يمكن تغيير النوع بعد أن يصبح لهذا الحيوان سجل تكاثر.",
+    "sexLocked": "لا يمكن تغيير الجنس بعد أن يصبح لهذا الحيوان سجل تكاثر.",
+    "submit": "حفظ التغييرات",
+    "submitting": "جارٍ الحفظ…",
+    "updatedToast": "تم تحديث {{name}}. 🌿"
   },
   "notFound": {
     "title": "404",
