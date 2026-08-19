@@ -394,6 +394,11 @@ class AnimalController extends Controller
             'is_eligible' => $animal->isEligibleForSacrifice(),
             'min_age_text' => Animal::MIN_AGE_TEXT[$animal->type] ?? null,
             'is_archived' => $animal->trashed(),
+            // Same condition AnimalUpdateRequest enforces server-side —
+            // exposed so the edit form can disable species/sex without
+            // re-implementing the rule client-side.
+            'breeding_locked' => $animal->breedingCycles()->exists()
+                || Animal::where('dam_id', $animal->id)->orWhere('sire_id', $animal->id)->exists(),
             'breeding_status' => $animal->breeding_status,
             'active_withdrawal' => $animal->active_withdrawal ? [
                 'health_record_id' => $animal->active_withdrawal->id,

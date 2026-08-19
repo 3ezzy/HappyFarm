@@ -77,6 +77,9 @@ class AnimalLifecycleTest extends TestCase
         [$user, $farm] = $this->farmOwner();
         $animal = $this->animal($farm);
 
+        $this->actingAs($user, 'sanctum')->getJson("/api/animals/{$animal->id}")
+            ->assertJson(['breeding_locked' => false]);
+
         $this->actingAs($user, 'sanctum')->putJson("/api/animals/{$animal->id}", [
             'type' => 'goat', 'name' => 'Nour', 'sex' => 'male', 'age' => 3,
         ])->assertStatus(200)->assertJson(['type' => 'goat', 'sex' => 'male']);
@@ -87,6 +90,9 @@ class AnimalLifecycleTest extends TestCase
         [$user, $farm] = $this->farmOwner();
         $dam = $this->animal($farm);
         \App\Models\BreedingCycle::create(['animal_id' => $dam->id, 'method' => 'natural', 'bred_on' => now()]);
+
+        $this->actingAs($user, 'sanctum')->getJson("/api/animals/{$dam->id}")
+            ->assertJson(['breeding_locked' => true]);
 
         $this->actingAs($user, 'sanctum')->putJson("/api/animals/{$dam->id}", [
             'type' => 'goat', 'name' => 'Nour', 'sex' => 'female', 'age' => 3,
