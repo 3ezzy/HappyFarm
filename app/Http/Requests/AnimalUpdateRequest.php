@@ -2,28 +2,29 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Animal;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class AnimalRequest extends FormRequest
+/**
+ * Full-object replace, mirroring AnimalRequest (creation) with three
+ * differences: tag uniqueness excludes this animal itself, dam_id/sire_id
+ * self-reference is newly possible (impossible at creation, since the
+ * animal has no id yet), and species/sex become locked once this animal
+ * has breeding history — checked in withValidator() since it needs to
+ * load the current row to compare against.
+ */
+class AnimalUpdateRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        // Authorized if user is authenticated (handled by middleware)
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $farmId = $this->user()?->farm?->id;
+        $animalId = $this->route('id');
 
         return [
             'type' => 'required|string|in:sheep,goat,cow,camel',
@@ -32,12 +33,10 @@ class AnimalRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:50',
-                // Rule::unique() checks the raw table and doesn't know
-                // about SoftDeletes — without excluding trashed rows here
-                // too, an archived animal's tag would still block reuse
-                // even though the partial DB index (deleted_at IS NULL)
-                // would otherwise allow it.
-                Rule::unique('animals', 'tag')->where(fn ($q) => $q->where('farm_id', $farmId)->whereNull('deleted_at')),
+                // Same reasoning as AnimalRequest: Rule::unique() doesn't
+                // know about SoftDeletes, so archived rows need to be
+                // excluded explicitly to match the partial DB index.
+                Rule::unique('animals', 'tag')->where(fn ($q) => $q->where('farm_id', $farmId)->whereNull('deleted_at'))->ignore($animalId),
             ],
             'breed_id' => 'nullable|integer|exists:breeds,id',
             'sex' => 'nullable|in:male,female',
@@ -58,51 +57,55 @@ class AnimalRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom error messages for validation rules.
-     */
     public function messages(): array
     {
         return [
             'type.required' => 'The animal type field is required.',
             'type.in' => 'The animal type must be one of: sheep, goat, cow, camel.',
             'name.required' => 'The animal name field is required.',
-            'name.min' => 'The animal name must have at least 1 character.',
-            'name.max' => 'The animal name may not be greater than 255 characters.',
             'tag.unique' => 'You already have an animal with this tag.',
             'breed_id.exists' => 'Please select a valid breed.',
-            'age.numeric' => 'The animal age must be a number.',
-            'age.min' => 'The animal age must be at least 0.',
-            'age.max' => 'The animal age may not be greater than 50 years.',
             'dam_id.exists' => 'The selected mother is not one of your animals.',
             'sire_id.exists' => 'The selected father is not one of your animals.',
         ];
     }
 
-    /**
-     * Get custom attributes for validator errors.
-     */
-    public function attributes(): array
-    {
-        return [
-            'type' => 'animal type',
-            'name' => 'animal name',
-            'age' => 'animal age',
-            'date_of_birth' => 'date of birth',
-            'date_of_purchase' => 'date of purchase',
-            'dam_id' => 'mother',
-            'sire_id' => 'father',
-        ];
-    }
-
-    /**
-     * Configure the validator instance.
-     */
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
             if (!$this->filled('age') && !$this->filled('date_of_birth')) {
                 $validator->errors()->add('age', 'Either age or date of birth is required.');
+            }
+
+            $animalId = (int) $this->route('id');
+
+            if ($this->filled('dam_id') && (int) $this->dam_id === $animalId) {
+                $validator->errors()->add('dam_id', 'An animal cannot be its own mother.');
+            }
+
+            if ($this->filled('sire_id') && (int) $this->sire_id === $animalId) {
+                $validator->errors()->add('sire_id', 'An animal cannot be its own father.');
+            }
+
+            $animal = Animal::find($animalId);
+
+            if (!$animal) {
+                return;
+            }
+
+            $hasBreedingHistory = $animal->breedingCycles()->exists()
+                || Animal::where('dam_id', $animal->id)->orWhere('sire_id', $animal->id)->exists();
+
+            if (!$hasBreedingHistory) {
+                return;
+            }
+
+            if ($this->filled('type') && $this->type !== $animal->type) {
+                $validator->errors()->add('type', 'Species cannot be changed once this animal has breeding history.');
+            }
+
+            if ($this->filled('sex') && $this->sex !== $animal->sex) {
+                $validator->errors()->add('sex', 'Sex cannot be changed once this animal has breeding history.');
             }
         });
     }

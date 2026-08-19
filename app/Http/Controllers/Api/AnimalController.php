@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Animal;
 use App\Http\Requests\AnimalRequest;
+use App\Http\Requests\AnimalUpdateRequest;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -27,6 +28,14 @@ class AnimalController extends Controller
         }
 
         $query = $farm->animals()->with(['breed', 'breedingCycles.birth', 'healthRecords']);
+
+        // Archived animals are excluded by the SoftDeletes scope by
+        // default — this is the only way back into seeing them, and it's
+        // deliberately all-or-nothing (not merged with the active list),
+        // since archiving specifically means "off my working view."
+        if ($request->boolean('archived')) {
+            $query->onlyTrashed();
+        }
 
         if ($search = trim((string) $request->query('search'))) {
             $needle = '%' . strtolower($search) . '%';
@@ -94,7 +103,10 @@ class AnimalController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $animal = $this->findOwnedAnimal($request, $id, with: ['breed', 'breedingCycles.birth', 'healthRecords']);
+        // withTrashed: an archived animal must still be viewable — both to
+        // restore it and so a descendant's profile can link to an
+        // archived dam/sire's own page.
+        $animal = $this->findOwnedAnimal($request, $id, with: ['breed', 'breedingCycles.birth', 'healthRecords'], withTrashed: true);
 
         if (!$animal) {
             return response()->json(['error' => 'Animal not found'], 404);
@@ -114,8 +126,8 @@ class AnimalController extends Controller
             return response()->json(['error' => 'Animal not found'], 404);
         }
 
-        if ($animal->is_sacrificed) {
-            return response()->json(['error' => 'Cannot feed a sacrificed animal'], 400);
+        if ($animal->hasExited()) {
+            return response()->json(['error' => 'Cannot feed an animal that has left the flock'], 400);
         }
 
         $animal->update([
@@ -139,8 +151,8 @@ class AnimalController extends Controller
             return response()->json(['error' => 'Animal not found'], 404);
         }
 
-        if ($animal->is_sacrificed) {
-            return response()->json(['error' => 'Cannot groom a sacrificed animal'], 400);
+        if ($animal->hasExited()) {
+            return response()->json(['error' => 'Cannot groom an animal that has left the flock'], 400);
         }
 
         $animal->update([
@@ -168,6 +180,10 @@ class AnimalController extends Controller
             return response()->json(['error' => 'Animal has already been sacrificed'], 400);
         }
 
+        if ($animal->hasExited()) {
+            return response()->json(['error' => 'Animal has already exited the flock and cannot be sacrificed'], 400);
+        }
+
         // Check sacrifice eligibility
         if (!$animal->isEligibleForSacrifice()) {
             return response()->json([
@@ -178,10 +194,9 @@ class AnimalController extends Controller
         $now = Carbon::now();
 
         // exit_date/exit_reason generalize sacrificed_at to also cover
-        // death and sale (added to the schema this phase, not yet exposed
-        // through a dedicated endpoint). Set alongside sacrificed_at so the
-        // two never drift while sacrifice() is the only path that writes
-        // either of them.
+        // death and sale, recorded via recordExit() below instead. Set
+        // alongside sacrificed_at here so the two never drift — sacrifice()
+        // is the only path that ever writes 'sacrifice' as the reason.
         $animal->update([
             'sacrificed_at' => $now,
             'exit_date' => $now->toDateString(),
@@ -198,17 +213,154 @@ class AnimalController extends Controller
     }
 
     /**
+     * Edit an animal's core profile. Excludes everything managed only by
+     * a dedicated action (birth_id, is_sacrificed, sacrificed_at, fed_at,
+     * groomed_at, exit_date, exit_reason) — same reasoning as
+     * BreedingCycleController::update() excluding pregnancy_result. Species
+     * and sex are additionally locked once this animal has breeding
+     * history; see AnimalUpdateRequest.
+     */
+    public function update(AnimalUpdateRequest $request, $id)
+    {
+        $animal = $this->findOwnedAnimal($request, $id);
+
+        if (!$animal) {
+            return response()->json(['error' => 'Animal not found'], 404);
+        }
+
+        $payload = [
+            'type' => $request->type,
+            'name' => $request->name,
+            'tag' => $request->tag,
+            'breed_id' => $request->breed_id,
+            'sex' => $request->sex,
+            'date_of_purchase' => $request->date_of_purchase,
+            'origin' => $request->origin,
+            'dam_id' => $request->dam_id,
+            'sire_id' => $request->sire_id,
+        ];
+
+        if ($request->filled('date_of_birth')) {
+            $payload['date_of_birth'] = $request->date_of_birth;
+        } elseif ($request->filled('age')) {
+            $payload['age'] = $request->age;
+        }
+
+        $animal->update($payload);
+        $animal->refresh();
+        $animal->load(['breed', 'breedingCycles.birth', 'healthRecords']);
+
+        return response()->json($this->present($animal));
+    }
+
+    /**
+     * Archives an animal with any history (weights, health records,
+     * breeding cycles, or being referenced as another animal's dam/sire);
+     * permanently deletes only a clean animal with none of that. There is
+     * deliberately no path from here to permanently deleting an animal
+     * that has ever had history — once archived, restore() is the only
+     * way back.
+     */
+    public function destroy(Request $request, $id)
+    {
+        $animal = $this->findOwnedAnimal($request, $id);
+
+        if (!$animal) {
+            return response()->json(['error' => 'Animal not found'], 404);
+        }
+
+        $hasHistory = $animal->weights()->exists()
+            || $animal->healthRecords()->exists()
+            || $animal->breedingCycles()->exists()
+            || Animal::where('dam_id', $animal->id)->orWhere('sire_id', $animal->id)->exists();
+
+        if ($hasHistory) {
+            $animal->delete();
+
+            return response()->json(['message' => 'Animal archived', 'action' => 'archived']);
+        }
+
+        $animal->forceDelete();
+
+        return response()->json(['message' => 'Animal deleted', 'action' => 'deleted']);
+    }
+
+    /**
+     * Restores an archived animal. Ownership-scoped via withTrashed()
+     * since the default scope would never find it otherwise.
+     */
+    public function restore(Request $request, $id)
+    {
+        $animal = $this->findOwnedAnimal($request, $id, withTrashed: true);
+
+        if (!$animal) {
+            return response()->json(['error' => 'Animal not found'], 404);
+        }
+
+        if (!$animal->trashed()) {
+            return response()->json(['error' => 'Animal is not archived'], 400);
+        }
+
+        $animal->restore();
+        $animal->load(['breed', 'breedingCycles.birth', 'healthRecords']);
+
+        return response()->json($this->present($animal));
+    }
+
+    /**
+     * Record a death or sale exit. Separate from sacrifice() on purpose:
+     * no age-eligibility gate applies, and this never touches
+     * sacrificed_at/is_sacrificed, which continue to mean only "was
+     * sacrificed" — not the broader "has left the flock" that
+     * Animal::hasExited() covers.
+     */
+    public function recordExit(Request $request, $id)
+    {
+        $animal = $this->findOwnedAnimal($request, $id);
+
+        if (!$animal) {
+            return response()->json(['error' => 'Animal not found'], 404);
+        }
+
+        if ($animal->hasExited()) {
+            return response()->json(['error' => 'Animal has already exited the flock'], 400);
+        }
+
+        $validated = $request->validate([
+            'reason' => 'required|in:death,sale',
+            'exit_date' => 'required|date|before_or_equal:today',
+        ]);
+
+        $animal->update([
+            'exit_date' => $validated['exit_date'],
+            'exit_reason' => $validated['reason'],
+        ]);
+
+        return response()->json([
+            'id' => $animal->id,
+            'exit_date' => $animal->exit_date->toDateString(),
+            'exit_reason' => $animal->exit_reason,
+            'is_sacrificed' => $animal->is_sacrificed,
+        ]);
+    }
+
+    /**
      * Find an animal by id, scoped to the authenticated user's farm.
      */
-    private function findOwnedAnimal(Request $request, $id, array $with = []): ?Animal
+    private function findOwnedAnimal(Request $request, $id, array $with = [], bool $withTrashed = false): ?Animal
     {
         $user = $request->user();
 
-        return Animal::with($with)
+        $query = Animal::with($with)
             ->whereHas('farm', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
-            })
-            ->find($id);
+            });
+
+        if ($withTrashed) {
+            $query->withTrashed();
+        }
+
+        return $query->find($id);
     }
 
     /**
@@ -241,6 +393,7 @@ class AnimalController extends Controller
             'exit_reason' => $animal->exit_reason,
             'is_eligible' => $animal->isEligibleForSacrifice(),
             'min_age_text' => Animal::MIN_AGE_TEXT[$animal->type] ?? null,
+            'is_archived' => $animal->trashed(),
             'breeding_status' => $animal->breeding_status,
             'active_withdrawal' => $animal->active_withdrawal ? [
                 'health_record_id' => $animal->active_withdrawal->id,

@@ -45,6 +45,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/animals', [AnimalController::class, 'index']);
     Route::post('/animals', [AnimalController::class, 'store']);
     Route::get('/animals/{id}', [AnimalController::class, 'show']);
+    Route::put('/animals/{id}', [AnimalController::class, 'update']);
+    Route::delete('/animals/{id}', [AnimalController::class, 'destroy']);
+    Route::post('/animals/{id}/restore', [AnimalController::class, 'restore']);
+    Route::post('/animals/{id}/exit', [AnimalController::class, 'recordExit']);
     Route::post('/animals/{id}/feed', [AnimalController::class, 'feed']);
     Route::post('/animals/{id}/groom', [AnimalController::class, 'groom']);
     Route::post('/animals/{id}/sacrifice', [AnimalController::class, 'sacrifice']);
