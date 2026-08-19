@@ -66,14 +66,16 @@ class Birth extends Model
         return $this->belongsTo(BreedingCycle::class);
     }
 
+    // withTrashed(): this birth's log entry must keep displaying the dam's/
+    // sire's name even after that animal is later archived.
     public function dam()
     {
-        return $this->belongsTo(Animal::class, 'dam_id');
+        return $this->belongsTo(Animal::class, 'dam_id')->withTrashed();
     }
 
     public function sire()
     {
-        return $this->belongsTo(Animal::class, 'sire_id');
+        return $this->belongsTo(Animal::class, 'sire_id')->withTrashed();
     }
 
     /**

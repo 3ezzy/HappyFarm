@@ -43,14 +43,16 @@ class BreedingCycle extends Model
         'birthed_on' => 'date',
     ];
 
+    // withTrashed(): this cycle's history must keep displaying the dam's/
+    // sire's name even after that animal is later archived.
     public function dam()
     {
-        return $this->belongsTo(Animal::class, 'animal_id');
+        return $this->belongsTo(Animal::class, 'animal_id')->withTrashed();
     }
 
     public function sire()
     {
-        return $this->belongsTo(Animal::class, 'sire_id');
+        return $this->belongsTo(Animal::class, 'sire_id')->withTrashed();
     }
 
     public function birth()

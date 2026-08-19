@@ -5,10 +5,12 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Animal extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     /**
      * Minimum age, in years, for sacrifice eligibility per species. Single
@@ -79,14 +81,19 @@ class Animal extends Model
         return $this->belongsTo(Breed::class);
     }
 
+    /**
+     * withTrashed(): a lamb's dam/sire must keep resolving even after that
+     * parent is archived — otherwise an archived mother silently turns
+     * into "Not recorded" on every descendant's profile.
+     */
     public function dam()
     {
-        return $this->belongsTo(Animal::class, 'dam_id');
+        return $this->belongsTo(Animal::class, 'dam_id')->withTrashed();
     }
 
     public function sire()
     {
-        return $this->belongsTo(Animal::class, 'sire_id');
+        return $this->belongsTo(Animal::class, 'sire_id')->withTrashed();
     }
 
     public function weights()
@@ -217,6 +224,18 @@ class Animal extends Model
                 $animal->is_sacrificed = !is_null($animal->sacrificed_at);
             }
         });
+    }
+
+    /**
+     * True once the animal has left the active flock for any reason —
+     * sacrifice, death, or sale. `is_sacrificed` deliberately keeps
+     * meaning only "was sacrificed"; this is the broader check used to
+     * block feed/groom/sacrifice/exit on an animal that's already exited
+     * by any of the three routes.
+     */
+    public function hasExited(): bool
+    {
+        return $this->exit_reason !== null;
     }
 
     /**
