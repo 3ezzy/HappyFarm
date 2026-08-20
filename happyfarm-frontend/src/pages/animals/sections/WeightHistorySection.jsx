@@ -3,9 +3,10 @@ import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import toast from 'react-hot-toast'
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 import { animalService } from '../../../services/api/animals.js'
 import ConfirmModal from '../../../components/common/UI/ConfirmModal.jsx'
-import { HfInput, fmtDate, cardClass } from '../../../theme/hf.jsx'
+import { HfInput, fmtDate, cardClass, C } from '../../../theme/hf.jsx'
 import { apiErrorMessage } from '../../../utils/apiError.js'
 
 const today = () => new Date().toISOString().slice(0, 10)
@@ -42,6 +43,13 @@ const WeightHistorySection = ({ animalId }) => {
   )
 
   const invalidate = () => queryClient.invalidateQueries(['weights', animalId])
+
+  // The list endpoint returns newest-first (correct for the table below);
+  // a trend line needs the opposite, oldest-first, so it reads left to right.
+  const trendData = weights
+    .slice()
+    .sort((a, b) => new Date(a.measured_at) - new Date(b.measured_at))
+    .map((w) => ({ date: fmtDate(w.measured_at, i18n.language), weight_kg: w.weight_kg }))
 
   const addWeightMutation = useMutation((payload) => animalService.addWeight(animalId, payload), {
     onSuccess: async () => {
@@ -101,6 +109,21 @@ const WeightHistorySection = ({ animalId }) => {
   return (
     <div className={classNames(cardClass, 'p-7')}>
       <h2 className="mb-[18px] text-[22px]">{t('animalDetails.weights.title')}</h2>
+
+      {trendData.length >= 2 && (
+        <div className="mb-6">
+          <p className="mb-2 text-sm font-semibold text-brown-text">{t('animalDetails.weights.trendTitle')}</p>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 12 }} width={40} />
+              <Tooltip />
+              <Line type="monotone" dataKey="weight_kg" name={t('animalDetails.weights.weightKg')} stroke={C.green} strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {weights.length === 0 ? (
         <p className="mb-4 text-sm text-tan">{t('animalDetails.weights.empty')}</p>

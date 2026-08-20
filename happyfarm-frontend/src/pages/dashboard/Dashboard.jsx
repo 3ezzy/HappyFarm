@@ -127,6 +127,7 @@ const Dashboard = () => {
             <QuickAction label={t('dashboard.addNewAnimal')} onClick={() => navigate('/animals/add')} className="border-none bg-brown text-white hover:bg-brown-dark" />
             <QuickAction label={t('dashboard.viewAllAnimals')} onClick={() => navigate('/animals')} className="border-none bg-green text-white hover:bg-green-dark" />
             <QuickAction label={t('dashboard.farmStatistics')} onClick={() => navigate('/farm')} className="border-2 border-line bg-cream text-brown-text" />
+            <QuickAction label={t('dashboard.viewReports')} onClick={() => navigate('/reports')} className="border-2 border-line bg-cream text-brown-text" />
           </div>
         </div>
       </div>

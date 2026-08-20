@@ -47,6 +47,7 @@ const Header = () => {
   const isDashboard = pathname === '/'
   const isAnimals = pathname.startsWith('/animals')
   const isFarm = pathname === '/farm'
+  const isReports = pathname === '/reports'
   const isProfile = pathname === '/profile'
 
   return (
@@ -77,6 +78,7 @@ const Header = () => {
               <NavButton label={t('nav.home')} active={isDashboard} onClick={() => navigate('/')} />
               <NavButton label={t('nav.animals')} active={isAnimals} onClick={() => navigate('/animals')} />
               <NavButton label={t('nav.farm')} active={isFarm} onClick={() => navigate('/farm')} />
+              <NavButton label={t('nav.reports')} active={isReports} onClick={() => navigate('/reports')} />
               <NavButton label={t('nav.profile')} active={isProfile} onClick={() => navigate('/profile')} />
             </div>
           </nav>
