@@ -22,7 +22,7 @@ class BreedSeeder extends Seeder
 
         foreach ($breeds as $species => $names) {
             foreach ($names as $name) {
-                Breed::firstOrCreate(['species' => $species, 'name' => $name]);
+                Breed::firstOrCreate(['species' => $species, 'name' => $name, 'farm_id' => null]);
             }
         }
     }
