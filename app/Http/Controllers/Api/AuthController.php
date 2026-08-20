@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Farm;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\PasswordUpdateRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -83,6 +84,21 @@ class AuthController extends Controller
             ],
             'token' => $token,
         ]);
+    }
+
+    /**
+     * Change the authenticated user's password. Requires the current
+     * password (enforced by PasswordUpdateRequest's current_password
+     * rule). Deliberately does not revoke the current token or any other
+     * device's tokens — forced logout elsewhere is out of scope for now.
+     */
+    public function updatePassword(PasswordUpdateRequest $request)
+    {
+        $request->user()->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json(['message' => 'Password updated successfully']);
     }
 
     /**
