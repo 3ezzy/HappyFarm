@@ -38,7 +38,13 @@ class AnimalUpdateRequest extends FormRequest
                 // excluded explicitly to match the partial DB index.
                 Rule::unique('animals', 'tag')->where(fn ($q) => $q->where('farm_id', $farmId)->whereNull('deleted_at'))->ignore($animalId),
             ],
-            'breed_id' => 'nullable|integer|exists:breeds,id',
+            'breed_id' => [
+                'nullable',
+                'integer',
+                // Same reasoning as AnimalRequest: a breed is assignable
+                // if it's global (farm_id null) or owned by this farm.
+                Rule::exists('breeds', 'id')->where(fn ($q) => $q->whereNull('farm_id')->orWhere('farm_id', $farmId)),
+            ],
             'sex' => 'nullable|in:male,female',
             'age' => 'nullable|numeric|min:0|max:50',
             'date_of_birth' => 'nullable|date|before_or_equal:today',

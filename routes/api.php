@@ -36,9 +36,11 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Authentication
     Route::post('/logout', [AuthController::class, 'logout']);
-    
+    Route::put('/user/password', [AuthController::class, 'updatePassword']);
+
     // Farm management routes
     Route::get('/farm', [FarmController::class, 'show']);
+    Route::put('/farm', [FarmController::class, 'update']);
     Route::get('/farm/statistics', [FarmController::class, 'statistics']);
     
     // Animal management routes
@@ -57,8 +59,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/weights/{id}', [WeightController::class, 'update']);
     Route::delete('/weights/{id}', [WeightController::class, 'destroy']);
 
-    // Breeds lookup (for the animal form's breed dropdown)
+    // Breeds — lookup for the animal form's breed dropdown, plus
+    // farm-scoped custom breed management.
     Route::get('/breeds', [BreedController::class, 'index']);
+    Route::post('/breeds', [BreedController::class, 'store']);
+    Route::put('/breeds/{id}', [BreedController::class, 'update']);
+    Route::delete('/breeds/{id}', [BreedController::class, 'destroy']);
 
     // Breeding cycles
     Route::get('/animals/{id}/breeding-cycles', [BreedingCycleController::class, 'index']);

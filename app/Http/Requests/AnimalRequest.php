@@ -39,7 +39,14 @@ class AnimalRequest extends FormRequest
                 // would otherwise allow it.
                 Rule::unique('animals', 'tag')->where(fn ($q) => $q->where('farm_id', $farmId)->whereNull('deleted_at')),
             ],
-            'breed_id' => 'nullable|integer|exists:breeds,id',
+            'breed_id' => [
+                'nullable',
+                'integer',
+                // A breed is assignable if it's global (farm_id null) or
+                // owned by this farm — never another farm's private
+                // custom breed.
+                Rule::exists('breeds', 'id')->where(fn ($q) => $q->whereNull('farm_id')->orWhere('farm_id', $farmId)),
+            ],
             'sex' => 'nullable|in:male,female',
             'age' => 'nullable|numeric|min:0|max:50',
             'date_of_birth' => 'nullable|date|before_or_equal:today',
