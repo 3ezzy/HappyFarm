@@ -1,30 +1,26 @@
-import { useState } from 'react'
-import classNames from 'classnames'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from 'react-query'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
+import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { farmService } from '../../services/api/farm.js'
-import { initialsOf } from '../../theme/hf.jsx'
+import { authService } from '../../services/api/auth.js'
+import { initialsOf, HfInput, cardClass } from '../../theme/hf.jsx'
+import { apiErrorMessage } from '../../utils/apiError.js'
 
-const Toggle = ({ on, onClick }) => (
-  <button
-    onClick={onClick}
-    className={classNames(
-      'inline-flex h-[26px] w-[46px] cursor-pointer items-center rounded-full border-none p-[3px] transition-colors duration-200',
-      on ? 'justify-end bg-green' : 'justify-start bg-toggleOff'
-    )}
-  >
-    <span className="block h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
-  </button>
-)
+const labelClass = 'mb-1.5 block text-xs font-semibold text-brown-text'
+
+const saveBtnClass =
+  'cursor-pointer rounded-2xl border-none bg-green px-5 py-2.5 font-display text-sm font-bold text-white ' +
+  'shadow-chip transition-transform duration-200 ease-pop enabled:hover:scale-[1.03] ' +
+  'disabled:cursor-not-allowed disabled:opacity-70'
 
 const Profile = () => {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const { user, farm, logout } = useAuth()
-  const [reminders, setReminders] = useState(true)
-  const [greetings, setGreetings] = useState(true)
+  const queryClient = useQueryClient()
+  const { user, farm, logout, updateFarmName } = useAuth()
 
   const { data: farmDetails } = useQuery('farm-details', farmService.getDetails, { refetchOnWindowFocus: false })
 
@@ -32,6 +28,57 @@ const Profile = () => {
   const memberSince = createdAt
     ? new Intl.DateTimeFormat(i18n.language, { month: 'long', year: 'numeric', numberingSystem: 'latn' }).format(new Date(createdAt))
     : '—'
+
+  const [farmNameInput, setFarmNameInput] = useState('')
+  useEffect(() => {
+    if (farmDetails?.name) setFarmNameInput(farmDetails.name)
+  }, [farmDetails?.name])
+
+  const renameFarmMutation = useMutation((name) => farmService.updateName(name), {
+    onSuccess: async (data) => {
+      updateFarmName(data)
+      await Promise.all([
+        queryClient.invalidateQueries('farm-details'),
+        queryClient.invalidateQueries('farm-statistics'),
+      ])
+      toast.success(t('profile.farmRenamedToast'))
+    },
+    onError: (error) => toast.error(apiErrorMessage(error, t('common.error'))),
+  })
+
+  const submitFarmName = () => {
+    const trimmed = farmNameInput.trim()
+    if (!trimmed) {
+      toast.error(t('profile.farmNameRequired'))
+      return
+    }
+    renameFarmMutation.mutate(trimmed)
+  }
+
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+
+  const changePasswordMutation = useMutation(
+    () => authService.updatePassword({ currentPassword, password: newPassword, passwordConfirmation: confirmPassword }),
+    {
+      onSuccess: () => {
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmPassword('')
+        toast.success(t('profile.passwordChangedToast'))
+      },
+      onError: (error) => toast.error(apiErrorMessage(error, t('common.error'))),
+    }
+  )
+
+  const submitPasswordChange = () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error(t('profile.passwordFieldsRequired'))
+      return
+    }
+    changePasswordMutation.mutate()
+  }
 
   const handleLogout = async () => {
     await logout()
@@ -64,15 +111,47 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl bg-cream p-6 shadow-ribbon">
-        <h2 className="mb-4 text-[22px]">{t('profile.preferences')}</h2>
-        <div className="flex items-center justify-between border-b border-cream-muted py-2.5">
-          <span className="text-[15px] text-brown">{t('profile.careReminders')}</span>
-          <Toggle on={reminders} onClick={() => setReminders((v) => !v)} />
+      <div className={`${cardClass} mb-6 p-6`}>
+        <h2 className="mb-4 text-[22px]">{t('profile.accountSettings')}</h2>
+
+        <div className="mb-6 border-b border-cream-muted pb-6">
+          <label className={labelClass}>{t('profile.farmName')}</label>
+          <div className="flex flex-col gap-3 xs:flex-row xs:items-center">
+            <HfInput
+              type="text"
+              value={farmNameInput}
+              onChange={(e) => setFarmNameInput(e.target.value)}
+              className="xs:flex-1"
+            />
+            <button onClick={submitFarmName} disabled={renameFarmMutation.isLoading} className={saveBtnClass}>
+              {renameFarmMutation.isLoading ? t('common.saving') : t('common.save')}
+            </button>
+          </div>
         </div>
-        <div className="flex items-center justify-between py-2.5">
-          <span className="text-[15px] text-brown">{t('profile.eidGreetings')}</span>
-          <Toggle on={greetings} onClick={() => setGreetings((v) => !v)} />
+
+        <div>
+          <h3 className="mb-3 text-[15px] font-semibold text-brown-text">{t('profile.changePassword')}</h3>
+          <div className="grid grid-cols-1 gap-3.5 xs:grid-cols-2">
+            <div className="xs:col-span-2">
+              <label className={labelClass}>{t('profile.currentPassword')}</label>
+              <HfInput type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" />
+            </div>
+            <div>
+              <label className={labelClass}>{t('profile.newPassword')}</label>
+              <HfInput type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" />
+            </div>
+            <div>
+              <label className={labelClass}>{t('profile.confirmPassword')}</label>
+              <HfInput type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" />
+            </div>
+          </div>
+          <button
+            onClick={submitPasswordChange}
+            disabled={changePasswordMutation.isLoading}
+            className={`${saveBtnClass} mt-4`}
+          >
+            {changePasswordMutation.isLoading ? t('common.saving') : t('profile.updatePassword')}
+          </button>
         </div>
       </div>
 

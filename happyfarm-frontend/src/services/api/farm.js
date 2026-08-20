@@ -12,5 +12,11 @@ export const farmService = {
   getStatistics: async () => {
     const response = await apiClient.get(FARM_ENDPOINTS.STATISTICS)
     return response.data
+  },
+
+  // Rename the farm
+  updateName: async (name) => {
+    const response = await apiClient.put(FARM_ENDPOINTS.UPDATE, { name })
+    return response.data
   }
 }

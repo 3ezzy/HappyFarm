@@ -91,16 +91,39 @@
     "fedLast24h": "Nourris (24 h)",
     "groomedLast24h": "Toilettés (24 h)",
     "eligibleForSacrifice": "Éligibles au sacrifice",
-    "notYetEligible": "Pas encore éligibles"
+    "notYetEligible": "Pas encore éligibles",
+    "breeds": {
+      "title": "Races personnalisées",
+      "empty": "Vous n'avez pas encore ajouté de race personnalisée.",
+      "species": "Espèce",
+      "name": "Nom de la race",
+      "namePlaceholder": "ex. Mouton de ma ferme",
+      "add": "Ajouter une race",
+      "addedToast": "Race ajoutée",
+      "updatedToast": "Race mise à jour",
+      "deletedToast": "Race supprimée",
+      "nameRequired": "Veuillez entrer un nom de race.",
+      "speciesLocked": "L'espèce ne peut pas être modifiée tant que cette race est utilisée.",
+      "inUse": "Utilisée",
+      "confirmDeleteTitle": "Supprimer cette race ?"
+    }
   },
   "profile": {
     "title": "Profil",
     "farm": "Ferme",
     "memberSince": "Membre depuis",
-    "preferences": "Préférences",
-    "careReminders": "Rappels de soins",
-    "eidGreetings": "Vœux de l'Aïd",
-    "logOut": "Se déconnecter"
+    "logOut": "Se déconnecter",
+    "accountSettings": "Paramètres du compte",
+    "farmName": "Nom de la ferme",
+    "farmNameRequired": "Veuillez entrer un nom de ferme.",
+    "farmRenamedToast": "Ferme renommée",
+    "changePassword": "Changer le mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "updatePassword": "Mettre à jour le mot de passe",
+    "passwordChangedToast": "Mot de passe mis à jour",
+    "passwordFieldsRequired": "Veuillez remplir tous les champs du mot de passe."
   },
   "animals": {
     "title": "Vos animaux",

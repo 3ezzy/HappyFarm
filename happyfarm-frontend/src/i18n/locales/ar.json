@@ -95,16 +95,39 @@
     "fedLast24h": "أُطعمت خلال 24 ساعة",
     "groomedLast24h": "عُنيت خلال 24 ساعة",
     "eligibleForSacrifice": "مؤهلة للأضحية",
-    "notYetEligible": "غير مؤهلة بعد"
+    "notYetEligible": "غير مؤهلة بعد",
+    "breeds": {
+      "title": "السلالات المخصصة",
+      "empty": "لم تُضِف أي سلالة مخصصة بعد.",
+      "species": "النوع",
+      "name": "اسم السلالة",
+      "namePlaceholder": "مثال: أغنام مزرعتي",
+      "add": "إضافة سلالة",
+      "addedToast": "تمت إضافة السلالة",
+      "updatedToast": "تم تحديث السلالة",
+      "deletedToast": "تم حذف السلالة",
+      "nameRequired": "الرجاء إدخال اسم السلالة.",
+      "speciesLocked": "لا يمكن تغيير النوع أثناء استخدام هذه السلالة.",
+      "inUse": "قيد الاستخدام",
+      "confirmDeleteTitle": "هل تريد حذف هذه السلالة؟"
+    }
   },
   "profile": {
     "title": "الملف الشخصي",
     "farm": "المزرعة",
     "memberSince": "عضو منذ",
-    "preferences": "التفضيلات",
-    "careReminders": "تذكيرات الرعاية",
-    "eidGreetings": "تهاني العيد",
-    "logOut": "تسجيل الخروج"
+    "logOut": "تسجيل الخروج",
+    "accountSettings": "إعدادات الحساب",
+    "farmName": "اسم المزرعة",
+    "farmNameRequired": "الرجاء إدخال اسم المزرعة.",
+    "farmRenamedToast": "تمت إعادة تسمية المزرعة",
+    "changePassword": "تغيير كلمة المرور",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmPassword": "تأكيد كلمة المرور الجديدة",
+    "updatePassword": "تحديث كلمة المرور",
+    "passwordChangedToast": "تم تحديث كلمة المرور",
+    "passwordFieldsRequired": "الرجاء تعبئة جميع حقول كلمة المرور."
   },
   "animals": {
     "title": "حيواناتك",

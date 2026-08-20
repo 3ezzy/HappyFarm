@@ -6,12 +6,14 @@ export const AUTH_ENDPOINTS = {
   REGISTER: '/register',
   LOGIN: '/login',
   LOGOUT: '/logout',
-  USER: '/user'
+  USER: '/user',
+  UPDATE_PASSWORD: '/user/password'
 }
 
 // Farm management endpoints
 export const FARM_ENDPOINTS = {
   DETAILS: '/farm',
+  UPDATE: '/farm',
   STATISTICS: '/farm/statistics'
 }
 
@@ -37,9 +39,13 @@ export const WEIGHT_ENDPOINTS = {
   DELETE: (id) => `/weights/${id}`
 }
 
-// Breed lookup endpoint
+// Breed endpoints — lookup for the animal form's dropdown, plus
+// farm-scoped custom breed management.
 export const BREED_ENDPOINTS = {
-  LIST: '/breeds'
+  LIST: '/breeds',
+  CREATE: '/breeds',
+  UPDATE: (id) => `/breeds/${id}`,
+  DELETE: (id) => `/breeds/${id}`
 }
 
 // Breeding cycle endpoints — list/create are scoped under the dam's animal

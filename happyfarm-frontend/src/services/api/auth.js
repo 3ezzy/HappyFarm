@@ -57,5 +57,15 @@ export const authService = {
       saveUserData(response.data)
     }
     return response.data
+  },
+
+  // Change password (requires the current password)
+  updatePassword: async ({ currentPassword, password, passwordConfirmation }) => {
+    const response = await apiClient.put(AUTH_ENDPOINTS.UPDATE_PASSWORD, {
+      current_password: currentPassword,
+      password,
+      password_confirmation: passwordConfirmation
+    })
+    return response.data
   }
 }

@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { authService } from '../services/api/auth.js'
-import { getUserData, getFarmData, isAuthenticated } from '../services/auth/tokenService.js'
+import { getUserData, getFarmData, isAuthenticated, saveFarmData } from '../services/auth/tokenService.js'
 import toast from 'react-hot-toast'
 
 // Initial state
@@ -17,6 +17,7 @@ const initialState = {
 const AUTH_ACTIONS = {
   SET_LOADING: 'SET_LOADING',
   SET_USER: 'SET_USER',
+  SET_FARM: 'SET_FARM',
   SET_ERROR: 'SET_ERROR',
   LOGOUT: 'LOGOUT',
   CLEAR_ERROR: 'CLEAR_ERROR'
@@ -38,6 +39,12 @@ const authReducer = (state, action) => {
         error: null
       }
     
+    case AUTH_ACTIONS.SET_FARM:
+      return {
+        ...state,
+        farm: { ...state.farm, ...action.payload }
+      }
+
     case AUTH_ACTIONS.SET_ERROR:
       return {
         ...state,
@@ -157,13 +164,23 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR })
   }
 
+  // Update the cached farm (e.g. after a rename) so every page reading
+  // farm data from this context — not just the one that made the
+  // request — reflects it without needing a fresh login.
+  const updateFarmName = (updatedFarm) => {
+    const farm = { ...state.farm, ...updatedFarm }
+    saveFarmData(farm)
+    dispatch({ type: AUTH_ACTIONS.SET_FARM, payload: farm })
+  }
+
   // Context value
   const value = {
     ...state,
     login,
     register,
     logout,
-    clearError
+    clearError,
+    updateFarmName
   }
 
   return (

@@ -91,16 +91,39 @@
     "fedLast24h": "Fed in last 24h",
     "groomedLast24h": "Groomed in last 24h",
     "eligibleForSacrifice": "Eligible for sacrifice",
-    "notYetEligible": "Not yet eligible"
+    "notYetEligible": "Not yet eligible",
+    "breeds": {
+      "title": "Custom breeds",
+      "empty": "You haven't added any custom breeds yet.",
+      "species": "Species",
+      "name": "Breed name",
+      "namePlaceholder": "e.g. My Farm's Sheep",
+      "add": "Add breed",
+      "addedToast": "Breed added",
+      "updatedToast": "Breed updated",
+      "deletedToast": "Breed deleted",
+      "nameRequired": "Please enter a breed name.",
+      "speciesLocked": "Species can't be changed while this breed is in use.",
+      "inUse": "In use",
+      "confirmDeleteTitle": "Delete this breed?"
+    }
   },
   "profile": {
     "title": "Profile",
     "farm": "Farm",
     "memberSince": "Member since",
-    "preferences": "Preferences",
-    "careReminders": "Care reminders",
-    "eidGreetings": "Eid greetings",
-    "logOut": "Log out"
+    "logOut": "Log out",
+    "accountSettings": "Account settings",
+    "farmName": "Farm name",
+    "farmNameRequired": "Please enter a farm name.",
+    "farmRenamedToast": "Farm renamed",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "updatePassword": "Update password",
+    "passwordChangedToast": "Password updated",
+    "passwordFieldsRequired": "Please fill in all password fields."
   },
   "animals": {
     "title": "Your animals",
