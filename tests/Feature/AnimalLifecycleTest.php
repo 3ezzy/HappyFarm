@@ -210,6 +210,69 @@ class AnimalLifecycleTest extends TestCase
         $this->assertDatabaseHas('animals', ['id' => $animal->id]);
     }
 
+    /**
+     * A sacrificed animal is exit history and must never be permanently
+     * deletable, even with zero weight/health/breeding records — sacrifice
+     * itself counts as history for deletion purposes.
+     */
+    public function test_a_sacrificed_animal_cannot_be_hard_deleted()
+    {
+        [$user, $farm] = $this->farmOwner();
+        $animal = $this->animal($farm, ['sex' => 'male']);
+        $this->actingAs($user, 'sanctum')->postJson("/api/animals/{$animal->id}/sacrifice")->assertStatus(200);
+
+        $response = $this->actingAs($user, 'sanctum')->deleteJson("/api/animals/{$animal->id}");
+
+        $response->assertStatus(200)->assertJson(['action' => 'archived']);
+        $this->assertSoftDeleted('animals', ['id' => $animal->id]);
+    }
+
+    public function test_an_animal_that_died_cannot_be_hard_deleted()
+    {
+        [$user, $farm] = $this->farmOwner();
+        $animal = $this->animal($farm);
+        $this->actingAs($user, 'sanctum')->postJson("/api/animals/{$animal->id}/exit", [
+            'reason' => 'death', 'exit_date' => now()->toDateString(),
+        ])->assertStatus(200);
+
+        $response = $this->actingAs($user, 'sanctum')->deleteJson("/api/animals/{$animal->id}");
+
+        $response->assertStatus(200)->assertJson(['action' => 'archived']);
+        $this->assertSoftDeleted('animals', ['id' => $animal->id]);
+    }
+
+    public function test_a_sold_animal_cannot_be_hard_deleted()
+    {
+        [$user, $farm] = $this->farmOwner();
+        $animal = $this->animal($farm);
+        $this->actingAs($user, 'sanctum')->postJson("/api/animals/{$animal->id}/exit", [
+            'reason' => 'sale', 'exit_date' => now()->toDateString(),
+        ])->assertStatus(200);
+
+        $response = $this->actingAs($user, 'sanctum')->deleteJson("/api/animals/{$animal->id}");
+
+        $response->assertStatus(200)->assertJson(['action' => 'archived']);
+        $this->assertSoftDeleted('animals', ['id' => $animal->id]);
+    }
+
+    /**
+     * The existing restore mechanism must keep working for animals archived
+     * because of exit history, not just those archived for weight/health/
+     * breeding history.
+     */
+    public function test_a_sacrificed_and_then_archived_animal_can_still_be_restored()
+    {
+        [$user, $farm] = $this->farmOwner();
+        $animal = $this->animal($farm, ['sex' => 'male']);
+        $this->actingAs($user, 'sanctum')->postJson("/api/animals/{$animal->id}/sacrifice")->assertStatus(200);
+        $this->actingAs($user, 'sanctum')->deleteJson("/api/animals/{$animal->id}")->assertStatus(200);
+
+        $response = $this->actingAs($user, 'sanctum')->postJson("/api/animals/{$animal->id}/restore");
+
+        $response->assertStatus(200)->assertJson(['is_archived' => false, 'is_sacrificed' => true]);
+        $this->assertDatabaseHas('animals', ['id' => $animal->id, 'deleted_at' => null]);
+    }
+
     // ------------------------------------------------------------
     // Archived filtering, statistics, alerts
     // ------------------------------------------------------------

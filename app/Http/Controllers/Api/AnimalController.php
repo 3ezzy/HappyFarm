@@ -272,7 +272,9 @@ class AnimalController extends Controller
         $hasHistory = $animal->weights()->exists()
             || $animal->healthRecords()->exists()
             || $animal->breedingCycles()->exists()
-            || Animal::where('dam_id', $animal->id)->orWhere('sire_id', $animal->id)->exists();
+            || Animal::where('dam_id', $animal->id)->orWhere('sire_id', $animal->id)->exists()
+            || $animal->is_sacrificed
+            || $animal->hasExited();
 
         if ($hasHistory) {
             $animal->delete();
