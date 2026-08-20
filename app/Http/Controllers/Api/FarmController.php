@@ -3,10 +3,31 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FarmUpdateRequest;
 use Illuminate\Http\Request;
 
 class FarmController extends Controller
 {
+    /**
+     * Rename the caller's own farm. There's no farm id in the route —
+     * it's always the authenticated user's own farm, same as show().
+     */
+    public function update(FarmUpdateRequest $request)
+    {
+        $farm = $request->user()->farm;
+
+        if (!$farm) {
+            return response()->json(['error' => 'No farm found for user'], 404);
+        }
+
+        $farm->update(['name' => $request->name]);
+
+        return response()->json([
+            'id' => $farm->id,
+            'name' => $farm->name,
+        ]);
+    }
+
     /**
      * Display the user's farm details.
      */
