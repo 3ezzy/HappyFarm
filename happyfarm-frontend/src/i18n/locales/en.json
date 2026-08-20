@@ -22,6 +22,7 @@
     "home": "Home",
     "animals": "Animals",
     "farm": "Farm",
+    "reports": "Reports",
     "profile": "Profile",
     "add": "Add"
   },
@@ -72,6 +73,7 @@
     "addNewAnimal": "Add a new animal",
     "viewAllAnimals": "View all animals",
     "farmStatistics": "Farm statistics",
+    "viewReports": "View reports",
     "recentAnimals": "Recent animals",
     "recentAnimalsSub": "Your latest additions to the farm.",
     "noAnimalsYet": "No animals yet — add your first one!"
@@ -106,6 +108,45 @@
       "speciesLocked": "Species can't be changed while this breed is in use.",
       "inUse": "In use",
       "confirmDeleteTitle": "Delete this breed?"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Spending, breeding performance, and flock status at a glance.",
+    "expenses": {
+      "title": "Expenses",
+      "total": "Total spent",
+      "byMonth": "Last 6 months",
+      "byKind": "By category"
+    },
+    "breeding": {
+      "title": "Breeding performance",
+      "totalBirths": "Total births",
+      "totalOffspring": "Offspring alive",
+      "weaningRate": "Weaning rate",
+      "empty": "No breeding cycles recorded yet."
+    },
+    "status": {
+      "title": "Current breeding status",
+      "empty": "No animals recorded yet."
+    },
+    "alerts": {
+      "title": "Open alerts",
+      "empty": "No alerts currently due."
+    },
+    "breedingOutcomes": {
+      "bred": "Bred, no check yet",
+      "pregnant": "Pregnant",
+      "not_pregnant": "Not pregnant",
+      "aborted": "Aborted",
+      "lambed": "Gave birth"
+    },
+    "alertTypes": {
+      "breeding_check_due": "Pregnancy checks due",
+      "lambing_due": "Births due",
+      "weaning_due": "Weaning due",
+      "reinsemination_due": "Ready to rebreed",
+      "health_due": "Health follow-ups due"
     }
   },
   "profile": {
@@ -226,6 +267,7 @@
     "weights": {
       "title": "Weight history",
       "empty": "No weight records yet.",
+      "trendTitle": "Weight trend",
       "add": "Record weight",
       "weightKg": "Weight (kg)",
       "date": "Date",

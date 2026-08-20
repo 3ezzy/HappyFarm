@@ -22,6 +22,7 @@
     "home": "Accueil",
     "animals": "Animaux",
     "farm": "Ferme",
+    "reports": "Rapports",
     "profile": "Profil",
     "add": "Ajouter"
   },
@@ -72,6 +73,7 @@
     "addNewAnimal": "Ajouter un animal",
     "viewAllAnimals": "Voir tous les animaux",
     "farmStatistics": "Statistiques de la ferme",
+    "viewReports": "Voir les rapports",
     "recentAnimals": "Animaux récents",
     "recentAnimalsSub": "Vos derniers ajouts à la ferme.",
     "noAnimalsYet": "Aucun animal pour l'instant — ajoutez le premier !"
@@ -106,6 +108,45 @@
       "speciesLocked": "L'espèce ne peut pas être modifiée tant que cette race est utilisée.",
       "inUse": "Utilisée",
       "confirmDeleteTitle": "Supprimer cette race ?"
+    }
+  },
+  "reports": {
+    "title": "Rapports",
+    "subtitle": "Dépenses, performance de reproduction et état du troupeau en un coup d'œil.",
+    "expenses": {
+      "title": "Dépenses",
+      "total": "Total dépensé",
+      "byMonth": "6 derniers mois",
+      "byKind": "Par catégorie"
+    },
+    "breeding": {
+      "title": "Performance de reproduction",
+      "totalBirths": "Naissances totales",
+      "totalOffspring": "Petits vivants",
+      "weaningRate": "Taux de sevrage",
+      "empty": "Aucun cycle de reproduction enregistré pour l'instant."
+    },
+    "status": {
+      "title": "Statut de reproduction actuel",
+      "empty": "Aucun animal enregistré pour l'instant."
+    },
+    "alerts": {
+      "title": "Alertes en cours",
+      "empty": "Aucune alerte en cours."
+    },
+    "breedingOutcomes": {
+      "bred": "Saillie, pas encore de contrôle",
+      "pregnant": "Gestante",
+      "not_pregnant": "Non gestante",
+      "aborted": "Avortée",
+      "lambed": "A mis bas"
+    },
+    "alertTypes": {
+      "breeding_check_due": "Contrôles de gestation à faire",
+      "lambing_due": "Mises bas à venir",
+      "weaning_due": "Sevrages à faire",
+      "reinsemination_due": "Prêtes pour une nouvelle saillie",
+      "health_due": "Suivis de santé à faire"
     }
   },
   "profile": {
@@ -226,6 +267,7 @@
     "weights": {
       "title": "Historique du poids",
       "empty": "Aucun relevé de poids pour l'instant.",
+      "trendTitle": "Évolution du poids",
       "add": "Enregistrer un poids",
       "weightKg": "Poids (kg)",
       "date": "Date",

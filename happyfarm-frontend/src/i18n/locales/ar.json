@@ -22,6 +22,7 @@
     "home": "الرئيسية",
     "animals": "الحيوانات",
     "farm": "المزرعة",
+    "reports": "التقارير",
     "profile": "الملف الشخصي",
     "add": "إضافة"
   },
@@ -72,6 +73,7 @@
     "addNewAnimal": "إضافة حيوان جديد",
     "viewAllAnimals": "عرض جميع الحيوانات",
     "farmStatistics": "إحصائيات المزرعة",
+    "viewReports": "عرض التقارير",
     "recentAnimals": "أحدث الحيوانات",
     "recentAnimalsSub": "أحدث الإضافات إلى مزرعتك.",
     "noAnimalsYet": "لا توجد حيوانات بعد — أضف أول حيوان!"
@@ -110,6 +112,45 @@
       "speciesLocked": "لا يمكن تغيير النوع أثناء استخدام هذه السلالة.",
       "inUse": "قيد الاستخدام",
       "confirmDeleteTitle": "هل تريد حذف هذه السلالة؟"
+    }
+  },
+  "reports": {
+    "title": "التقارير",
+    "subtitle": "نظرة سريعة على النفقات وأداء التكاثر وحالة القطيع.",
+    "expenses": {
+      "title": "النفقات",
+      "total": "إجمالي الإنفاق",
+      "byMonth": "آخر 6 أشهر",
+      "byKind": "حسب الفئة"
+    },
+    "breeding": {
+      "title": "أداء التكاثر",
+      "totalBirths": "إجمالي الولادات",
+      "totalOffspring": "المواليد الأحياء",
+      "weaningRate": "معدل الفطام",
+      "empty": "لا توجد دورات تكاثر مسجلة بعد."
+    },
+    "status": {
+      "title": "حالة التكاثر الحالية",
+      "empty": "لا توجد حيوانات مسجلة بعد."
+    },
+    "alerts": {
+      "title": "التنبيهات المفتوحة",
+      "empty": "لا توجد تنبيهات مستحقة حاليًا."
+    },
+    "breedingOutcomes": {
+      "bred": "تم التلقيح، بلا فحص بعد",
+      "pregnant": "حامل",
+      "not_pregnant": "غير حامل",
+      "aborted": "أجهضت",
+      "lambed": "وضعت مواليد"
+    },
+    "alertTypes": {
+      "breeding_check_due": "فحوصات حمل مستحقة",
+      "lambing_due": "ولادات مستحقة",
+      "weaning_due": "فطام مستحق",
+      "reinsemination_due": "جاهزة لتلقيح جديد",
+      "health_due": "متابعات صحية مستحقة"
     }
   },
   "profile": {
@@ -230,6 +271,7 @@
     "weights": {
       "title": "سجل الوزن",
       "empty": "لا توجد سجلات وزن بعد.",
+      "trendTitle": "تطور الوزن",
       "add": "تسجيل وزن",
       "weightKg": "الوزن (كجم)",
       "date": "التاريخ",
