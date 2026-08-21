@@ -20,7 +20,7 @@ class AlertGenerator
 
     public function generate(Farm $farm): array
     {
-        $farm->loadMissing(['animals.breedingCycles.birth', 'animals.healthRecords']);
+        $farm->loadMissing(['animals.breedingCycles.birth', 'animals.healthRecords', 'inventoryItems']);
 
         $alerts = [];
 
@@ -32,7 +32,7 @@ class AlertGenerator
             $alerts = [...$alerts, ...$this->breedingAlerts($animal), ...$this->healthAlerts($animal)];
         }
 
-        return $alerts;
+        return [...$alerts, ...$this->inventoryAlerts($farm)];
     }
 
     private function isDue(?Carbon $dueOn): bool
@@ -139,6 +139,46 @@ class AlertGenerator
                     'product' => $record->product,
                 ]);
             }
+        }
+
+        return $alerts;
+    }
+
+    /**
+     * Unlike the animal-based alerts above, a low-stock condition has no
+     * future due date — it's already true right now — so due_on/days_until
+     * are fixed at today/0 rather than computed. That keeps AlertController's
+     * existing sort-by-due_on working unchanged; the frontend gives this
+     * type its own wording instead of "due in N days".
+     *
+     * The dismissal key includes the item's latest restock transaction id
+     * (or 'none' if it's never been restocked), not just the item id: a
+     * dismissal should survive further consumption — still the same known
+     * problem — but a new restock is a real event worth re-surfacing the
+     * item over, even if that restock doesn't clear the threshold.
+     */
+    private function inventoryAlerts(Farm $farm): array
+    {
+        $alerts = [];
+
+        foreach ($farm->inventoryItems as $item) {
+            if (!$item->isLowStock()) {
+                continue;
+            }
+
+            $latestRestockId = $item->transactions()->where('type', 'restock')->max('id') ?? 'none';
+
+            $alerts[] = [
+                'type' => 'low_stock',
+                'key' => "low_stock:{$item->id}:{$latestRestockId}",
+                'item_id' => $item->id,
+                'item_name' => $item->name,
+                'unit' => $item->unit,
+                'current_stock' => $item->currentStock(),
+                'low_stock_threshold' => (float) $item->low_stock_threshold,
+                'due_on' => Carbon::today()->toDateString(),
+                'days_until' => 0,
+            ];
         }
 
         return $alerts;

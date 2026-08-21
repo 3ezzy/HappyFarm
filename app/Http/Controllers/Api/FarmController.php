@@ -229,7 +229,14 @@ class FarmController extends Controller
         $dismissed = $farm->alertDismissals()->pluck('alert_key')->all();
         $alerts = array_filter($alerts, fn ($a) => !in_array($a['key'], $dismissed, true));
 
-        $byType = ['breeding_check_due' => 0, 'lambing_due' => 0, 'weaning_due' => 0, 'reinsemination_due' => 0, 'health_due' => 0];
+        $byType = [
+            'breeding_check_due' => 0,
+            'lambing_due' => 0,
+            'weaning_due' => 0,
+            'reinsemination_due' => 0,
+            'health_due' => 0,
+            'low_stock' => 0,
+        ];
         foreach ($alerts as $alert) {
             $byType[$alert['type']]++;
         }
