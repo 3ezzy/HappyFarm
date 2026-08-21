@@ -81,6 +81,16 @@ export const ALERT_ENDPOINTS = {
   DISMISS: '/alerts/dismiss'
 }
 
+// Inventory items + their append-only restock/consume ledger.
+export const INVENTORY_ENDPOINTS = {
+  LIST: '/inventory-items',
+  CREATE: '/inventory-items',
+  UPDATE: (id) => `/inventory-items/${id}`,
+  DELETE: (id) => `/inventory-items/${id}`,
+  TRANSACTIONS: (id) => `/inventory-items/${id}/transactions`,
+  ADD_TRANSACTION: (id) => `/inventory-items/${id}/transactions`
+}
+
 // Complete endpoint URLs
 export const getEndpointUrl = (endpoint) => {
   return `${API_BASE_URL}${endpoint}`

@@ -18,6 +18,7 @@ import AddAnimal from './pages/animals/AddAnimal.jsx'
 import EditAnimal from './pages/animals/EditAnimal.jsx'
 import Farm from './pages/farm/Farm.jsx'
 import Reports from './pages/reports/Reports.jsx'
+import Inventory from './pages/inventory/Inventory.jsx'
 import Profile from './pages/profile/Profile.jsx'
 import NotFound from './pages/NotFound.jsx'
 
@@ -64,6 +65,7 @@ function App() {
             {/* Farm Management Routes */}
             <Route path="farm" element={<Farm />} />
             <Route path="reports" element={<Reports />} />
+            <Route path="inventory" element={<Inventory />} />
 
             {/* Profile Routes */}
             <Route path="profile" element={<Profile />} />
