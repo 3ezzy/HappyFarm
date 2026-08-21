@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\BreedController;
 use App\Http\Controllers\Api\BreedingCycleController;
 use App\Http\Controllers\Api\FarmController;
 use App\Http\Controllers\Api\HealthRecordController;
+use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\WeightController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -89,4 +90,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Alerts (computed at read time, no scheduler)
     Route::get('/alerts', [AlertController::class, 'index']);
     Route::post('/alerts/dismiss', [AlertController::class, 'dismiss']);
+
+    // Inventory items + their append-only restock/consume ledger
+    Route::get('/inventory-items', [InventoryController::class, 'index']);
+    Route::post('/inventory-items', [InventoryController::class, 'store']);
+    Route::put('/inventory-items/{id}', [InventoryController::class, 'update']);
+    Route::delete('/inventory-items/{id}', [InventoryController::class, 'destroy']);
+    Route::get('/inventory-items/{id}/transactions', [InventoryController::class, 'transactions']);
+    Route::post('/inventory-items/{id}/transactions', [InventoryController::class, 'storeTransaction']);
 });
