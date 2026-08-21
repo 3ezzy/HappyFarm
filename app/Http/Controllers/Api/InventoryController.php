@@ -126,6 +126,10 @@ class InventoryController extends Controller
             'low_stock_threshold' => $item->low_stock_threshold !== null ? (float) $item->low_stock_threshold : null,
             'current_stock' => $item->currentStock(),
             'is_low_stock' => $item->isLowStock(),
+            // Lets the frontend disable the delete button before submitting
+            // rather than only finding out via the 422 from destroy() —
+            // same "derive, don't reimplement" approach as breeds' in_use.
+            'has_transactions' => $item->transactions()->exists(),
         ];
     }
 

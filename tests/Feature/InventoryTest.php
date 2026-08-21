@@ -191,6 +191,20 @@ class InventoryTest extends TestCase
         $this->assertDatabaseMissing('inventory_items', ['id' => $item->id]);
     }
 
+    public function test_the_item_list_flags_has_transactions()
+    {
+        [$user, $farm] = $this->farmOwner();
+        $used = $this->item($farm, ['name' => 'Used']);
+        $unused = $this->item($farm, ['name' => 'Unused']);
+        $used->transactions()->create(['type' => 'restock', 'quantity' => 5, 'transaction_date' => now()]);
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/inventory-items');
+        $byId = collect($response->json())->keyBy('id');
+
+        $this->assertTrue($byId[$used->id]['has_transactions']);
+        $this->assertFalse($byId[$unused->id]['has_transactions']);
+    }
+
     public function test_an_item_with_transactions_cannot_be_deleted()
     {
         [$user, $farm] = $this->farmOwner();
