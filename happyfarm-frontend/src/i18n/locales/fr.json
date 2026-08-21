@@ -23,6 +23,7 @@
     "animals": "Animaux",
     "farm": "Ferme",
     "reports": "Rapports",
+    "inventory": "Inventaire",
     "profile": "Profil",
     "add": "Ajouter"
   },
@@ -148,6 +149,37 @@
       "reinsemination_due": "Prêtes pour une nouvelle saillie",
       "health_due": "Suivis de santé à faire"
     }
+  },
+  "inventory": {
+    "title": "Inventaire",
+    "subtitle": "Suivez l'alimentation, les médicaments et les fournitures avec un journal simple de réapprovisionnement/consommation.",
+    "empty": "Aucun article d'inventaire pour l'instant.",
+    "addItem": "Ajouter un article",
+    "add": "Ajouter l'article",
+    "name": "Nom de l'article",
+    "namePlaceholder": "ex. Aliment pour moutons",
+    "unit": "Unité",
+    "unitPlaceholder": "ex. kg, sacs, litres",
+    "lowStockThreshold": "Seuil de stock faible",
+    "thresholdLabel": "Seuil de stock faible : {{threshold}} {{unit}}",
+    "lowStock": "Stock faible",
+    "nameAndUnitRequired": "Veuillez saisir un nom et une unité.",
+    "addedToast": "Article ajouté",
+    "updatedToast": "Article mis à jour",
+    "deletedToast": "Article supprimé",
+    "confirmDeleteTitle": "Supprimer cet article ?",
+    "deleteDisabledHint": "Cet article a des transactions enregistrées et ne peut pas être supprimé.",
+    "viewHistory": "Voir l'historique",
+    "hideHistory": "Masquer l'historique",
+    "noTransactions": "Aucune transaction enregistrée pour l'instant.",
+    "restock": "Réapprovisionner",
+    "consume": "Consommer",
+    "restockToast": "Réapprovisionnement enregistré",
+    "consumeToast": "Consommation enregistrée",
+    "quantity": "Quantité",
+    "quantityRequired": "Veuillez saisir une quantité valide.",
+    "date": "Date",
+    "notes": "Notes"
   },
   "profile": {
     "title": "Profil",
@@ -508,12 +540,15 @@
     "dueIn_other": "Dans {{count}} jours",
     "dueToday": "Aujourd'hui",
     "viewAnimal": "Voir l'animal",
+    "viewInventory": "Voir l'inventaire",
+    "lowStockDetail": "{{stock}} {{unit}} restant(s), seuil {{threshold}} {{unit}}",
     "types": {
       "breeding_check_due": "Contrôle de gestation à faire",
       "lambing_due": "{{term}} à venir",
       "weaning_due": "Sevrage à faire",
       "reinsemination_due": "Prête à être saillie",
-      "health_due": "{{kind}} à faire"
+      "health_due": "{{kind}} à faire",
+      "low_stock": "Stock faible"
     }
   }
 }

@@ -23,6 +23,7 @@
     "animals": "Animals",
     "farm": "Farm",
     "reports": "Reports",
+    "inventory": "Inventory",
     "profile": "Profile",
     "add": "Add"
   },
@@ -148,6 +149,37 @@
       "reinsemination_due": "Ready to rebreed",
       "health_due": "Health follow-ups due"
     }
+  },
+  "inventory": {
+    "title": "Inventory",
+    "subtitle": "Track feed, medicine, and supplies with a simple restock/consume log.",
+    "empty": "No inventory items yet.",
+    "addItem": "Add an item",
+    "add": "Add item",
+    "name": "Item name",
+    "namePlaceholder": "e.g. Sheep feed",
+    "unit": "Unit",
+    "unitPlaceholder": "e.g. kg, bags, liters",
+    "lowStockThreshold": "Low-stock threshold",
+    "thresholdLabel": "Low-stock threshold: {{threshold}} {{unit}}",
+    "lowStock": "Low stock",
+    "nameAndUnitRequired": "Please enter a name and a unit.",
+    "addedToast": "Item added",
+    "updatedToast": "Item updated",
+    "deletedToast": "Item deleted",
+    "confirmDeleteTitle": "Delete this item?",
+    "deleteDisabledHint": "This item has recorded transactions and cannot be deleted.",
+    "viewHistory": "View history",
+    "hideHistory": "Hide history",
+    "noTransactions": "No transactions recorded yet.",
+    "restock": "Restock",
+    "consume": "Consume",
+    "restockToast": "Restock recorded",
+    "consumeToast": "Consumption recorded",
+    "quantity": "Quantity",
+    "quantityRequired": "Please enter a valid quantity.",
+    "date": "Date",
+    "notes": "Notes"
   },
   "profile": {
     "title": "Profile",
@@ -508,12 +540,15 @@
     "dueIn_other": "Due in {{count}} days",
     "dueToday": "Due today",
     "viewAnimal": "View animal",
+    "viewInventory": "View inventory",
+    "lowStockDetail": "{{stock}} {{unit}} left, threshold {{threshold}} {{unit}}",
     "types": {
       "breeding_check_due": "Pregnancy check due",
       "lambing_due": "{{term}} due",
       "weaning_due": "Weaning due",
       "reinsemination_due": "Ready to rebreed",
-      "health_due": "{{kind}} due"
+      "health_due": "{{kind}} due",
+      "low_stock": "Low stock"
     }
   }
 }

@@ -23,6 +23,7 @@
     "animals": "الحيوانات",
     "farm": "المزرعة",
     "reports": "التقارير",
+    "inventory": "المخزون",
     "profile": "الملف الشخصي",
     "add": "إضافة"
   },
@@ -152,6 +153,37 @@
       "reinsemination_due": "جاهزة لتلقيح جديد",
       "health_due": "متابعات صحية مستحقة"
     }
+  },
+  "inventory": {
+    "title": "المخزون",
+    "subtitle": "تتبع الأعلاف والأدوية والمستلزمات بسجل بسيط لإعادة التخزين والاستهلاك.",
+    "empty": "لا توجد عناصر مخزون بعد.",
+    "addItem": "إضافة عنصر",
+    "add": "إضافة العنصر",
+    "name": "اسم العنصر",
+    "namePlaceholder": "مثال: علف الأغنام",
+    "unit": "الوحدة",
+    "unitPlaceholder": "مثال: كجم، أكياس، لترات",
+    "lowStockThreshold": "حد المخزون المنخفض",
+    "thresholdLabel": "حد المخزون المنخفض: {{threshold}} {{unit}}",
+    "lowStock": "مخزون منخفض",
+    "nameAndUnitRequired": "الرجاء إدخال اسم ووحدة.",
+    "addedToast": "تمت إضافة العنصر",
+    "updatedToast": "تم تحديث العنصر",
+    "deletedToast": "تم حذف العنصر",
+    "confirmDeleteTitle": "هل تريد حذف هذا العنصر؟",
+    "deleteDisabledHint": "لهذا العنصر معاملات مسجلة ولا يمكن حذفه.",
+    "viewHistory": "عرض السجل",
+    "hideHistory": "إخفاء السجل",
+    "noTransactions": "لا توجد معاملات مسجلة بعد.",
+    "restock": "إعادة تخزين",
+    "consume": "استهلاك",
+    "restockToast": "تم تسجيل إعادة التخزين",
+    "consumeToast": "تم تسجيل الاستهلاك",
+    "quantity": "الكمية",
+    "quantityRequired": "الرجاء إدخال كمية صحيحة.",
+    "date": "التاريخ",
+    "notes": "ملاحظات"
   },
   "profile": {
     "title": "الملف الشخصي",
@@ -536,12 +568,15 @@
     "dueIn_other": "مستحق خلال {{count}} يوم",
     "dueToday": "مستحق اليوم",
     "viewAnimal": "عرض الحيوان",
+    "viewInventory": "عرض المخزون",
+    "lowStockDetail": "متبقٍ {{stock}} {{unit}}، الحد الأدنى {{threshold}} {{unit}}",
     "types": {
       "breeding_check_due": "فحص الحمل مستحق",
       "lambing_due": "{{term}} متوقعة",
       "weaning_due": "الفطام مستحق",
       "reinsemination_due": "جاهزة للتلقيح مجددًا",
-      "health_due": "{{kind}} مستحق"
+      "health_due": "{{kind}} مستحق",
+      "low_stock": "مخزون منخفض"
     }
   }
 }
