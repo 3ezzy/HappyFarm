@@ -14,6 +14,7 @@ const TYPE_ICON = {
   weaning_due: '🌾',
   reinsemination_due: '💞',
   health_due: '💉',
+  low_stock: '📦',
 }
 
 /**
@@ -58,6 +59,19 @@ const AlertsPanel = () => {
     return t('alerts.dueIn', { count: alert.days_until })
   }
 
+  // low_stock has no future due date — the condition is already true right
+  // now — so it gets its own second line (remaining stock vs. threshold)
+  // instead of the "due in N days" framing every other alert type uses.
+  const detailLabel = (alert) =>
+    alert.type === 'low_stock'
+      ? t('alerts.lowStockDetail', { stock: alert.current_stock, unit: alert.unit, threshold: alert.low_stock_threshold })
+      : `${fmtDate(alert.due_on, i18n.language)} · ${dueLabel(alert)}`
+
+  // Every other alert type turns red once overdue (days_until < 0, which
+  // low_stock's fixed days_until=0 never triggers) — for low_stock, red
+  // means "completely out" instead.
+  const isUrgent = (alert) => (alert.type === 'low_stock' ? alert.current_stock <= 0 : alert.days_until < 0)
+
   return (
     <div className={classNames(cardClass, 'p-6')}>
       <h2 className="mb-1.5 text-[22px]">{t('alerts.title')}</h2>
@@ -74,26 +88,26 @@ const AlertsPanel = () => {
               key={alert.key}
               className={classNames(
                 'flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3',
-                alert.days_until < 0 ? 'bg-red-soft' : 'bg-yellow-badgeBg'
+                isUrgent(alert) ? 'bg-red-soft' : 'bg-yellow-badgeBg'
               )}
             >
               <div className="flex min-w-0 items-center gap-3">
                 <span className="text-xl">{TYPE_ICON[alert.type] || '🔔'}</span>
                 <div className="min-w-0">
                   <p className="truncate font-display text-[15px] font-bold text-brown-text">
-                    {typeLabel(alert)} — {alert.animal_name}
+                    {typeLabel(alert)} — {alert.type === 'low_stock' ? alert.item_name : alert.animal_name}
                   </p>
                   <p className="text-[12.5px] text-tan">
-                    {fmtDate(alert.due_on, i18n.language)} · {dueLabel(alert)}
+                    {detailLabel(alert)}
                   </p>
                 </div>
               </div>
               <div className="flex flex-none items-center gap-2">
                 <button
-                  onClick={() => navigate(`/animals/${alert.animal_id}`)}
+                  onClick={() => navigate(alert.type === 'low_stock' ? '/inventory' : `/animals/${alert.animal_id}`)}
                   className="cursor-pointer rounded-full border-2 border-line bg-cream px-3.5 py-1.5 font-display text-[12.5px] font-bold text-brown-text transition-transform duration-150 hover:scale-105"
                 >
-                  {t('alerts.viewAnimal')}
+                  {alert.type === 'low_stock' ? t('alerts.viewInventory') : t('alerts.viewAnimal')}
                 </button>
                 <button
                   onClick={() => dismissMutation.mutate(alert.key)}
