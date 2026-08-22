@@ -20,12 +20,16 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
         // Validation is automatically handled by RegisterRequest
-        
-        // Create user
+
+        // New accounts start pending — they need admin approval (see
+        // login()) before they can ever obtain a token. Role defaults to
+        // 'user'; only the user:make-admin command grants 'admin'.
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'status' => 'pending',
+            'role' => 'user',
         ]);
 
         // Create farm for the user
@@ -34,20 +38,20 @@ class AuthController extends Controller
             'name' => $user->name . "'s Farm",
         ]);
 
-        // Generate Sanctum token
-        $token = $user->createToken('api-token')->plainTextToken;
-
+        // No token: a pending account must not be able to access the
+        // application until an admin approves it.
         return response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'role' => $user->role,
             ],
             'farm' => [
                 'id' => $farm->id,
                 'name' => $farm->name,
             ],
-            'token' => $token,
+            'message' => 'Your account has been created and is awaiting administrator approval.',
         ], 201);
     }
 
@@ -66,6 +70,23 @@ class AuthController extends Controller
             ]);
         }
 
+        // Checked only after credentials are verified — surfacing a
+        // status-specific message to someone who doesn't know the
+        // password would leak whether that email belongs to a
+        // pending/rejected account. Admins bypass this gate entirely (the
+        // user:make-admin command deliberately leaves status untouched, so
+        // the first admin — created while still 'pending' — must still be
+        // able to log in to approve anyone, including themselves).
+        if ($user->role !== 'admin') {
+            if ($user->status === 'pending') {
+                return response()->json(['error' => 'Your account is awaiting administrator approval.'], 400);
+            }
+
+            if ($user->status === 'rejected') {
+                return response()->json(['error' => 'Your account has been rejected.'], 400);
+            }
+        }
+
         // Load the user's farm
         $farm = $user->farm;
 
@@ -77,6 +98,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'role' => $user->role,
             ],
             'farm' => [
                 'id' => $farm->id,
