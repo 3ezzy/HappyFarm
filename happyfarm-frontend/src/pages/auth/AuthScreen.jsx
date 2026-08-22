@@ -43,13 +43,20 @@ const AuthScreen = ({ mode }) => {
 
   const doRegister = async () => {
     try {
-      await register({
+      const data = await register({
         name: regName,
         email: regEmail,
         password: regPass,
         password_confirmation: regPass,
       })
-      navigate('/')
+      // A pending account gets no token — stay on the auth screen (on the
+      // login tab) instead of navigating into a protected route that
+      // would just bounce back out via ProtectedRoute.
+      if (data.token) {
+        navigate('/')
+      } else {
+        navigate('/login')
+      }
     } catch (_) {
       /* error surfaced via context + toast */
     }

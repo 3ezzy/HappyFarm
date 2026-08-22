@@ -124,20 +124,32 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // Register function
+  // Register function. A new account starts 'pending' and the backend
+  // issues no token (see AuthController::register()) — only dispatch
+  // SET_USER when one actually comes back, otherwise this would flip
+  // isAuthenticated true with nothing in storage to back it, and the next
+  // API call would 401.
   const register = async (userData) => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true })
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR })
-      
+
       const data = await authService.register(userData)
-      
-      dispatch({
-        type: AUTH_ACTIONS.SET_USER,
-        payload: { user: data.user, farm: data.farm }
-      })
-      
-      toast.success(t('auth.welcomeNewToast', { name: data.user.name }))
+
+      if (data.token) {
+        dispatch({
+          type: AUTH_ACTIONS.SET_USER,
+          payload: { user: data.user, farm: data.farm }
+        })
+        toast.success(t('auth.welcomeNewToast', { name: data.user.name }))
+      } else {
+        dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false })
+        // Backend-supplied text (same reasoning as sacrifice-eligibility
+        // messages elsewhere) — the pending-approval wording is a business
+        // decision, not something to duplicate/localize client-side.
+        toast.success(data.message)
+      }
+
       return data
     } catch (error) {
       const errorMessage = error.response?.data?.error || t('errors.unexpected')
