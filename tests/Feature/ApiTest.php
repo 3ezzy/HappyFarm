@@ -12,6 +12,11 @@ class ApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * A new registration is created 'pending' and receives no token — it
+     * needs admin approval before it can access the app. See
+     * AuthApprovalTest for the full approval-flow coverage.
+     */
     public function test_user_can_register()
     {
         $response = $this->postJson('/api/register', [
@@ -23,13 +28,16 @@ class ApiTest extends TestCase
 
         $response->assertStatus(201)
                 ->assertJsonStructure([
-                    'user' => ['id', 'name', 'email'],
+                    'user' => ['id', 'name', 'email', 'role'],
                     'farm' => ['id', 'name'],
-                    'token'
-                ]);
+                    'message',
+                ])
+                ->assertJsonMissing(['token']);
 
         $this->assertDatabaseHas('users', [
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
+            'status' => 'pending',
+            'role' => 'user',
         ]);
 
         $this->assertDatabaseHas('farms', [
