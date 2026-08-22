@@ -264,4 +264,61 @@ class Animal extends Model
 
         return $messages[$this->type] ?? 'Animal is not eligible for sacrifice.';
     }
+
+    /**
+     * Latest date_of_birth that still satisfies MIN_AGES[$type] as of today
+     * — same math as getAgeAttribute()/setAgeAttribute(), exposed as a date
+     * so it can be used inside Rule::exists()->where() closures, which run
+     * against a plain query builder and can't call the age accessor.
+     */
+    public static function maturityCutoffDate(?string $type): string
+    {
+        $days = (int) round((self::MIN_AGES[$type] ?? 0) * 365.25);
+
+        return Carbon::now()->subDays($days)->toDateString();
+    }
+
+    /**
+     * Whether this animal meets MIN_AGES for its species — reused as the
+     * breeding-maturity threshold per Phase 4 scope, rather than
+     * introducing a second age table. Kept separate from
+     * isEligibleForSacrifice() (even though the math is identical today)
+     * so the two concepts don't silently couple if the thresholds ever
+     * diverge.
+     */
+    public function isMatureForBreeding(): bool
+    {
+        if ($this->age === null) {
+            return false;
+        }
+
+        return $this->age >= (self::MIN_AGES[$this->type] ?? 0);
+    }
+
+    /**
+     * Not archived and hasn't exited (death/sale/sacrifice) — the
+     * "active/valid for breeding" half of parent eligibility. Archived is
+     * checked via trashed() rather than a fresh query, so this also works
+     * on models loaded with withTrashed() (e.g. BreedingCycle::dam()).
+     */
+    public function isActiveForBreeding(): bool
+    {
+        return !$this->trashed() && !$this->hasExited();
+    }
+
+    /**
+     * Mirrors getSacrificeEligibilityError() for the breeding-maturity
+     * check above — same MIN_AGES thresholds, different context/wording.
+     */
+    public function getBreedingEligibilityError(): string
+    {
+        $messages = [
+            'sheep' => 'Sheep must be at least 6 months old to be used for breeding.',
+            'goat' => 'Goat must be at least 1 year old to be used for breeding.',
+            'cow' => 'Cow must be at least 2 years old to be used for breeding.',
+            'camel' => 'Camel must be at least 5 years old to be used for breeding.',
+        ];
+
+        return $messages[$this->type] ?? 'Animal is not eligible for breeding.';
+    }
 }

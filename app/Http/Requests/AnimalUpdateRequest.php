@@ -25,6 +25,40 @@ class AnimalUpdateRequest extends FormRequest
     {
         $farmId = $this->user()?->farm?->id;
         $animalId = $this->route('id');
+        $type = $this->input('type');
+        $maturityCutoff = Animal::maturityCutoffDate($type);
+        $current = Animal::find($animalId);
+
+        // Same dam_id/sire_id eligibility as AnimalRequest — same species,
+        // correct sex, on this farm, not archived, hasn't exited, old
+        // enough per Animal::MIN_AGES — but only when the value is actually
+        // changing. Resubmitting the animal's existing dam_id/sire_id
+        // unchanged (full-object-replace form) must keep passing even if
+        // that parent has since been archived or exited: existing
+        // historical relationships stay intact (see Animal::dam()/sire()
+        // withTrashed()), only *new* selections are gated. Self-reference
+        // is checked separately below in withValidator(), since it needs
+        // $animalId rather than a query condition.
+        $parentRule = function (string $sex, ?int $currentValue) use ($farmId, $type, $maturityCutoff) {
+            return function ($attribute, $value, $fail) use ($sex, $currentValue, $farmId, $type, $maturityCutoff) {
+                if ((int) $value === $currentValue) {
+                    return;
+                }
+
+                $exists = Animal::where('id', $value)
+                    ->where('farm_id', $farmId)
+                    ->where('type', $type)
+                    ->where('sex', $sex)
+                    ->whereNull('deleted_at')
+                    ->whereNull('exit_reason')
+                    ->where('date_of_birth', '<=', $maturityCutoff)
+                    ->exists();
+
+                if (!$exists) {
+                    $fail('The selected ' . ($sex === 'female' ? 'mother' : 'father') . ' is not one of your animals.');
+                }
+            };
+        };
 
         return [
             'type' => 'required|string|in:sheep,goat,cow,camel',
@@ -53,12 +87,12 @@ class AnimalUpdateRequest extends FormRequest
             'dam_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('animals', 'id')->where(fn ($q) => $q->where('farm_id', $farmId)),
+                $parentRule('female', $current?->dam_id),
             ],
             'sire_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('animals', 'id')->where(fn ($q) => $q->where('farm_id', $farmId)),
+                $parentRule('male', $current?->sire_id),
             ],
         ];
     }
@@ -71,8 +105,8 @@ class AnimalUpdateRequest extends FormRequest
             'name.required' => 'The animal name field is required.',
             'tag.unique' => 'You already have an animal with this tag.',
             'breed_id.exists' => 'Please select a valid breed.',
-            'dam_id.exists' => 'The selected mother is not one of your animals.',
-            'sire_id.exists' => 'The selected father is not one of your animals.',
+            // dam_id/sire_id use closure-based rules (see rules() above),
+            // which supply their own $fail() message directly.
         ];
     }
 
@@ -81,6 +115,10 @@ class AnimalUpdateRequest extends FormRequest
         $validator->after(function ($validator) {
             if (!$this->filled('age') && !$this->filled('date_of_birth')) {
                 $validator->errors()->add('age', 'Either age or date of birth is required.');
+            }
+
+            if ($this->input('origin') === 'born' && $this->filled('date_of_purchase')) {
+                $validator->errors()->add('date_of_purchase', 'An animal born on the farm cannot have a purchase date.');
             }
 
             $animalId = (int) $this->route('id');

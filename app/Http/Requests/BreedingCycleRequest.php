@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Animal;
+use App\Models\BreedingCycle;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,13 +26,29 @@ class BreedingCycleRequest extends FormRequest
     {
         $farmId = $this->user()?->farm?->id;
 
+        // store() is POST /animals/{id}/breeding-cycles — {id} is the dam.
+        // update() is PUT /breeding-cycles/{id} — {id} is the cycle, whose
+        // dam is looked up via the cycle. Either way, the sire must match
+        // the dam's species.
+        $dam = $this->isMethod('post')
+            ? Animal::find($this->route('id'))
+            : BreedingCycle::find($this->route('id'))?->dam;
+        $maturityCutoff = Animal::maturityCutoffDate($dam?->type);
+
         return [
             'sire_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('animals', 'id')->where(
-                    fn ($q) => $q->where('farm_id', $farmId)->where('sex', 'male')
-                ),
+                Rule::exists('animals', 'id')->where(function ($q) use ($farmId, $dam, $maturityCutoff) {
+                    $q->where('farm_id', $farmId)->where('sex', 'male');
+
+                    if ($dam) {
+                        $q->where('type', $dam->type)
+                            ->whereNull('deleted_at')
+                            ->whereNull('exit_reason')
+                            ->where('date_of_birth', '<=', $maturityCutoff);
+                    }
+                }),
             ],
             'method' => 'required|in:natural,ai',
             'bred_on' => 'required|date|before_or_equal:today',

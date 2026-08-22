@@ -22,6 +22,13 @@ class BirthRequest extends FormRequest
     public function rules(): array
     {
         $farmId = $this->user()?->farm?->id;
+        // The dam is the route animal — offspring (and therefore any
+        // sire) must match her species. Structural lookup only, same
+        // reasoning as the sire_id rule below: no whereHas() inside
+        // Rule::exists()->where(), so this can't go through the
+        // relationship-aware findOwnedAnimal() the controller uses.
+        $dam = Animal::find($this->route('id'));
+        $maturityCutoff = Animal::maturityCutoffDate($dam?->type);
 
         return [
             // Structural check only. Rule::exists()->where()'s closure runs
@@ -35,9 +42,16 @@ class BirthRequest extends FormRequest
             'sire_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('animals', 'id')->where(
-                    fn ($q) => $q->where('farm_id', $farmId)->where('sex', 'male')
-                ),
+                Rule::exists('animals', 'id')->where(function ($q) use ($farmId, $dam, $maturityCutoff) {
+                    $q->where('farm_id', $farmId)->where('sex', 'male');
+
+                    if ($dam) {
+                        $q->where('type', $dam->type)
+                            ->whereNull('deleted_at')
+                            ->whereNull('exit_reason')
+                            ->where('date_of_birth', '<=', $maturityCutoff);
+                    }
+                }),
             ],
             'born_on' => 'required|date|before_or_equal:today',
             'offspring_total' => 'required|integer|min:0',

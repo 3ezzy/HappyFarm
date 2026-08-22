@@ -105,6 +105,7 @@ class BirthController extends Controller
         }
 
         $farmId = $request->user()?->farm?->id;
+        $maturityCutoff = Animal::maturityCutoffDate($birth->dam?->type);
 
         $validated = $request->validate([
             // Structural check only, same reasoning as BirthRequest — a
@@ -114,9 +115,16 @@ class BirthController extends Controller
             'breeding_cycle_id' => 'nullable|integer',
             'sire_id' => [
                 'nullable', 'integer',
-                Rule::exists('animals', 'id')->where(
-                    fn ($q) => $q->where('farm_id', $farmId)->where('sex', 'male')
-                ),
+                Rule::exists('animals', 'id')->where(function ($q) use ($farmId, $birth, $maturityCutoff) {
+                    $q->where('farm_id', $farmId)->where('sex', 'male');
+
+                    if ($birth->dam) {
+                        $q->where('type', $birth->dam->type)
+                            ->whereNull('deleted_at')
+                            ->whereNull('exit_reason')
+                            ->where('date_of_birth', '<=', $maturityCutoff);
+                    }
+                }),
             ],
             'born_on' => 'required|date|before_or_equal:today',
             'offspring_total' => 'required|integer|min:0',

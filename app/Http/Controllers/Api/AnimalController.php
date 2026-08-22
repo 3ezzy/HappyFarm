@@ -395,6 +395,10 @@ class AnimalController extends Controller
             'exit_reason' => $animal->exit_reason,
             'is_eligible' => $animal->isEligibleForSacrifice(),
             'min_age_text' => Animal::MIN_AGE_TEXT[$animal->type] ?? null,
+            // Reused as the breeding-maturity threshold too (Phase 4) — the
+            // frontend's dam/sire filters read this rather than
+            // re-declaring Animal::MIN_AGES client-side.
+            'min_age' => Animal::MIN_AGES[$animal->type] ?? null,
             'is_archived' => $animal->trashed(),
             // Same condition AnimalUpdateRequest enforces server-side —
             // exposed so the edit form can disable species/sex without

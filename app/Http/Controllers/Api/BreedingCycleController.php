@@ -41,6 +41,16 @@ class BreedingCycleController extends Controller
             return response()->json(['error' => 'Only female animals can be bred'], 400);
         }
 
+        // Archived is already excluded by findOwnedAnimal() (no
+        // withTrashed(), so an archived dam 404s before reaching here).
+        if (!$dam->isMatureForBreeding()) {
+            return response()->json(['error' => $dam->getBreedingEligibilityError()], 400);
+        }
+
+        if ($dam->hasExited()) {
+            return response()->json(['error' => 'This animal has left the flock and cannot be bred.'], 400);
+        }
+
         if ($this->hasOpenCycle($dam)) {
             return response()->json(['error' => 'This animal already has an open breeding cycle'], 400);
         }
@@ -74,6 +84,23 @@ class BreedingCycleController extends Controller
 
         if (!$cycle) {
             return response()->json(['error' => 'Breeding cycle not found'], 404);
+        }
+
+        // dam() uses withTrashed(), so unlike store() an archived dam
+        // doesn't 404 here — checked explicitly alongside the same
+        // maturity/exited rules applied when the cycle was created.
+        $dam = $cycle->dam;
+
+        if ($dam->trashed()) {
+            return response()->json(['error' => 'This animal is archived and cannot be bred.'], 400);
+        }
+
+        if (!$dam->isMatureForBreeding()) {
+            return response()->json(['error' => $dam->getBreedingEligibilityError()], 400);
+        }
+
+        if ($dam->hasExited()) {
+            return response()->json(['error' => 'This animal has left the flock and cannot be bred.'], 400);
         }
 
         $cycle->update([

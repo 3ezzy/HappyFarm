@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Animal;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,7 +25,13 @@ class AnimalRequest extends FormRequest
     public function rules(): array
     {
         $farmId = $this->user()?->farm?->id;
+        $type = $this->input('type');
+        $maturityCutoff = Animal::maturityCutoffDate($type);
 
+        // A valid dam_id/sire_id below: same species as the animal being
+        // created, correct sex, on this farm, not archived, hasn't exited
+        // (death/sale/sacrifice), and old enough per Animal::MIN_AGES.
+        // Self-reference is impossible here — this animal has no id yet.
         return [
             'type' => 'required|string|in:sheep,goat,cow,camel',
             'name' => 'required|string|max:255|min:1',
@@ -55,12 +62,26 @@ class AnimalRequest extends FormRequest
             'dam_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('animals', 'id')->where(fn ($q) => $q->where('farm_id', $farmId)),
+                Rule::exists('animals', 'id')->where(function ($q) use ($farmId, $type, $maturityCutoff) {
+                    $q->where('farm_id', $farmId)
+                        ->where('type', $type)
+                        ->where('sex', 'female')
+                        ->whereNull('deleted_at')
+                        ->whereNull('exit_reason')
+                        ->where('date_of_birth', '<=', $maturityCutoff);
+                }),
             ],
             'sire_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('animals', 'id')->where(fn ($q) => $q->where('farm_id', $farmId)),
+                Rule::exists('animals', 'id')->where(function ($q) use ($farmId, $type, $maturityCutoff) {
+                    $q->where('farm_id', $farmId)
+                        ->where('type', $type)
+                        ->where('sex', 'male')
+                        ->whereNull('deleted_at')
+                        ->whereNull('exit_reason')
+                        ->where('date_of_birth', '<=', $maturityCutoff);
+                }),
             ],
         ];
     }
@@ -110,6 +131,10 @@ class AnimalRequest extends FormRequest
         $validator->after(function ($validator) {
             if (!$this->filled('age') && !$this->filled('date_of_birth')) {
                 $validator->errors()->add('age', 'Either age or date of birth is required.');
+            }
+
+            if ($this->input('origin') === 'born' && $this->filled('date_of_purchase')) {
+                $validator->errors()->add('date_of_purchase', 'An animal born on the farm cannot have a purchase date.');
             }
         });
     }
