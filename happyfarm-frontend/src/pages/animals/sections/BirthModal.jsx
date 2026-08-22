@@ -42,7 +42,16 @@ const BirthModal = ({ dam, initialCycleId, onClose }) => {
 
   const { data: cycles = [] } = useQuery(['breeding-cycles', dam.id], () => breedingCycleService.getAll(dam.id))
   const { data: animals = [] } = useQuery('animals', () => animalService.getAll())
-  const sires = animals.filter((a) => a.sex === 'male')
+  // Same species as the dam, old enough, not archived, hasn't exited.
+  const sires = animals.filter((a) =>
+    a.type === dam.type &&
+    a.sex === 'male' &&
+    a.age != null &&
+    a.min_age != null &&
+    a.age >= a.min_age &&
+    !a.is_archived &&
+    !a.exit_reason
+  )
   const openCycles = cycles.filter((c) => !c.birth_id)
 
   const [cycleId, setCycleId] = useState(initialCycleId ? String(initialCycleId) : '')

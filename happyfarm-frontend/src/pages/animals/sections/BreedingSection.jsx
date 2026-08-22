@@ -61,7 +61,16 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
     () => breedingCycleService.getAll(animal.id)
   )
   const { data: animals = [] } = useQuery('animals', () => animalService.getAll())
-  const sires = animals.filter((a) => a.sex === 'male')
+  // Same species as this dam, old enough, not archived, hasn't exited.
+  const sires = animals.filter((a) =>
+    a.type === animal.type &&
+    a.sex === 'male' &&
+    a.age != null &&
+    a.min_age != null &&
+    a.age >= a.min_age &&
+    !a.is_archived &&
+    !a.exit_reason
+  )
 
   const invalidate = () =>
     Promise.all([

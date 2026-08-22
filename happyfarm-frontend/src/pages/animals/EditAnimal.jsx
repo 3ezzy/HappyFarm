@@ -77,8 +77,18 @@ const EditAnimal = () => {
 
   const { data: breeds = [] } = useQuery(['breeds', type], () => breedService.getAll(type))
   const others = animals.filter((a) => a.id !== Number(id))
-  const dams = others.filter((a) => a.sex !== 'male')
-  const sires = others.filter((a) => a.sex !== 'female')
+  // Same eligibility predicate as AddAnimal: same species as the currently
+  // selected type, correct sex, old enough, not archived, hasn't exited.
+  const isEligibleParent = (a, requiredSex) =>
+    a.type === type &&
+    a.sex === requiredSex &&
+    a.age != null &&
+    a.min_age != null &&
+    a.age >= a.min_age &&
+    !a.is_archived &&
+    !a.exit_reason
+  const dams = others.filter((a) => isEligibleParent(a, 'female'))
+  const sires = others.filter((a) => isEligibleParent(a, 'male'))
 
   const updateMutation = useMutation((payload) => animalService.update(id, payload), {
     onSuccess: async (data) => {
@@ -233,11 +243,21 @@ const EditAnimal = () => {
               value={datePurchased}
               max={new Date().toISOString().slice(0, 10)}
               onChange={(e) => setDatePurchased(e.target.value)}
+              disabled={origin === 'born'}
+              className={origin === 'born' ? 'cursor-not-allowed opacity-60' : ''}
             />
           </div>
           <div className={fieldGroupClass}>
             <label htmlFor="ao" className={labelClass}>{t('addAnimal.origin')}</label>
-            <HfSelect id="ao" value={origin} onChange={(e) => setOrigin(e.target.value)}>
+            <HfSelect
+              id="ao"
+              value={origin}
+              onChange={(e) => {
+                const value = e.target.value
+                setOrigin(value)
+                if (value === 'born') setDatePurchased('')
+              }}
+            >
               <option value="">{t('addAnimal.selectOptional')}</option>
               <option value="born">{t('addAnimal.born')}</option>
               <option value="purchased">{t('addAnimal.purchased')}</option>

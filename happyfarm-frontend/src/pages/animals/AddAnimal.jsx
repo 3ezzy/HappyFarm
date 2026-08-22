@@ -51,8 +51,19 @@ const AddAnimal = () => {
 
   const { data: breeds = [] } = useQuery(['breeds', type], () => breedService.getAll(type))
   const { data: animals = [] } = useQuery('animals', () => animalService.getAll())
-  const dams = animals.filter((a) => a.sex !== 'male')
-  const sires = animals.filter((a) => a.sex !== 'female')
+  // A valid parent: same species as the animal being created, correct sex,
+  // old enough (age/min_age come straight from the API — see
+  // AnimalController::present()), not archived, hasn't exited the flock.
+  const isEligibleParent = (a, requiredSex) =>
+    a.type === type &&
+    a.sex === requiredSex &&
+    a.age != null &&
+    a.min_age != null &&
+    a.age >= a.min_age &&
+    !a.is_archived &&
+    !a.exit_reason
+  const dams = animals.filter((a) => isEligibleParent(a, 'female'))
+  const sires = animals.filter((a) => isEligibleParent(a, 'male'))
 
   const createMutation = useMutation(animalService.create, {
     onSuccess: async (data) => {
@@ -177,11 +188,21 @@ const AddAnimal = () => {
               value={datePurchased}
               max={new Date().toISOString().slice(0, 10)}
               onChange={(e) => setDatePurchased(e.target.value)}
+              disabled={origin === 'born'}
+              className={origin === 'born' ? 'cursor-not-allowed opacity-60' : ''}
             />
           </div>
           <div className={fieldGroupClass}>
             <label htmlFor="ao" className={labelClass}>{t('addAnimal.origin')}</label>
-            <HfSelect id="ao" value={origin} onChange={(e) => setOrigin(e.target.value)}>
+            <HfSelect
+              id="ao"
+              value={origin}
+              onChange={(e) => {
+                const value = e.target.value
+                setOrigin(value)
+                if (value === 'born') setDatePurchased('')
+              }}
+            >
               <option value="">{t('addAnimal.selectOptional')}</option>
               <option value="born">{t('addAnimal.born')}</option>
               <option value="purchased">{t('addAnimal.purchased')}</option>
