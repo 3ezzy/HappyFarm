@@ -555,7 +555,8 @@
     "status": {
       "pending": "قيد المراجعة",
       "approved": "مقبول",
-      "rejected": "مرفوض"
+      "rejected": "مرفوض",
+      "suspended": "موقوف"
     },
     "role": {
       "admin": "مسؤول"
@@ -564,8 +565,14 @@
     "registeredOn": "تاريخ التسجيل {{date}}",
     "approve": "قبول",
     "reject": "رفض",
+    "suspend": "إيقاف",
+    "reactivate": "إعادة تفعيل",
     "userApprovedToast": "تم قبول المستخدم.",
-    "userRejectedToast": "تم رفض المستخدم."
+    "userRejectedToast": "تم رفض المستخدم.",
+    "userSuspendedToast": "تم إيقاف المستخدم.",
+    "userReactivatedToast": "تمت إعادة تفعيل المستخدم.",
+    "confirmSuspendTitle": "إيقاف {{name}}؟",
+    "confirmSuspendBody": "سيؤدي هذا إلى تسجيل خروجه فورًا من جميع الأجهزة ومنعه من تسجيل الدخول حتى تتم إعادة تفعيل حسابه."
   },
   "alerts": {
     "title": "التنبيهات",

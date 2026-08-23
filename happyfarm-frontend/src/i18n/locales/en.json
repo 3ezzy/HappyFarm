@@ -535,7 +535,8 @@
     "status": {
       "pending": "Pending",
       "approved": "Approved",
-      "rejected": "Rejected"
+      "rejected": "Rejected",
+      "suspended": "Suspended"
     },
     "role": {
       "admin": "Admin"
@@ -544,8 +545,14 @@
     "registeredOn": "Registered {{date}}",
     "approve": "Approve",
     "reject": "Reject",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
     "userApprovedToast": "User approved.",
-    "userRejectedToast": "User rejected."
+    "userRejectedToast": "User rejected.",
+    "userSuspendedToast": "User suspended.",
+    "userReactivatedToast": "User reactivated.",
+    "confirmSuspendTitle": "Suspend {{name}}?",
+    "confirmSuspendBody": "This immediately signs them out of every device and blocks login until reactivated."
   },
   "alerts": {
     "title": "Alerts",
