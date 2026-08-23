@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AlertController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AnimalController;
@@ -98,4 +99,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/inventory-items/{id}', [InventoryController::class, 'destroy']);
     Route::get('/inventory-items/{id}/transactions', [InventoryController::class, 'transactions']);
     Route::post('/inventory-items/{id}/transactions', [InventoryController::class, 'storeTransaction']);
+
+    // Admin-only user management — see EnsureUserIsAdmin. Not farm-scoped:
+    // an admin reviews registrations across the whole application.
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::post('/users/{id}/approve', [AdminUserController::class, 'approve']);
+        Route::post('/users/{id}/reject', [AdminUserController::class, 'reject']);
+    });
 });
