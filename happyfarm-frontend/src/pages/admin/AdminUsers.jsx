@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import toast from 'react-hot-toast'
 import { adminService } from '../../services/api/admin.js'
+import { useAuth } from '../../context/AuthContext.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
+import ConfirmModal from '../../components/common/UI/ConfirmModal.jsx'
 import { badge, cardClass, fmtDate } from '../../theme/hf.jsx'
 import { apiErrorMessage } from '../../utils/apiError.js'
 
-const STATUSES = ['pending', 'approved', 'rejected']
+const STATUSES = ['pending', 'approved', 'rejected', 'suspended']
 
 const filterBtnClass = (active) =>
   classNames(
@@ -28,8 +30,10 @@ const actionBtnClass =
  */
 const AdminUsers = () => {
   const { t, i18n } = useTranslation()
+  const { user: currentUser } = useAuth()
   const queryClient = useQueryClient()
   const [status, setStatus] = useState('pending')
+  const [suspendingUser, setSuspendingUser] = useState(null) // user object or null
 
   const { data: users = [], isLoading } = useQuery(
     ['admin-users', status],
@@ -50,6 +54,26 @@ const AdminUsers = () => {
     onSuccess: async () => {
       await invalidate()
       toast.success(t('admin.userRejectedToast'))
+    },
+    onError: (error) => toast.error(apiErrorMessage(error, t('common.error'))),
+  })
+
+  const suspendMutation = useMutation((id) => adminService.suspendUser(id), {
+    onSuccess: async () => {
+      await invalidate()
+      setSuspendingUser(null)
+      toast.success(t('admin.userSuspendedToast'))
+    },
+    onError: (error) => {
+      setSuspendingUser(null)
+      toast.error(apiErrorMessage(error, t('common.error')))
+    },
+  })
+
+  const reactivateMutation = useMutation((id) => adminService.reactivateUser(id), {
+    onSuccess: async () => {
+      await invalidate()
+      toast.success(t('admin.userReactivatedToast'))
     },
     onError: (error) => toast.error(apiErrorMessage(error, t('common.error'))),
   })
@@ -109,12 +133,49 @@ const AdminUsers = () => {
                       </button>
                     </div>
                   )}
+
+                  {/* Suspend is hidden for the admin's own row — the backend
+                      also rejects this, this just avoids the confusing
+                      round-trip of clicking it and getting an error. */}
+                  {u.status === 'approved' && u.id !== currentUser?.id && (
+                    <div className="flex flex-none gap-2">
+                      <button
+                        onClick={() => setSuspendingUser(u)}
+                        className={classNames(actionBtnClass, 'bg-red')}
+                      >
+                        {t('admin.suspend')}
+                      </button>
+                    </div>
+                  )}
+
+                  {u.status === 'suspended' && (
+                    <div className="flex flex-none gap-2">
+                      <button
+                        onClick={() => reactivateMutation.mutate(u.id)}
+                        disabled={reactivateMutation.isLoading}
+                        className={classNames(actionBtnClass, 'bg-green')}
+                      >
+                        {t('admin.reactivate')}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {suspendingUser && (
+        <ConfirmModal
+          title={t('admin.confirmSuspendTitle', { name: suspendingUser.name })}
+          body={t('admin.confirmSuspendBody')}
+          confirmLabel={t('admin.suspend')}
+          isConfirming={suspendMutation.isLoading}
+          onCancel={() => setSuspendingUser(null)}
+          onConfirm={() => suspendMutation.mutate(suspendingUser.id)}
+        />
+      )}
     </div>
   )
 }

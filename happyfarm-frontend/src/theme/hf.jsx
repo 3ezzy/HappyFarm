@@ -137,6 +137,9 @@ const badgeTone = {
   pending: 'border-yellow-line bg-yellow-badgeBg text-yellow-badge',
   approved: 'border-green-line bg-green-badgeBg text-green-badge',
   rejected: 'border-red-line bg-red-soft text-red-dark',
+  // Same muted tone as sacrificed — reads as "inactive," distinct from
+  // rejected's red ("actively denied").
+  suspended: 'border-line bg-cream-muted text-tan',
 }
 
 export const badge = (tone, size = 'sm') => classNames(badgeBase, badgeSize[size], badgeTone[tone])

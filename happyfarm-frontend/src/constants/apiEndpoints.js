@@ -95,7 +95,9 @@ export const INVENTORY_ENDPOINTS = {
 export const ADMIN_ENDPOINTS = {
   USERS: '/admin/users',
   APPROVE: (id) => `/admin/users/${id}/approve`,
-  REJECT: (id) => `/admin/users/${id}/reject`
+  REJECT: (id) => `/admin/users/${id}/reject`,
+  SUSPEND: (id) => `/admin/users/${id}/suspend`,
+  REACTIVATE: (id) => `/admin/users/${id}/reactivate`
 }
 
 // Complete endpoint URLs
