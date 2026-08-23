@@ -50,6 +50,7 @@ const Header = () => {
   const isReports = pathname === '/reports'
   const isInventory = pathname === '/inventory'
   const isProfile = pathname === '/profile'
+  const isAdmin = pathname === '/admin'
 
   return (
     <div className="relative">
@@ -82,6 +83,9 @@ const Header = () => {
               <NavButton label={t('nav.reports')} active={isReports} onClick={() => navigate('/reports')} />
               <NavButton label={t('nav.inventory')} active={isInventory} onClick={() => navigate('/inventory')} />
               <NavButton label={t('nav.profile')} active={isProfile} onClick={() => navigate('/profile')} />
+              {user?.role === 'admin' && (
+                <NavButton label={t('nav.admin')} active={isAdmin} onClick={() => navigate('/admin')} />
+              )}
             </div>
           </nav>
 

@@ -91,6 +91,13 @@ export const INVENTORY_ENDPOINTS = {
   ADD_TRANSACTION: (id) => `/inventory-items/${id}/transactions`
 }
 
+// Admin-only user management — not farm-scoped.
+export const ADMIN_ENDPOINTS = {
+  USERS: '/admin/users',
+  APPROVE: (id) => `/admin/users/${id}/approve`,
+  REJECT: (id) => `/admin/users/${id}/reject`
+}
+
 // Complete endpoint URLs
 export const getEndpointUrl = (endpoint) => {
   return `${API_BASE_URL}${endpoint}`

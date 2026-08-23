@@ -126,6 +126,9 @@ const badgeTone = {
   sacrificed: 'border-line bg-cream-muted text-tan',
   active: 'border-green-line bg-green-badgeBg text-green-badge',
   eligible: 'border-yellow-line bg-yellow-badgeBg text-yellow-badge',
+  pending: 'border-yellow-line bg-yellow-badgeBg text-yellow-badge',
+  approved: 'border-green-line bg-green-badgeBg text-green-badge',
+  rejected: 'border-red-line bg-red-soft text-red-dark',
 }
 
 export const badge = (tone, size = 'sm') => classNames(badgeBase, badgeSize[size], badgeTone[tone])

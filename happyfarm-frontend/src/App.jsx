@@ -7,6 +7,7 @@ import LoadingSpinner from './components/common/UI/LoadingSpinner.jsx'
 
 // Auth Components
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx'
+import AdminRoute from './components/auth/AdminRoute.jsx'
 
 // Page Components
 import Login from './pages/auth/Login.jsx'
@@ -20,6 +21,7 @@ import Farm from './pages/farm/Farm.jsx'
 import Reports from './pages/reports/Reports.jsx'
 import Inventory from './pages/inventory/Inventory.jsx'
 import Profile from './pages/profile/Profile.jsx'
+import AdminUsers from './pages/admin/AdminUsers.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 function App() {
@@ -69,6 +71,11 @@ function App() {
 
             {/* Profile Routes */}
             <Route path="profile" element={<Profile />} />
+
+            {/* Admin Routes */}
+            <Route element={<AdminRoute />}>
+              <Route path="admin" element={<AdminUsers />} />
+            </Route>
           </Route>
         </Route>
 
