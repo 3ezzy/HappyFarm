@@ -72,6 +72,68 @@ class AdminUserController extends Controller
         return response()->json($this->present($user->load('farm')));
     }
 
+    /**
+     * Suspend an approved user: takes access away immediately, not just at
+     * their next login. Restricted to status='approved' so this is the
+     * only path that can ever remove access from a decided-and-working
+     * account — there is no path from pending/rejected straight to
+     * suspended. tokens()->delete() revokes every device/session this
+     * user is currently logged in on; Sanctum is fully DB-backed, so once
+     * those rows are gone the very next request with any of those tokens
+     * fails auth:sanctum on its own, with no extra per-request check
+     * needed anywhere else in the app.
+     */
+    public function suspend(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        // An admin must not be able to lock themselves out — checked
+        // before the status check so this is always the specific message,
+        // not whatever "only approved users..." happens to say for their
+        // own current status.
+        if ($user->id === $request->user()->id) {
+            return response()->json(['error' => 'You cannot suspend your own account.'], 400);
+        }
+
+        if ($user->status !== 'approved') {
+            return response()->json(['error' => 'Only approved users can be suspended.'], 400);
+        }
+
+        $user->update(['status' => 'suspended']);
+        $user->tokens()->delete();
+
+        return response()->json($this->present($user->load('farm')));
+    }
+
+    /**
+     * Reactivate a suspended user back to approved. No token action needed
+     * — they log in fresh and get a new one, same as any other approved
+     * user. No self-action guard needed here: a suspended admin has no
+     * valid token (suspend() just revoked them all) and login() blocks
+     * suspended accounts unconditionally, so self-reactivation is already
+     * impossible by construction, not just discouraged.
+     */
+    public function reactivate(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        if ($user->status !== 'suspended') {
+            return response()->json(['error' => 'Only suspended users can be reactivated.'], 400);
+        }
+
+        $user->update(['status' => 'approved']);
+
+        return response()->json($this->present($user->load('farm')));
+    }
+
     private function present(User $user): array
     {
         return [

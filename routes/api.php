@@ -106,5 +106,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users', [AdminUserController::class, 'index']);
         Route::post('/users/{id}/approve', [AdminUserController::class, 'approve']);
         Route::post('/users/{id}/reject', [AdminUserController::class, 'reject']);
+        Route::post('/users/{id}/suspend', [AdminUserController::class, 'suspend']);
+        Route::post('/users/{id}/reactivate', [AdminUserController::class, 'reactivate']);
     });
 });

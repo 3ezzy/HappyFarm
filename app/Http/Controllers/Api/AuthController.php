@@ -73,10 +73,20 @@ class AuthController extends Controller
         // Checked only after credentials are verified — surfacing a
         // status-specific message to someone who doesn't know the
         // password would leak whether that email belongs to a
-        // pending/rejected account. Admins bypass this gate entirely (the
-        // user:make-admin command deliberately leaves status untouched, so
-        // the first admin — created while still 'pending' — must still be
-        // able to log in to approve anyone, including themselves).
+        // pending/rejected/suspended account.
+        //
+        // Suspended blocks everyone, including admins — unlike
+        // pending/rejected, there's no bootstrap scenario that needs a
+        // suspended admin to log in (another admin did the suspending and
+        // can reactivate them), so this check runs unconditionally.
+        if ($user->status === 'suspended') {
+            return response()->json(['error' => 'Your account has been suspended.'], 400);
+        }
+
+        // Admins bypass the pending/rejected gate (the user:make-admin
+        // command deliberately leaves status untouched, so the first
+        // admin — created while still 'pending' — must still be able to
+        // log in to approve anyone, including themselves).
         if ($user->role !== 'admin') {
             if ($user->status === 'pending') {
                 return response()->json(['error' => 'Your account is awaiting administrator approval.'], 400);
