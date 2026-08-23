@@ -71,6 +71,25 @@ class AdminUserManagementTest extends TestCase
         $this->assertArrayNotHasKey('password', $row);
     }
 
+    /**
+     * Regression: created_at must be date-only ("YYYY-MM-DD"), matching
+     * every other date field in this API. A full ISO timestamp here
+     * previously made the frontend's fmtDate() throw on render (it splits
+     * on "-" expecting exactly a date), which blanked the entire Admin
+     * page — this app has no error boundary, so an uncaught render error
+     * anywhere unmounts everything, not just the offending row.
+     */
+    public function test_admin_user_list_created_at_is_date_only()
+    {
+        $admin = $this->admin();
+        $user = User::factory()->create(['status' => 'pending']);
+
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/admin/users?status=pending');
+
+        $row = collect($response->json())->firstWhere('id', $user->id);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $row['created_at']);
+    }
+
     // ------------------------------------------------------------
     // Approve / reject
     // ------------------------------------------------------------

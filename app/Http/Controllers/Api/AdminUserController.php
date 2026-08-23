@@ -81,7 +81,10 @@ class AdminUserController extends Controller
             'farm_name' => $user->farm?->name,
             'status' => $user->status,
             'role' => $user->role,
-            'created_at' => $user->created_at?->toISOString(),
+            // Date-only, matching every other date field in this API
+            // (date_of_birth, bred_on, etc.) — fmtDate() on the frontend
+            // is built specifically for that shape.
+            'created_at' => $user->created_at?->toDateString(),
         ];
     }
 }

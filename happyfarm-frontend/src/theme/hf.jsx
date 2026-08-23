@@ -75,15 +75,23 @@ export const fmt = (ts, language, t) => {
  * midnight, which can display as the previous day in timezones behind
  * UTC — build the Date from local components instead.
  */
+// Expects a date-only "YYYY-MM-DD" string, matching how every date field
+// in this API is serialized (date_of_birth, bred_on, weaned_on, etc.).
+// Guards against malformed input (e.g. a full ISO timestamp, which would
+// otherwise produce an Invalid Date and make Intl.DateTimeFormat throw)
+// rather than crashing the whole page — this app has no error boundary,
+// so an uncaught render error here unmounts everything, not just this row.
 export const fmtDate = (dateStr, language) => {
   if (!dateStr) return null
   const [y, m, d] = dateStr.split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  if (Number.isNaN(date.getTime())) return null
   return new Intl.DateTimeFormat(language, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     numberingSystem: 'latn',
-  }).format(new Date(y, m - 1, d))
+  }).format(date)
 }
 
 export const initialsOf = (name) =>
