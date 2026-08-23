@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Farm;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 /**
@@ -162,6 +163,124 @@ class AdminUserManagementTest extends TestCase
     }
 
     // ------------------------------------------------------------
+    // Suspend / reactivate
+    // ------------------------------------------------------------
+
+    public function test_suspending_an_approved_user_requires_approved_status()
+    {
+        $admin = $this->admin();
+        $pending = User::factory()->create(['status' => 'pending']);
+        $rejected = User::factory()->create(['status' => 'rejected']);
+        $alreadySuspended = User::factory()->create(['status' => 'suspended']);
+
+        foreach ([$pending, $rejected, $alreadySuspended] as $target) {
+            $this->actingAs($admin, 'sanctum')->postJson("/api/admin/users/{$target->id}/suspend")
+                ->assertStatus(400)->assertJson(['error' => 'Only approved users can be suspended.']);
+        }
+    }
+
+    public function test_reactivating_requires_suspended_status()
+    {
+        $admin = $this->admin();
+        $approved = User::factory()->create(['status' => 'approved']);
+
+        $this->actingAs($admin, 'sanctum')->postJson("/api/admin/users/{$approved->id}/reactivate")
+            ->assertStatus(400)->assertJson(['error' => 'Only suspended users can be reactivated.']);
+    }
+
+    /**
+     * The critical guarantee: suspension must remove access from an
+     * already-issued token immediately, not just block the next login.
+     */
+    public function test_suspending_a_user_immediately_revokes_their_existing_token()
+    {
+        $admin = $this->admin();
+        $user = User::factory()->create(['status' => 'approved', 'password' => bcrypt('password')]);
+        Farm::create(['user_id' => $user->id, 'name' => 'Farm']);
+
+        $login = $this->postJson('/api/login', ['email' => $user->email, 'password' => 'password']);
+        $login->assertStatus(200);
+        $token = $login->json('token');
+
+        // The token works before suspension.
+        $this->withToken($token)->getJson('/api/animals')->assertStatus(200);
+
+        $this->actingAs($admin, 'sanctum')->postJson("/api/admin/users/{$user->id}/suspend")
+            ->assertStatus(200)->assertJson(['status' => 'suspended']);
+
+        // Auth::forgetGuards(): Laravel's test harness caches the guard's
+        // resolved user across multiple simulated requests within one test
+        // method — without this, the second call below would reuse the
+        // first call's already-resolved user instead of re-checking the
+        // (now-deleted) token against the database. Real HTTP requests in
+        // production don't share this cache; each is independently
+        // resolved, so this is purely a test-isolation detail, not a
+        // production behavior being worked around.
+        Auth::forgetGuards();
+
+        // The exact same token no longer works — not a new login attempt,
+        // the same previously-valid session.
+        $this->withToken($token)->getJson('/api/animals')->assertStatus(401);
+    }
+
+    public function test_suspended_user_cannot_login()
+    {
+        $user = User::factory()->create(['status' => 'suspended', 'password' => bcrypt('password')]);
+
+        $this->postJson('/api/login', ['email' => $user->email, 'password' => 'password'])
+            ->assertStatus(400)->assertJson(['error' => 'Your account has been suspended.']);
+    }
+
+    /**
+     * Unlike pending/rejected, admins do NOT bypass the suspended gate —
+     * there's no bootstrap scenario that needs it, since another admin
+     * did the suspending and can reactivate them.
+     */
+    public function test_suspended_admin_does_not_bypass_the_login_gate()
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'suspended', 'password' => bcrypt('password')]);
+
+        $this->postJson('/api/login', ['email' => $admin->email, 'password' => 'password'])
+            ->assertStatus(400)->assertJson(['error' => 'Your account has been suspended.']);
+    }
+
+    public function test_reactivated_user_can_login_again()
+    {
+        $admin = $this->admin();
+        $user = User::factory()->create(['status' => 'suspended', 'password' => bcrypt('password')]);
+        Farm::create(['user_id' => $user->id, 'name' => 'Farm']);
+
+        $this->actingAs($admin, 'sanctum')->postJson("/api/admin/users/{$user->id}/reactivate")
+            ->assertStatus(200)->assertJson(['status' => 'approved']);
+
+        $this->postJson('/api/login', ['email' => $user->email, 'password' => 'password'])
+            ->assertStatus(200)->assertJsonStructure(['token']);
+    }
+
+    /**
+     * Backend guard: an admin must not be able to lock themselves out,
+     * even if they bypass or ignore the frontend's hidden button.
+     */
+    public function test_admin_cannot_suspend_their_own_account()
+    {
+        $admin = $this->admin();
+
+        $this->actingAs($admin, 'sanctum')->postJson("/api/admin/users/{$admin->id}/suspend")
+            ->assertStatus(400)->assertJson(['error' => 'You cannot suspend your own account.']);
+
+        $this->assertDatabaseHas('users', ['id' => $admin->id, 'status' => 'approved']);
+    }
+
+    public function test_admin_can_suspend_another_admins_account()
+    {
+        $admin = $this->admin();
+        $otherAdmin = $this->admin();
+
+        $this->actingAs($admin, 'sanctum')->postJson("/api/admin/users/{$otherAdmin->id}/suspend")
+            ->assertStatus(200)->assertJson(['status' => 'suspended']);
+    }
+
+    // ------------------------------------------------------------
     // Authorization boundary
     // ------------------------------------------------------------
 
@@ -181,6 +300,19 @@ class AdminUserManagementTest extends TestCase
         $this->actingAs($user, 'sanctum')->postJson("/api/admin/users/{$target->id}/reject")->assertStatus(403);
 
         $this->assertDatabaseHas('users', ['id' => $target->id, 'status' => 'pending']);
+    }
+
+    public function test_normal_user_cannot_suspend_or_reactivate()
+    {
+        $user = User::factory()->create(['role' => 'user']);
+        $approvedTarget = User::factory()->create(['status' => 'approved']);
+        $suspendedTarget = User::factory()->create(['status' => 'suspended']);
+
+        $this->actingAs($user, 'sanctum')->postJson("/api/admin/users/{$approvedTarget->id}/suspend")->assertStatus(403);
+        $this->actingAs($user, 'sanctum')->postJson("/api/admin/users/{$suspendedTarget->id}/reactivate")->assertStatus(403);
+
+        $this->assertDatabaseHas('users', ['id' => $approvedTarget->id, 'status' => 'approved']);
+        $this->assertDatabaseHas('users', ['id' => $suspendedTarget->id, 'status' => 'suspended']);
     }
 
     public function test_unauthenticated_request_cannot_access_admin_endpoints()
