@@ -25,6 +25,7 @@
     "reports": "Rapports",
     "inventory": "Inventaire",
     "profile": "Profil",
+    "admin": "Admin",
     "add": "Ajouter"
   },
   "banner": {
@@ -526,6 +527,25 @@
     "withdrawalActiveTag": "Délai d'attente en cours",
     "administeredOnRequired": "Veuillez saisir une date valide.",
     "loadError": "Impossible de charger le suivi sanitaire."
+  },
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Passez en revue les nouvelles inscriptions et gérez l'accès à HappyFarm.",
+    "empty": "Aucun utilisateur dans ce statut.",
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuvé",
+      "rejected": "Rejeté"
+    },
+    "role": {
+      "admin": "Admin"
+    },
+    "farmLabel": "Ferme : {{farm}}",
+    "registeredOn": "Inscrit le {{date}}",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "userApprovedToast": "Utilisateur approuvé.",
+    "userRejectedToast": "Utilisateur rejeté."
   },
   "alerts": {
     "title": "Alertes",

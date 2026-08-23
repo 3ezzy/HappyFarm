@@ -25,6 +25,7 @@
     "reports": "Reports",
     "inventory": "Inventory",
     "profile": "Profile",
+    "admin": "Admin",
     "add": "Add"
   },
   "banner": {
@@ -526,6 +527,25 @@
     "withdrawalActiveTag": "Withdrawal active",
     "administeredOnRequired": "Please enter a valid date.",
     "loadError": "Could not load health records."
+  },
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Review new registrations and manage access to HappyFarm.",
+    "empty": "No users in this status.",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "role": {
+      "admin": "Admin"
+    },
+    "farmLabel": "Farm: {{farm}}",
+    "registeredOn": "Registered {{date}}",
+    "approve": "Approve",
+    "reject": "Reject",
+    "userApprovedToast": "User approved.",
+    "userRejectedToast": "User rejected."
   },
   "alerts": {
     "title": "Alerts",

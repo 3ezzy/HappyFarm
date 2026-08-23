@@ -25,6 +25,7 @@
     "reports": "التقارير",
     "inventory": "المخزون",
     "profile": "الملف الشخصي",
+    "admin": "الإدارة",
     "add": "إضافة"
   },
   "banner": {
@@ -546,6 +547,25 @@
     "withdrawalActiveTag": "فترة سحب سارية",
     "administeredOnRequired": "يرجى إدخال تاريخ صحيح.",
     "loadError": "تعذّر تحميل السجلات الصحية."
+  },
+  "admin": {
+    "title": "الإدارة",
+    "subtitle": "راجع طلبات التسجيل الجديدة وأدر الوصول إلى HappyFarm.",
+    "empty": "لا يوجد مستخدمون بهذه الحالة.",
+    "status": {
+      "pending": "قيد المراجعة",
+      "approved": "مقبول",
+      "rejected": "مرفوض"
+    },
+    "role": {
+      "admin": "مسؤول"
+    },
+    "farmLabel": "المزرعة: {{farm}}",
+    "registeredOn": "تاريخ التسجيل {{date}}",
+    "approve": "قبول",
+    "reject": "رفض",
+    "userApprovedToast": "تم قبول المستخدم.",
+    "userRejectedToast": "تم رفض المستخدم."
   },
   "alerts": {
     "title": "التنبيهات",
