@@ -8,8 +8,11 @@ use App\Models\Farm;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\PasswordUpdateRequest;
+use App\Http\Requests\ForgotPasswordRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -131,6 +134,61 @@ class AuthController extends Controller
         ]);
 
         return response()->json(['message' => 'Password updated successfully']);
+    }
+
+    /**
+     * Request a password reset link. Always returns the same generic
+     * message regardless of whether the email is registered — the broker
+     * itself silently no-ops for unknown emails, so nothing is sent, but
+     * the response must not reveal that to avoid user enumeration. Status
+     * (pending/rejected/suspended) is deliberately not checked here: any
+     * account may request and complete a reset, it just won't be able to
+     * log in afterward until the existing status/role rules allow it.
+     */
+    public function forgotPassword(ForgotPasswordRequest $request)
+    {
+        Password::sendResetLink($request->only('email'));
+
+        return response()->json([
+            'message' => 'If that email address is registered, a password reset link has been sent.',
+        ]);
+    }
+
+    /**
+     * Complete a password reset. The broker validates the token (exists,
+     * matches the email, not expired) and deletes it after a successful
+     * reset, making it single-use. Only the password is touched — status
+     * and role are never modified, and all existing Sanctum tokens are
+     * revoked so every device must log in again with the new password.
+     */
+    public function resetPassword(ResetPasswordRequest $request)
+    {
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill(['password' => Hash::make($password)])->save();
+                $user->tokens()->delete();
+            }
+        );
+
+        // Mapped explicitly rather than via __() — this project has no
+        // lang/ files (all backend-supplied error text elsewhere is a
+        // literal string, e.g. login()'s status errors), so the broker's
+        // translation-key constants would otherwise surface unresolved
+        // ("passwords.token") straight to the API response.
+        if ($status !== Password::PASSWORD_RESET) {
+            $message = match ($status) {
+                Password::RESET_THROTTLED => 'Please wait before requesting another password reset.',
+                // INVALID_TOKEN and INVALID_USER are deliberately given the
+                // same generic message — distinguishing them would leak
+                // whether an email address is registered.
+                default => 'This password reset link is invalid or has expired.',
+            };
+
+            return response()->json(['error' => $message], 400);
+        }
+
+        return response()->json(['message' => 'Your password has been reset successfully.']);
     }
 
     /**

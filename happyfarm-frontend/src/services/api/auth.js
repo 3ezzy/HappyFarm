@@ -67,5 +67,23 @@ export const authService = {
       password_confirmation: passwordConfirmation
     })
     return response.data
+  },
+
+  // Request a password reset link. Backend always returns the same
+  // generic message whether or not the email is registered.
+  forgotPassword: async (email) => {
+    const response = await apiClient.post(AUTH_ENDPOINTS.FORGOT_PASSWORD, { email })
+    return response.data
+  },
+
+  // Complete a password reset with the token/email from the emailed link.
+  resetPassword: async ({ token, email, password, passwordConfirmation }) => {
+    const response = await apiClient.post(AUTH_ENDPOINTS.RESET_PASSWORD, {
+      token,
+      email,
+      password,
+      password_confirmation: passwordConfirmation
+    })
+    return response.data
   }
 }

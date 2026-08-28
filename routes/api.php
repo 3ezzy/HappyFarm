@@ -28,6 +28,10 @@ use Illuminate\Support\Facades\Route;
 // Authentication Routes (Public)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('throttle:6,1')->group(function () {
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+});
 
 // Protected Routes (Require Sanctum Authentication)
 Route::middleware('auth:sanctum')->group(function () {

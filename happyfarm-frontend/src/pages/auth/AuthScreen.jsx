@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { C, HfInput, LeafMark } from '../../theme/hf.jsx'
 
@@ -106,8 +106,13 @@ const AuthScreen = ({ mode }) => {
                 onChange={(e) => setLoginPass(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && doLogin()}
                 placeholder="••••••••"
-                className="mb-[22px]"
+                className="mb-2.5"
               />
+              <p className="mb-[22px] text-right">
+                <Link to="/forgot-password" className="text-[13px] font-semibold text-brown">
+                  {t('auth.forgotPasswordLink')}
+                </Link>
+              </p>
               <button onClick={doLogin} disabled={isLoading} className={submitClass}>
                 {isLoading ? t('auth.loggingIn') : t('auth.login')} <span className="text-lg rtl:rotate-180">→</span>
               </button>

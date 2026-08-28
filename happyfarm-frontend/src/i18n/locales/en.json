@@ -51,7 +51,22 @@
     "farmAutoCreated": "Your farm is created automatically. 🌾",
     "welcomeBackToast": "Welcome back, {{name}}!",
     "welcomeNewToast": "Welcome to HappyFarm, {{name}}!",
-    "loggedOutToast": "Logged out successfully"
+    "loggedOutToast": "Logged out successfully",
+    "forgotPasswordLink": "Forgot password?",
+    "forgotPasswordTagline": "Enter your email and we'll send you a reset link.",
+    "forgotPasswordSentMessage": "If that email address is registered, we've sent a password reset link to it.",
+    "sendResetLink": "Send reset link",
+    "sending": "Sending…",
+    "backToLogin": "Back to login",
+    "emailRequired": "Please enter your email address.",
+    "resetPasswordTagline": "Enter a new password for your account.",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "resetPassword": "Reset password",
+    "resetting": "Resetting…",
+    "passwordFieldsRequired": "Please fill in both password fields.",
+    "resetLinkInvalid": "This password reset link is invalid or incomplete.",
+    "requestNewResetLink": "Request a new reset link"
   },
   "errors": {
     "sessionExpired": "Session expired. Please login again.",

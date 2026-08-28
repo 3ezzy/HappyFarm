@@ -12,6 +12,8 @@ import AdminRoute from './components/auth/AdminRoute.jsx'
 // Page Components
 import Login from './pages/auth/Login.jsx'
 import Register from './pages/auth/Register.jsx'
+import ForgotPassword from './pages/auth/ForgotPassword.jsx'
+import ResetPassword from './pages/auth/ResetPassword.jsx'
 import Dashboard from './pages/dashboard/Dashboard.jsx'
 import Animals from './pages/animals/Animals.jsx'
 import AnimalDetails from './pages/animals/AnimalDetails.jsx'
@@ -46,11 +48,23 @@ function App() {
             isAuthenticated ? <Navigate to="/" replace /> : <Login />
           } 
         />
-        <Route 
-          path="/register" 
+        <Route
+          path="/register"
           element={
             isAuthenticated ? <Navigate to="/" replace /> : <Register />
-          } 
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <ForgotPassword />
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <ResetPassword />
+          }
         />
 
         {/* Protected Routes */}

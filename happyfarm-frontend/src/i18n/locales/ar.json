@@ -51,7 +51,22 @@
     "farmAutoCreated": "يتم إنشاء مزرعتك تلقائيًا. 🌾",
     "welcomeBackToast": "مرحبًا بعودتك، {{name}}!",
     "welcomeNewToast": "مرحبًا بك في HappyFarm، {{name}}!",
-    "loggedOutToast": "تم تسجيل الخروج بنجاح"
+    "loggedOutToast": "تم تسجيل الخروج بنجاح",
+    "forgotPasswordLink": "نسيت كلمة المرور؟",
+    "forgotPasswordTagline": "أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين.",
+    "forgotPasswordSentMessage": "إذا كان هذا البريد الإلكتروني مسجلاً، فقد أرسلنا إليه رابط إعادة تعيين كلمة المرور.",
+    "sendResetLink": "إرسال رابط إعادة التعيين",
+    "sending": "جارٍ الإرسال…",
+    "backToLogin": "العودة إلى تسجيل الدخول",
+    "emailRequired": "الرجاء إدخال بريدك الإلكتروني.",
+    "resetPasswordTagline": "أدخل كلمة مرور جديدة لحسابك.",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "resetting": "جارٍ إعادة التعيين…",
+    "passwordFieldsRequired": "الرجاء تعبئة حقلي كلمة المرور.",
+    "resetLinkInvalid": "رابط إعادة تعيين كلمة المرور غير صالح أو غير مكتمل.",
+    "requestNewResetLink": "طلب رابط جديد"
   },
   "errors": {
     "sessionExpired": "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.",

@@ -7,7 +7,9 @@ export const AUTH_ENDPOINTS = {
   LOGIN: '/login',
   LOGOUT: '/logout',
   USER: '/user',
-  UPDATE_PASSWORD: '/user/password'
+  UPDATE_PASSWORD: '/user/password',
+  FORGOT_PASSWORD: '/forgot-password',
+  RESET_PASSWORD: '/reset-password'
 }
 
 // Farm management endpoints

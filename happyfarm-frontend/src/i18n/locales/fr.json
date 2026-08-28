@@ -51,7 +51,22 @@
     "farmAutoCreated": "Votre ferme est créée automatiquement. 🌾",
     "welcomeBackToast": "Bon retour, {{name}} !",
     "welcomeNewToast": "Bienvenue sur HappyFarm, {{name}} !",
-    "loggedOutToast": "Déconnexion réussie"
+    "loggedOutToast": "Déconnexion réussie",
+    "forgotPasswordLink": "Mot de passe oublié ?",
+    "forgotPasswordTagline": "Entrez votre e-mail et nous vous enverrons un lien de réinitialisation.",
+    "forgotPasswordSentMessage": "Si cette adresse e-mail est enregistrée, un lien de réinitialisation lui a été envoyé.",
+    "sendResetLink": "Envoyer le lien",
+    "sending": "Envoi…",
+    "backToLogin": "Retour à la connexion",
+    "emailRequired": "Veuillez saisir votre adresse e-mail.",
+    "resetPasswordTagline": "Entrez un nouveau mot de passe pour votre compte.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "resetting": "Réinitialisation…",
+    "passwordFieldsRequired": "Veuillez remplir les deux champs de mot de passe.",
+    "resetLinkInvalid": "Ce lien de réinitialisation est invalide ou incomplet.",
+    "requestNewResetLink": "Demander un nouveau lien"
   },
   "errors": {
     "sessionExpired": "Session expirée. Veuillez vous reconnecter.",
