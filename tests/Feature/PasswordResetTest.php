@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
@@ -83,6 +84,27 @@ class PasswordResetTest extends TestCase
 
         $this->postJson('/api/forgot-password', ['email' => 'user7@example.com'])
             ->assertStatus(429);
+    }
+
+    /**
+     * A mail transport failure (e.g. misconfigured/unreachable SMTP) must
+     * not surface as a 500, and must not make this response distinguishable
+     * from the normal generic one — it's logged server-side instead.
+     */
+    public function test_forgot_password_still_returns_the_generic_message_if_the_mail_transport_fails()
+    {
+        $user = User::factory()->create(['status' => 'approved']);
+
+        Password::shouldReceive('sendResetLink')
+            ->once()
+            ->andThrow(new \RuntimeException('Connection could not be established with host smtp-relay.brevo.com'));
+        Log::shouldReceive('error')->once();
+
+        $response = $this->postJson('/api/forgot-password', ['email' => $user->email]);
+
+        $response->assertStatus(200)->assertJson([
+            'message' => 'If that email address is registered, a password reset link has been sent.',
+        ]);
     }
 
     // ------------------------------------------------------------

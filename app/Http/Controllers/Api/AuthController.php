@@ -12,8 +12,10 @@ use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -144,10 +146,24 @@ class AuthController extends Controller
      * (pending/rejected/suspended) is deliberately not checked here: any
      * account may request and complete a reset, it just won't be able to
      * log in afterward until the existing status/role rules allow it.
+     *
+     * The broker's own send step (a real network call to the mail
+     * transport) is wrapped separately: a transport failure — e.g. a
+     * misconfigured or temporarily unreachable SMTP provider — must not
+     * turn into a raw 500 or, worse, a response that differs from the
+     * normal generic message and thereby leaks that something about this
+     * specific request failed. It's logged server-side instead.
      */
     public function forgotPassword(ForgotPasswordRequest $request)
     {
-        Password::sendResetLink($request->only('email'));
+        try {
+            Password::sendResetLink($request->only('email'));
+        } catch (Throwable $e) {
+            Log::error('Password reset link could not be sent.', [
+                'email' => $request->email,
+                'exception' => $e->getMessage(),
+            ]);
+        }
 
         return response()->json([
             'message' => 'If that email address is registered, a password reset link has been sent.',
