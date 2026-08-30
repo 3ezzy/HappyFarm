@@ -79,6 +79,11 @@ return [
             'transport' => 'array',
         ],
 
+        // Brevo Transactional Email API — see App\Mail\Transport\BrevoApiTransport.
+        'brevo' => [
+            'transport' => 'brevo',
+        ],
+
         'failover' => [
             'transport' => 'failover',
             'mailers' => [

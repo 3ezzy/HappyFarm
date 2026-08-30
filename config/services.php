@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    // Brevo Transactional Email API — see App\Mail\Transport\BrevoApiTransport,
+    // registered as the "brevo" mail transport in AppServiceProvider.
+    'brevo' => [
+        'api_key' => env('BREVO_API_KEY'),
+        'from_email' => env('BREVO_FROM_EMAIL'),
+        'from_name' => env('BREVO_FROM_NAME'),
+    ],
+
 ];
