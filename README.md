@@ -797,4 +797,4 @@ The application was developed iteratively through multiple phases.
 
 ## 📄 License
 
-This repository does not currently include a `LICENSE` file. If this project is intended to be released under the MIT License (or another license), add the corresponding `LICENSE` file to the repository root.
+This project is open-source software licensed under the [MIT License](LICENSE).
