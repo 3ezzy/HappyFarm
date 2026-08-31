@@ -3,7 +3,7 @@
 
    Consumed in two places:
      1. tailwind.config.js, which turns these into utility classes
-        (bg-green, text-brown-text, border-line-input, ...)
+        (bg-meadow-700, text-ink-900, border-line, ...)
      2. JS that needs a raw colour value where a class cannot reach —
         SVG `fill`/`stroke` attributes, canvas, inline gradients.
 
@@ -13,49 +13,14 @@
 
 export const C = {
   // ------------------------------------------------------------
-  // LEGACY — the original "farm" palette. Still read by ~15 pages not
-  // yet migrated to Meadow (Animals, AnimalDetails, AddAnimal, EditAnimal,
-  // Farm, Reports, Inventory, Profile, AdminUsers, the 4 animal-section
-  // files, ConfirmModal). Remove this whole block once those are migrated
-  // in a later redesign slice — do not add new consumers of these keys.
+  // SHARED — not part of the Meadow per-page palette, but still actively
+  // used outside it. pageBg backs the pre-auth/pre-i18n bootstrap loading
+  // screens (App.jsx, ProtectedRoute.jsx) that render before the Meadow
+  // app shell mounts, so they can't reach into it. scrim is the shared
+  // modal-overlay wash used by ConfirmModal/BirthModal, deliberately kept
+  // cross-cutting rather than migrated per-page.
   // ------------------------------------------------------------
   pageBg: '#E7F4EC',
-  green: '#008160',
-  greenDark: '#00684D',
-  greenSoft: '#E2F4EC',
-  greenSoft2: '#EAF7EF',
-  cream: '#FBFAF1',
-  brown: '#6B5C43',
-  brownText: '#574A30',
-  brownDark: '#51442F',
-  tan: '#8A7B60',
-  yellow: '#E29A2B',
-  sand: '#F3F0E1',
-  border: '#C9BD9F',
-  inputBorder: '#BBAE8C',
-  red: '#D83A3A',
-  redDark: '#B12B2B',
-  blue: '#68A1D7',
-  blueDark: '#2D6895',
-  redSoft: '#FCE7E5',
-  redLine: '#F6CFCB',
-  greenLine: '#C7E9D2',
-  leafPale: '#BEE6D5',
-  creamMuted: '#ECE7D2',
-  yellowText: '#7A5A18',
-  greenHover: '#DCEFE8',
-  greenBadge: '#2E7A48',
-  greenBadgeBg: '#E4F5E9',
-  blueSoft: '#EAF2FB',
-  yellowBadge: '#B8771A',
-  yellowBadgeBg: '#FBF1DD',
-  yellowLine: '#F5E2B8',
-  toggleOff: '#D9E8D2',
-  yellowDeep: '#8A5912',
-  greenMuted: '#5FAE7E',
-  greenBorder: '#9BD9C2',
-  disabledBg: '#ECE9DC',
-  disabledText: '#A99E86',
   scrim: 'rgba(58,47,32,0.5)',
 
   // ------------------------------------------------------------
@@ -100,14 +65,4 @@ export const C = {
   chart1: '#1B6349', chart2: '#2A5D86', chart3: '#C08A3E',
   chart4: '#A32E20', chart5: '#6C5B9E', chart6: '#5C8391',
   chartGrid: '#E3E8E0',
-}
-
-/* Per-species card tints — legacy palette. Still consumed by the
-   not-yet-migrated pages listed above; see MEADOW's sheepTag/goatTag/etc.
-   for the new tag-specific (not card-tint) species colors. */
-export const SPECIES_BG = {
-  sheep: '#DCEAF8',
-  goat: '#D6EBDB',
-  cow: '#F7E6BE',
-  camel: '#FADCC6',
 }
