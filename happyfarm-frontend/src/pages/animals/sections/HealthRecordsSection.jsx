@@ -6,21 +6,12 @@ import toast from 'react-hot-toast'
 import { healthRecordService } from '../../../services/api/healthRecords.js'
 import ConfirmModal from '../../../components/common/UI/ConfirmModal.jsx'
 import LoadingSpinner from '../../../components/common/UI/LoadingSpinner.jsx'
-import { HfInput, HfSelect, fmtDate, cardClass, badge } from '../../../theme/hf.jsx'
+import { HfInput, HfSelect, fmtDate, cardClass, badge, btnPrimary, btnSecondary } from '../../../theme/hf.jsx'
 import { apiErrorMessage } from '../../../utils/apiError.js'
 
 const today = () => new Date().toISOString().slice(0, 10)
-const fieldLabel = 'mb-1.5 block text-xs font-semibold text-brown-text'
+const fieldLabel = 'mb-1.5 block text-xs font-medium text-ink-700'
 const KINDS = ['vaccine', 'antiparasitic', 'antibiotic', 'vitamin', 'disease', 'surgery', 'injury']
-
-const actionBtnClass =
-  'inline-flex cursor-pointer items-center gap-2 rounded-full border-none bg-green px-5 py-2.5 ' +
-  'font-display text-sm font-bold text-white shadow-chip transition-transform duration-200 ease-pop ' +
-  'enabled:hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-70'
-
-const ghostBtnClass =
-  'cursor-pointer rounded-full border-2 border-line bg-cream px-4 py-2 font-display text-[13.5px] font-bold ' +
-  'text-brown-text transition-transform duration-200 ease-pop hover:scale-[1.03]'
 
 const emptyForm = {
   kind: 'vaccine',
@@ -62,7 +53,7 @@ const RecordForm = ({ form, setForm, onSave, onCancel, isSaving, submitLabel, sa
   const { t } = useTranslation()
 
   return (
-    <div className="grid grid-cols-1 gap-3 rounded-xl bg-sand p-4 xs:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 rounded-lg border border-line bg-surface-sunken p-4 xs:grid-cols-3">
       <div>
         <label className={fieldLabel}>{t('healthRecords.kind')}</label>
         <HfSelect value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}>
@@ -104,10 +95,10 @@ const RecordForm = ({ form, setForm, onSave, onCancel, isSaving, submitLabel, sa
         <HfInput type="text" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder={t('healthRecords.notesPlaceholder')} />
       </div>
       <div className="flex gap-2 xs:col-span-3">
-        <button onClick={onSave} disabled={isSaving} className={actionBtnClass}>
+        <button onClick={onSave} disabled={isSaving} className={btnPrimary}>
           {isSaving ? savingLabel : submitLabel}
         </button>
-        <button onClick={onCancel} className={ghostBtnClass}>{t('common.cancel')}</button>
+        <button onClick={onCancel} className={btnSecondary}>{t('common.cancel')}</button>
       </div>
     </div>
   )
@@ -197,7 +188,7 @@ const HealthRecordsSection = ({ animalId }) => {
       <div className="mb-[18px] flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[22px]">{t('healthRecords.title')}</h2>
         {!showAddForm && (
-          <button onClick={() => setShowAddForm(true)} className={actionBtnClass}>{t('healthRecords.add')}</button>
+          <button onClick={() => setShowAddForm(true)} className={btnPrimary}>{t('healthRecords.add')}</button>
         )}
       </div>
 
@@ -218,16 +209,16 @@ const HealthRecordsSection = ({ animalId }) => {
       {isLoading ? (
         <div className="flex justify-center py-6"><LoadingSpinner message={t('common.loading')} /></div>
       ) : records.length === 0 ? (
-        <p className="text-sm text-tan">{t('healthRecords.empty')}</p>
+        <p className="text-sm text-ink-500">{t('healthRecords.empty')}</p>
       ) : (
         <div className="flex flex-col gap-2.5">
           {records.map((r) => (
-            <div key={r.id} className="rounded-xl bg-sand px-4 py-3.5">
+            <div key={r.id} className="rounded-lg border border-line bg-surface-sunken px-4 py-3.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={badge('active')}>{t(`healthRecords.kinds.${r.kind}`)}</span>
-                  {r.product && <span className="font-display text-[15px] font-bold text-brown-text">{r.product}</span>}
-                  <span className="text-[13px] text-tan">{fmtDate(r.administered_on, i18n.language)}</span>
+                  {r.product && <span className="font-display text-[15px] font-semibold text-ink-900">{r.product}</span>}
+                  <span className="text-[13px] text-ink-500">{fmtDate(r.administered_on, i18n.language)}</span>
                   {isWithdrawalActive(r) && (
                     <span className={badge('eligible')}>{t('healthRecords.withdrawalActiveTag')}</span>
                   )}
@@ -235,23 +226,23 @@ const HealthRecordsSection = ({ animalId }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => { setEditingId(editingId === r.id ? null : r.id); setEditForm(formFromRecord(r)) }}
-                    className="text-[12.5px] font-semibold text-green underline decoration-dotted underline-offset-2"
+                    className="text-[12.5px] font-medium text-meadow-700 underline decoration-dotted underline-offset-2"
                   >
                     {t('common.edit')}
                   </button>
-                  <button onClick={() => setDeletingRecord(r)} className="text-[12.5px] font-semibold text-red underline decoration-dotted underline-offset-2">
+                  <button onClick={() => setDeletingRecord(r)} className="text-[12.5px] font-medium text-danger-fg underline decoration-dotted underline-offset-2">
                     {t('common.delete')}
                   </button>
                 </div>
               </div>
-              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[12.5px] text-tan">
+              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[12.5px] text-ink-500">
                 {r.dose && <span>{t('healthRecords.dose')}: {r.dose}</span>}
                 {r.next_due_on && <span>{t('healthRecords.nextDueOn')}: {fmtDate(r.next_due_on, i18n.language)}</span>}
                 {r.withdrawal_until && <span>{t('healthRecords.withdrawalUntil')}: {fmtDate(r.withdrawal_until, i18n.language)}</span>}
                 {r.cost !== null && r.cost !== undefined && <span>{t('healthRecords.cost')}: {r.cost}</span>}
                 {r.veterinarian && <span>{t('healthRecords.veterinarian')}: {r.veterinarian}</span>}
               </div>
-              {r.notes && <p className="mt-1 text-[12.5px] text-tan">{r.notes}</p>}
+              {r.notes && <p className="mt-1 text-[12.5px] text-ink-500">{r.notes}</p>}
 
               {editingId === r.id && (
                 <div className="mt-3">

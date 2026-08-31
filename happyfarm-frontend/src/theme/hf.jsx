@@ -265,7 +265,7 @@ export function Eligibility({ eligible, label, className }) {
 /* ------------------------------------------------------------
    Still to build (later redesign slices, not this one):
    - StockMeter (.hf-stock)                     — Inventory slice
-   - Pedigree rail (.hf-ped)                     — AnimalDetails slice (2b)
-   - Table/Th/Td as page-local markup, not a shared component — see
-     Animals.jsx for the first real usage.
+   - Table/Th/Td and the pedigree rail (.hf-ped) are page-local markup,
+     not shared components — see Animals.jsx and AnimalDetails.jsx for
+     their single real usages.
    ------------------------------------------------------------ */

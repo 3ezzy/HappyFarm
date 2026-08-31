@@ -12,9 +12,8 @@ import { apiErrorMessage } from '../../../utils/apiError.js'
 const today = () => new Date().toISOString().slice(0, 10)
 
 const saveBtnClass =
-  'col-span-2 h-[46px] cursor-pointer rounded-2xl border-none bg-green px-5 font-display text-sm font-bold ' +
-  'text-white shadow-chip transition-transform duration-200 ease-pop enabled:hover:scale-[1.03] ' +
-  'disabled:cursor-not-allowed disabled:opacity-70 xs:col-span-1'
+  'col-span-2 flex h-[46px] items-center justify-center rounded border-none bg-meadow-700 px-5 text-sm font-medium ' +
+  'text-white transition-colors duration-hf enabled:hover:bg-meadow-900 disabled:cursor-not-allowed disabled:opacity-45 xs:col-span-1'
 
 /**
  * Weight history for one animal, extended in Phase 2 with edit/delete —
@@ -112,34 +111,34 @@ const WeightHistorySection = ({ animalId }) => {
 
       {trendData.length >= 2 && (
         <div className="mb-6">
-          <p className="mb-2 text-sm font-semibold text-brown-text">{t('animalDetails.weights.trendTitle')}</p>
+          <p className="mb-2 text-sm font-semibold text-ink-900">{t('animalDetails.weights.trendTitle')}</p>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.chartGrid} />
               <XAxis dataKey="date" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 12 }} width={40} />
               <Tooltip />
-              <Line type="monotone" dataKey="weight_kg" name={t('animalDetails.weights.weightKg')} stroke={C.green} strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="weight_kg" name={t('animalDetails.weights.weightKg')} stroke={C.chart1} strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
 
       {weights.length === 0 ? (
-        <p className="mb-4 text-sm text-tan">{t('animalDetails.weights.empty')}</p>
+        <p className="mb-4 text-sm text-ink-500">{t('animalDetails.weights.empty')}</p>
       ) : (
         <div className="mb-5 flex flex-col gap-2">
           {weights.map((w) => (
-            <div key={w.id} className="rounded-xl bg-green-soft2 px-4 py-2.5">
+            <div key={w.id} className="rounded-lg border border-line bg-surface-sunken px-4 py-2.5">
               <div className="flex items-center justify-between gap-3">
-                <span className="font-display text-base font-bold text-brown-text">{w.weight_kg} kg</span>
-                <span className="text-sm text-tan">{fmtDate(w.measured_at, i18n.language)}</span>
-                {w.notes && <span className="min-w-0 flex-1 truncate text-end text-[12.5px] text-tan">{w.notes}</span>}
+                <span className="font-display text-base font-semibold text-ink-900">{w.weight_kg} kg</span>
+                <span className="text-sm text-ink-500">{fmtDate(w.measured_at, i18n.language)}</span>
+                {w.notes && <span className="min-w-0 flex-1 truncate text-end text-[12.5px] text-ink-500">{w.notes}</span>}
                 <div className="flex flex-none gap-2">
-                  <button onClick={() => (editingId === w.id ? setEditingId(null) : startEdit(w))} className="text-[12.5px] font-semibold text-green underline decoration-dotted underline-offset-2">
+                  <button onClick={() => (editingId === w.id ? setEditingId(null) : startEdit(w))} className="text-[12.5px] font-medium text-meadow-700 underline decoration-dotted underline-offset-2">
                     {t('common.edit')}
                   </button>
-                  <button onClick={() => setDeletingWeight(w)} className="text-[12.5px] font-semibold text-red underline decoration-dotted underline-offset-2">
+                  <button onClick={() => setDeletingWeight(w)} className="text-[12.5px] font-medium text-danger-fg underline decoration-dotted underline-offset-2">
                     {t('common.delete')}
                   </button>
                 </div>
@@ -148,15 +147,15 @@ const WeightHistorySection = ({ animalId }) => {
               {editingId === w.id && (
                 <div className="mt-3 grid grid-cols-2 gap-3 border-t border-line pt-3 xs:grid-cols-[1fr_1fr_2fr_auto] xs:items-end">
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.weights.weightKg')}</label>
+                    <label className="mb-1.5 block text-xs font-medium text-ink-700">{t('animalDetails.weights.weightKg')}</label>
                     <HfInput type="number" min="0" step="0.1" value={editKg} onChange={(e) => setEditKg(e.target.value)} />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.weights.date')}</label>
+                    <label className="mb-1.5 block text-xs font-medium text-ink-700">{t('animalDetails.weights.date')}</label>
                     <HfInput type="date" value={editDate} max={today()} onChange={(e) => setEditDate(e.target.value)} />
                   </div>
                   <div className="col-span-2 xs:col-span-1">
-                    <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.weights.notes')}</label>
+                    <label className="mb-1.5 block text-xs font-medium text-ink-700">{t('animalDetails.weights.notes')}</label>
                     <HfInput type="text" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} placeholder={t('animalDetails.weights.notesPlaceholder')} />
                   </div>
                   <button onClick={submitEdit} disabled={updateWeightMutation.isLoading} className={saveBtnClass}>
@@ -171,21 +170,21 @@ const WeightHistorySection = ({ animalId }) => {
 
       <div className="grid grid-cols-2 gap-3 xs:grid-cols-[1fr_1fr_2fr_auto] xs:items-end">
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.weights.weightKg')}</label>
+          <label className="mb-1.5 block text-xs font-medium text-ink-700">{t('animalDetails.weights.weightKg')}</label>
           <HfInput type="number" min="0" step="0.1" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} />
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.weights.date')}</label>
+          <label className="mb-1.5 block text-xs font-medium text-ink-700">{t('animalDetails.weights.date')}</label>
           <HfInput type="date" value={measuredAt} max={today()} onChange={(e) => setMeasuredAt(e.target.value)} />
         </div>
         <div className="col-span-2 xs:col-span-1">
-          <label className="mb-1.5 block text-xs font-semibold text-brown-text">{t('animalDetails.weights.notes')}</label>
+          <label className="mb-1.5 block text-xs font-medium text-ink-700">{t('animalDetails.weights.notes')}</label>
           <HfInput type="text" value={weightNotes} onChange={(e) => setWeightNotes(e.target.value)} placeholder={t('animalDetails.weights.notesPlaceholder')} />
         </div>
         <button
           onClick={submitWeight}
           disabled={addWeightMutation.isLoading}
-          className="col-span-2 h-[46px] cursor-pointer rounded-2xl border-none bg-green px-5 font-display text-sm font-bold text-white shadow-chip transition-transform duration-200 ease-pop enabled:hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-70 xs:col-span-1"
+          className={saveBtnClass}
         >
           {addWeightMutation.isLoading ? t('animalDetails.weights.saving') : t('animalDetails.weights.save')}
         </button>

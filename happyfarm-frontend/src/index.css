@@ -238,4 +238,51 @@
     text-align: end;
     font-variant-numeric: tabular-nums;
   }
+
+  /* ---- Pedigree rail — dam/sire, AnimalDetails only ---- */
+  .hf-ped {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .hf-ped .node {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--hf-line);
+    border-radius: var(--hf-r-md);
+    background: var(--hf-sunken);
+    text-align: start;
+    font: inherit;
+  }
+  .hf-ped .node .role {
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--hf-ink-500);
+  }
+  .hf-ped .node .name {
+    font-family: var(--hf-font-display);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--hf-ink-900);
+  }
+  .hf-ped .node.link {
+    cursor: pointer;
+    border: none;
+    background: var(--hf-sunken);
+  }
+  .hf-ped .node.link .name {
+    color: var(--hf-green-700);
+  }
+  .hf-ped .node.link:hover .name {
+    text-decoration: underline;
+  }
+  .hf-ped .node.empty .name {
+    color: var(--hf-ink-400);
+    font-weight: 400;
+  }
 }

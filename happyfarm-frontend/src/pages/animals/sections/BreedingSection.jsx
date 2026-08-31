@@ -7,21 +7,12 @@ import { breedingCycleService } from '../../../services/api/breedingCycles.js'
 import { animalService } from '../../../services/api/animals.js'
 import ConfirmModal from '../../../components/common/UI/ConfirmModal.jsx'
 import LoadingSpinner from '../../../components/common/UI/LoadingSpinner.jsx'
-import { HfInput, HfSelect, fmtDate, cardClass, badge } from '../../../theme/hf.jsx'
+import { HfInput, HfSelect, fmtDate, cardClass, badge, btnPrimary, btnSecondary } from '../../../theme/hf.jsx'
 import { apiErrorMessage } from '../../../utils/apiError.js'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
-const actionBtnClass =
-  'inline-flex cursor-pointer items-center gap-2 rounded-full border-none bg-green px-5 py-2.5 ' +
-  'font-display text-sm font-bold text-white shadow-chip transition-transform duration-200 ease-pop ' +
-  'enabled:hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-70'
-
-const ghostBtnClass =
-  'cursor-pointer rounded-full border-2 border-line bg-cream px-4 py-2 font-display text-[13.5px] font-bold ' +
-  'text-brown-text transition-transform duration-200 ease-pop hover:scale-[1.03]'
-
-const fieldLabel = 'mb-1.5 block text-xs font-semibold text-brown-text'
+const fieldLabel = 'mb-1.5 block text-xs font-medium text-ink-700'
 
 const cycleStatusTone = {
   bred: 'active',
@@ -184,7 +175,7 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
     const [eNotes, setENotes] = useState(cycle.notes || '')
 
     return (
-      <div className="mt-3 grid grid-cols-1 gap-3 rounded-xl bg-sand p-4 xs:grid-cols-2">
+      <div className="mt-3 grid grid-cols-1 gap-3 rounded-lg border border-line bg-surface-sunken p-4 xs:grid-cols-2">
         <div>
           <label className={fieldLabel}>{t('breeding.sire')}</label>
           <HfSelect value={eSireId} onChange={(e) => setESireId(e.target.value)}>
@@ -213,11 +204,11 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
           <button
             onClick={() => updateMutation.mutate({ id: cycle.id, payload: { sire_id: eSireId || undefined, method: eMethod, bred_on: eBredOn, notes: eNotes.trim() || undefined } })}
             disabled={updateMutation.isLoading}
-            className={actionBtnClass}
+            className={btnPrimary}
           >
             {updateMutation.isLoading ? t('common.saving') : t('common.save')}
           </button>
-          <button onClick={() => setEditingCycle(null)} className={ghostBtnClass}>{t('common.cancel')}</button>
+          <button onClick={() => setEditingCycle(null)} className={btnSecondary}>{t('common.cancel')}</button>
         </div>
       </div>
     )
@@ -228,14 +219,14 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
       <div className="mb-[18px] flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[22px]">{t('breeding.title')}</h2>
         {!openCycle && !nursingCycle && !showStartForm && (
-          <button onClick={() => setShowStartForm(true)} className={actionBtnClass}>
+          <button onClick={() => setShowStartForm(true)} className={btnPrimary}>
             {t('breeding.startCycle')}
           </button>
         )}
       </div>
 
       {showStartForm && (
-        <div className="mb-5 grid grid-cols-1 gap-3 rounded-xl bg-green-soft2 p-4 xs:grid-cols-2">
+        <div className="mb-5 grid grid-cols-1 gap-3 rounded-lg border border-line bg-surface-sunken p-4 xs:grid-cols-2">
           <div>
             <label className={fieldLabel}>{t('breeding.sire')}</label>
             <HfSelect value={sireId} onChange={(e) => setSireId(e.target.value)}>
@@ -261,31 +252,31 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
             <HfInput type="text" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('breeding.notesPlaceholder')} />
           </div>
           <div className="flex gap-2 xs:col-span-2">
-            <button onClick={submitStart} disabled={startMutation.isLoading} className={actionBtnClass}>
+            <button onClick={submitStart} disabled={startMutation.isLoading} className={btnPrimary}>
               {startMutation.isLoading ? t('breeding.starting') : t('breeding.startCycle')}
             </button>
-            <button onClick={() => { setShowStartForm(false); resetStartForm() }} className={ghostBtnClass}>{t('common.cancel')}</button>
+            <button onClick={() => { setShowStartForm(false); resetStartForm() }} className={btnSecondary}>{t('common.cancel')}</button>
           </div>
         </div>
       )}
 
       {/* Current cycle card */}
       {openCycle && (
-        <div className="mb-5 rounded-2xl border-[3px] border-green-border bg-green-soft p-[18px]">
+        <div className="mb-5 rounded-lg border border-ok-fg/25 bg-ok-bg p-[18px]">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <h4 className="text-[15px] text-brown-text">{t('breeding.openCycleTitle')}</h4>
+            <h4 className="text-[15px] font-medium text-ink-900">{t('breeding.openCycleTitle')}</h4>
             <span className={badge(cycleStatusTone[openCycle.status] || 'active')}>
               {t(`breeding.status.${animal.breeding_status}`)}
             </span>
           </div>
-          <p className="text-sm text-brown">{t('breeding.bredOn')}: {fmtDate(openCycle.bred_on, i18n.language)}</p>
-          {openCycle.sire_name && <p className="mt-0.5 text-sm text-brown">{t('breeding.sire')}: {openCycle.sire_name}</p>}
+          <p className="text-sm text-ink-700">{t('breeding.bredOn')}: {fmtDate(openCycle.bred_on, i18n.language)}</p>
+          {openCycle.sire_name && <p className="mt-0.5 text-sm text-ink-700">{t('breeding.sire')}: {openCycle.sire_name}</p>}
 
           {openCycle.pregnancy_result === 'pending' && (
             <>
-              <p className="mt-1.5 text-[13.5px] text-tan">{t('breeding.expectedCheckOn')}: {fmtDate(openCycle.expected_check_on, i18n.language)}</p>
+              <p className="mt-1.5 text-[13.5px] text-ink-500">{t('breeding.expectedCheckOn')}: {fmtDate(openCycle.expected_check_on, i18n.language)}</p>
               {showCheckForm === openCycle.id ? (
-                <div className="mt-3 grid grid-cols-1 gap-3 rounded-xl bg-cream p-4 xs:grid-cols-2">
+                <div className="mt-3 grid grid-cols-1 gap-3 rounded-lg border border-line bg-surface-card p-4 xs:grid-cols-2">
                   <div>
                     <label className={fieldLabel}>{t('breeding.pregnancyCheck.result')}</label>
                     <HfSelect value={checkResult} onChange={(e) => setCheckResult(e.target.value)}>
@@ -299,14 +290,14 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
                     <HfInput type="date" value={checkedOn} min={openCycle.bred_on} max={today()} onChange={(e) => setCheckedOn(e.target.value)} />
                   </div>
                   <div className="flex gap-2 xs:col-span-2">
-                    <button onClick={() => submitCheck(openCycle.id)} disabled={checkMutation.isLoading} className={actionBtnClass}>
+                    <button onClick={() => submitCheck(openCycle.id)} disabled={checkMutation.isLoading} className={btnPrimary}>
                       {checkMutation.isLoading ? t('breeding.pregnancyCheck.saving') : t('breeding.pregnancyCheck.submit')}
                     </button>
-                    <button onClick={() => setShowCheckForm(null)} className={ghostBtnClass}>{t('common.cancel')}</button>
+                    <button onClick={() => setShowCheckForm(null)} className={btnSecondary}>{t('common.cancel')}</button>
                   </div>
                 </div>
               ) : (
-                <button onClick={() => setShowCheckForm(openCycle.id)} className={classNames(actionBtnClass, 'mt-3')}>
+                <button onClick={() => setShowCheckForm(openCycle.id)} className={classNames(btnPrimary, 'mt-3')}>
                   {t('breeding.pregnancyCheck.title')}
                 </button>
               )}
@@ -315,15 +306,15 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
 
           {openCycle.pregnancy_result === 'pregnant' && (
             <>
-              <p className="mt-1.5 text-[13.5px] text-tan">
+              <p className="mt-1.5 text-[13.5px] text-ink-500">
                 {t('breeding.expectedBirthOn', { term: birthTerm })}: {fmtDate(openCycle.expected_lambing_on, i18n.language)}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <button onClick={() => onRecordBirth(openCycle)} className={actionBtnClass}>
+                <button onClick={() => onRecordBirth(openCycle)} className={btnPrimary}>
                   {t('breeding.recordBirth')}
                 </button>
                 {showCheckForm === openCycle.id ? (
-                  <div className="mt-3 grid w-full grid-cols-1 gap-3 rounded-xl bg-cream p-4 xs:grid-cols-2">
+                  <div className="mt-3 grid w-full grid-cols-1 gap-3 rounded-lg border border-line bg-surface-card p-4 xs:grid-cols-2">
                     <div>
                       <label className={fieldLabel}>{t('breeding.pregnancyCheck.result')}</label>
                       <HfSelect value={checkResult} onChange={(e) => setCheckResult(e.target.value)}>
@@ -337,14 +328,14 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
                       <HfInput type="date" value={checkedOn} min={openCycle.bred_on} max={today()} onChange={(e) => setCheckedOn(e.target.value)} />
                     </div>
                     <div className="flex gap-2 xs:col-span-2">
-                      <button onClick={() => submitCheck(openCycle.id)} disabled={checkMutation.isLoading} className={actionBtnClass}>
+                      <button onClick={() => submitCheck(openCycle.id)} disabled={checkMutation.isLoading} className={btnPrimary}>
                         {checkMutation.isLoading ? t('breeding.pregnancyCheck.saving') : t('breeding.pregnancyCheck.submit')}
                       </button>
-                      <button onClick={() => setShowCheckForm(null)} className={ghostBtnClass}>{t('common.cancel')}</button>
+                      <button onClick={() => setShowCheckForm(null)} className={btnSecondary}>{t('common.cancel')}</button>
                     </div>
                   </div>
                 ) : (
-                  <button onClick={() => setShowCheckForm(openCycle.id)} className={ghostBtnClass}>
+                  <button onClick={() => setShowCheckForm(openCycle.id)} className={btnSecondary}>
                     {t('common.edit')} {t('breeding.pregnancyCheck.title').toLowerCase()}
                   </button>
                 )}
@@ -355,26 +346,26 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
       )}
 
       {nursingCycle && (
-        <div className="mb-5 rounded-2xl border-[3px] border-blue bg-blue-soft p-[18px]">
+        <div className="mb-5 rounded-lg border border-info-fg/25 bg-info-bg p-[18px]">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <h4 className="text-[15px] text-blue-dark">{t('breeding.status.nursing')}</h4>
+            <h4 className="text-[15px] font-medium text-info-fg">{t('breeding.status.nursing')}</h4>
           </div>
-          <p className="text-sm text-blue-dark">{t('breeding.expectedWeaningOn')}: {fmtDate(nursingCycle.expected_weaning_on, i18n.language)}</p>
+          <p className="text-sm text-ink-700">{t('breeding.expectedWeaningOn')}: {fmtDate(nursingCycle.expected_weaning_on, i18n.language)}</p>
           {showWeanForm === nursingCycle.id ? (
-            <div className="mt-3 grid grid-cols-1 gap-3 rounded-xl bg-cream p-4 xs:grid-cols-2">
+            <div className="mt-3 grid grid-cols-1 gap-3 rounded-lg border border-line bg-surface-card p-4 xs:grid-cols-2">
               <div>
                 <label className={fieldLabel}>{t('breeding.wean.weanedOn')}</label>
                 <HfInput type="date" value={weanedOn} min={nursingCycle.bred_on} max={today()} onChange={(e) => setWeanedOn(e.target.value)} />
               </div>
               <div className="flex items-end gap-2">
-                <button onClick={() => submitWean(nursingCycle.id)} disabled={weanMutation.isLoading} className={actionBtnClass}>
+                <button onClick={() => submitWean(nursingCycle.id)} disabled={weanMutation.isLoading} className={btnPrimary}>
                   {weanMutation.isLoading ? t('breeding.wean.saving') : t('breeding.wean.submit')}
                 </button>
-                <button onClick={() => setShowWeanForm(null)} className={ghostBtnClass}>{t('common.cancel')}</button>
+                <button onClick={() => setShowWeanForm(null)} className={btnSecondary}>{t('common.cancel')}</button>
               </div>
             </div>
           ) : (
-            <button onClick={() => setShowWeanForm(nursingCycle.id)} className={classNames(actionBtnClass, 'mt-3')}>
+            <button onClick={() => setShowWeanForm(nursingCycle.id)} className={classNames(btnPrimary, 'mt-3')}>
               {t('breeding.wean.title')}
             </button>
           )}
@@ -382,31 +373,31 @@ const BreedingSection = ({ animal, onRecordBirth }) => {
       )}
 
       {/* History */}
-      <h3 className="mb-2.5 text-base font-bold text-brown-text">{t('breeding.history')}</h3>
+      <h3 className="mb-2.5 text-base font-semibold text-ink-900">{t('breeding.history')}</h3>
       {isLoading ? (
         <div className="flex justify-center py-6"><LoadingSpinner message={t('common.loading')} /></div>
       ) : cycles.length === 0 ? (
-        <p className="text-sm text-tan">{t('breeding.empty')}</p>
+        <p className="text-sm text-ink-500">{t('breeding.empty')}</p>
       ) : (
         <div className="flex flex-col gap-2.5">
           {cycles.map((c) => (
-            <div key={c.id} className="rounded-xl bg-sand px-4 py-3">
+            <div key={c.id} className="rounded-lg border border-line bg-surface-sunken px-4 py-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={badge(cycleStatusTone[c.status] || 'active')}>{cycleBadgeLabel(c)}</span>
-                  <span className="text-sm font-semibold text-brown-text">{fmtDate(c.bred_on, i18n.language)}</span>
-                  {c.sire_name && <span className="text-[12.5px] text-tan">· {t('breeding.sire')}: {c.sire_name}</span>}
+                  <span className="text-sm font-semibold text-ink-900">{fmtDate(c.bred_on, i18n.language)}</span>
+                  {c.sire_name && <span className="text-[12.5px] text-ink-500">· {t('breeding.sire')}: {c.sire_name}</span>}
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => setEditingCycle(editingCycle === c.id ? null : c.id)} className="text-[12.5px] font-semibold text-green underline decoration-dotted underline-offset-2">
+                  <button onClick={() => setEditingCycle(editingCycle === c.id ? null : c.id)} className="text-[12.5px] font-medium text-meadow-700 underline decoration-dotted underline-offset-2">
                     {t('common.edit')}
                   </button>
-                  <button onClick={() => setDeletingCycle(c)} className="text-[12.5px] font-semibold text-red underline decoration-dotted underline-offset-2">
+                  <button onClick={() => setDeletingCycle(c)} className="text-[12.5px] font-medium text-danger-fg underline decoration-dotted underline-offset-2">
                     {t('common.delete')}
                   </button>
                 </div>
               </div>
-              {c.notes && <p className="mt-1 text-[12.5px] text-tan">{c.notes}</p>}
+              {c.notes && <p className="mt-1 text-[12.5px] text-ink-500">{c.notes}</p>}
               {editingCycle === c.id && <EditCycleForm cycle={c} />}
             </div>
           ))}
