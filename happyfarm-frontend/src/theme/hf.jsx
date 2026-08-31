@@ -262,9 +262,28 @@ export function Eligibility({ eligible, label, className }) {
   )
 }
 
+/** Stock quantity + optional proportional bar (only when `threshold` is
+ *  set — there's no "capacity" field on the backend, so the bar's full
+ *  reference is 2x the threshold, a presentational heuristic only).
+ *  `low` is the backend's own is_low_stock, never recomputed here. */
+export function StockMeter({ current, unit, threshold, low = false, className }) {
+  const hasBar = threshold != null && threshold > 0
+  const fillPercent = hasBar ? Math.min(100, Math.max(0, (current / (threshold * 2)) * 100)) : null
+
+  return (
+    <span className={classNames('hf-stock', className)}>
+      <span className="qty">{current} {unit}</span>
+      {hasBar && (
+        <span className={classNames('bar', low && 'low')}>
+          <span className="fill" style={{ width: `${fillPercent}%` }} />
+        </span>
+      )}
+    </span>
+  )
+}
+
 /* ------------------------------------------------------------
    Still to build (later redesign slices, not this one):
-   - StockMeter (.hf-stock)                     — Inventory slice
    - Table/Th/Td and the pedigree rail (.hf-ped) are page-local markup,
      not shared components — see Animals.jsx and AnimalDetails.jsx for
      their single real usages.

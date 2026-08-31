@@ -285,4 +285,42 @@
     color: var(--hf-ink-400);
     font-weight: 400;
   }
+
+  /* ---- Stock meter — quantity, plus an optional proportional bar when
+     a low-stock threshold exists. No "capacity" field exists on the
+     backend, so the bar's visual full-reference is 2x the threshold —
+     a presentational heuristic only, never sent to the server. ---- */
+  .hf-stock {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hf-stock .qty {
+    font-family: var(--hf-font-data);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--hf-ink-900);
+    white-space: nowrap;
+  }
+  .hf-stock .bar {
+    position: relative;
+    flex: 1;
+    min-width: 60px;
+    height: 6px;
+    border-radius: var(--hf-r-pill);
+    background: var(--hf-sunken);
+    overflow: hidden;
+  }
+  .hf-stock .bar .fill {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: var(--hf-r-pill);
+    background: var(--hf-ok-fg);
+    transition: width var(--hf-dur) var(--hf-ease);
+  }
+  .hf-stock .bar.low .fill {
+    background: var(--hf-danger-fg);
+  }
 }
