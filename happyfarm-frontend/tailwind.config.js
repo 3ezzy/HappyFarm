@@ -107,7 +107,8 @@ export default {
         toggleOff: C.toggleOff,
         sand: C.sand,
         line: {
-          DEFAULT: C.border,
+          DEFAULT: C.line,
+          strong: C.lineStrong,
           input: C.inputBorder,
         },
         red: {
