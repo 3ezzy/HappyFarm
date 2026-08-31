@@ -127,6 +127,8 @@ export const btnPrimary = `${btnBase} border border-transparent bg-meadow-700 te
 export const btnSecondary = `${btnBase} border border-line-strong bg-surface-card text-ink-900 enabled:hover:bg-surface-sunken`
 /** Ghost button — no border, no fill. */
 export const btnGhost = `${btnBase} border border-transparent bg-transparent text-meadow-700 enabled:hover:bg-meadow-50`
+/** Danger ghost — outlined, for destructive actions that aren't the page's primary action (e.g. Delete, Log out). */
+export const btnDangerGhost = `${btnBase} border border-danger-fg/30 bg-surface-card text-danger-fg enabled:hover:bg-danger-bg`
 
 /* Legacy 7-tone status names (still used by ~15 not-yet-migrated pages via
    badge()) mapped onto the design system's 5 status tones. Pill's own

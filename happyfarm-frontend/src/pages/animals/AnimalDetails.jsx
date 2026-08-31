@@ -8,17 +8,12 @@ import { animalService } from '../../services/api/animals.js'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
 import ConfirmModal from '../../components/common/UI/ConfirmModal.jsx'
-import { speciesBgClass, ageText, fmt, fmtDate, timeSince, badge, cardClass, HfInput, HfSelect, btnSecondary, AlertRow } from '../../theme/hf.jsx'
+import { speciesBgClass, ageText, fmt, fmtDate, timeSince, badge, cardClass, HfInput, HfSelect, btnSecondary, btnDangerGhost, AlertRow } from '../../theme/hf.jsx'
 import BreedingSection from './sections/BreedingSection.jsx'
 import BirthsSection from './sections/BirthsSection.jsx'
 import BirthModal from './sections/BirthModal.jsx'
 import HealthRecordsSection from './sections/HealthRecordsSection.jsx'
 import WeightHistorySection from './sections/WeightHistorySection.jsx'
-
-const btnDangerGhost =
-  'inline-flex cursor-pointer items-center justify-center gap-2 rounded border border-danger-fg/30 bg-surface-card ' +
-  'px-[18px] py-2.5 text-sm font-medium text-danger-fg transition-colors duration-hf enabled:hover:bg-danger-bg ' +
-  'disabled:cursor-not-allowed disabled:opacity-45'
 
 const careBtnClass =
   'flex cursor-pointer items-center gap-2.5 rounded border-none px-5 py-[13px] ' +
