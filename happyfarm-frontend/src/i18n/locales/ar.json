@@ -238,7 +238,9 @@
     "noneFound": "لا توجد حيوانات هنا",
     "noneMatchSearch": "لا توجد حيوانات مطابقة لبحثك.",
     "tryAnotherFilter": "جرّب تصفية أخرى أو أضف أول حيوان.",
-    "eligible": "مؤهل"
+    "eligible": "مؤهل",
+    "ageHeader": "العمر",
+    "statusHeader": "الحالة"
   },
   "animalDetails": {
     "notFoundTitle": "الحيوان غير موجود",

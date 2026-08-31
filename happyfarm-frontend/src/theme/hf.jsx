@@ -242,10 +242,30 @@ export function AlertRow({ severity = 'info', title, detail, when, actions, clas
   )
 }
 
+/** Sacrifice-eligibility badge. The filled/outline crescent carries the
+ *  eligible/not-eligible state; the "why" and "when" (if it's only a
+ *  matter of time) belong in `label`, not a second icon variant. */
+export function Eligibility({ eligible, label, className }) {
+  return (
+    <span className={classNames('hf-elig', !eligible && 'no', className)}>
+      {eligible ? (
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M11.2 2.4a6 6 0 100 11.2 6.8 6.8 0 010-11.2z" fill="currentColor" />
+        </svg>
+      ) : (
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="8" cy="8" r="5.6" stroke="currentColor" strokeWidth="1.4" />
+        </svg>
+      )}
+      {label}
+    </span>
+  )
+}
+
 /* ------------------------------------------------------------
    Still to build (later redesign slices, not this one):
-   - Table/Th/Td primitives (.hf-table)         — Animals slice
    - StockMeter (.hf-stock)                     — Inventory slice
-   - Eligibility badge (.hf-elig)                — Animals slice
-   - Pedigree rail (.hf-ped)                     — Animals slice
+   - Pedigree rail (.hf-ped)                     — AnimalDetails slice (2b)
+   - Table/Th/Td as page-local markup, not a shared component — see
+     Animals.jsx for the first real usage.
    ------------------------------------------------------------ */
