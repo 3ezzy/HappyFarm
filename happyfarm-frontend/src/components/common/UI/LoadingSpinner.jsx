@@ -14,8 +14,8 @@ const LoadingSpinner = ({
   }
 
   const colorClasses = {
-    primary: 'border-green',
-    gray: 'border-tan',
+    primary: 'border-meadow-700',
+    gray: 'border-ink-400',
     white: 'border-white'
   }
 
@@ -30,7 +30,7 @@ const LoadingSpinner = ({
     <div className="flex flex-col items-center justify-center space-y-2">
       <div className={spinnerClasses}></div>
       {message && (
-        <p className="animate-pulse text-sm text-tan">
+        <p className="animate-pulse text-sm text-ink-500">
           {message}
         </p>
       )}

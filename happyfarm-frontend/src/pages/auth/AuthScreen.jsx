@@ -3,21 +3,14 @@ import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { C, HfInput, LeafMark } from '../../theme/hf.jsx'
+import { AlertRow, C, HfInput, LeafMark, btnPrimary } from '../../theme/hf.jsx'
 
-const labelClass = 'mb-2 block text-sm font-medium text-brown-text'
-
-const submitClass =
-  'flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border-none ' +
-  'bg-brown p-[13px] font-display text-base font-bold text-white shadow-soft ' +
-  'transition-all duration-200 ease-pop ' +
-  'enabled:hover:scale-[1.03] enabled:hover:bg-brown-dark enabled:hover:shadow-ribbon ' +
-  'disabled:cursor-not-allowed disabled:opacity-70'
+const labelClass = 'mb-2 block text-sm font-medium text-ink-900'
 
 const tabClass = (active) =>
   classNames(
-    'flex-1 cursor-pointer rounded-full border-none p-[9px] font-display text-[15px] font-bold transition-all duration-200',
-    active ? 'bg-cream text-brown-text shadow-soft' : 'bg-transparent text-tan'
+    'flex-1 cursor-pointer rounded border-none p-[9px] font-sans text-sm font-medium transition-colors duration-hf',
+    active ? 'bg-surface-card text-ink-900 shadow-e1' : 'bg-transparent text-ink-500'
   )
 
 const AuthScreen = ({ mode }) => {
@@ -63,29 +56,25 @@ const AuthScreen = ({ mode }) => {
   }
 
   return (
-    <div className="hf-leaf-bg flex min-h-screen animate-hf-fade items-center justify-center bg-pageBg px-5 py-8">
+    <div className="flex min-h-screen items-center justify-center bg-surface-page px-5 py-8">
       <div className="relative w-full max-w-[430px]">
         <div className="mb-6 text-center">
           <div className="inline-flex items-center gap-2.5">
-            <span className="inline-flex h-[46px] w-[46px] items-center justify-center rounded-[14px] bg-green shadow-ribbon">
-              <LeafMark size={26} color={C.leafPale} />
+            <span className="inline-flex h-[46px] w-[46px] items-center justify-center rounded-lg bg-meadow-700 shadow-e1">
+              <LeafMark size={26} color={C.meadow100} />
             </span>
-            <span className="font-display text-3xl font-bold text-brown-text">HappyFarm</span>
+            <span className="font-display text-3xl font-semibold text-ink-900">HappyFarm</span>
           </div>
-          <p className="mt-3 text-[15px] text-brown">{t('auth.tagline')}</p>
+          <p className="mt-3 text-[15px] text-ink-500">{t('auth.tagline')}</p>
         </div>
 
-        <div className="animate-hf-pop rounded-2xl bg-cream p-7 shadow-card">
-          <div className="mb-[22px] flex rounded-full bg-green-soft2 p-1">
+        <div className="rounded-lg border border-line bg-surface-card p-7 shadow-e2">
+          <div className="mb-[22px] flex rounded bg-surface-sunken p-1">
             <button onClick={() => navigate('/login')} className={tabClass(isLogin)}>{t('auth.login')}</button>
             <button onClick={() => navigate('/register')} className={tabClass(!isLogin)}>{t('auth.register')}</button>
           </div>
 
-          {error && (
-            <div className="mb-4 rounded-xl border-2 border-red-line bg-red-soft px-3.5 py-2.5 text-[13.5px] text-red-dark">
-              {error}
-            </div>
-          )}
+          {error && <AlertRow severity="danger" title={error} className="mb-4" />}
 
           {isLogin ? (
             <div>
@@ -108,16 +97,16 @@ const AuthScreen = ({ mode }) => {
                 placeholder="••••••••"
                 className="mb-2.5"
               />
-              <p className="mb-[22px] text-right">
-                <Link to="/forgot-password" className="text-[13px] font-semibold text-brown">
+              <p className="mb-[22px] text-end">
+                <Link to="/forgot-password" className="text-[13px] font-medium text-ink-700">
                   {t('auth.forgotPasswordLink')}
                 </Link>
               </p>
-              <button onClick={doLogin} disabled={isLoading} className={submitClass}>
+              <button onClick={doLogin} disabled={isLoading} className={classNames(btnPrimary, 'w-full')}>
                 {isLoading ? t('auth.loggingIn') : t('auth.login')} <span className="text-lg rtl:rotate-180">→</span>
               </button>
-              <p className="mt-4 text-center text-[13px] text-tan">
-                {t('auth.demoHintPrefix')} <strong className="text-brown-text">ali@example.com</strong>
+              <p className="mt-4 text-center text-[13px] text-ink-500">
+                {t('auth.demoHintPrefix')} <strong className="text-ink-900">ali@example.com</strong>
               </p>
             </div>
           ) : (
@@ -150,10 +139,10 @@ const AuthScreen = ({ mode }) => {
                 placeholder="••••••••"
                 className="mb-[22px]"
               />
-              <button onClick={doRegister} disabled={isLoading} className={submitClass}>
+              <button onClick={doRegister} disabled={isLoading} className={classNames(btnPrimary, 'w-full')}>
                 {isLoading ? t('auth.creating') : t('auth.createFarmCta')} <span className="text-lg rtl:rotate-180">→</span>
               </button>
-              <p className="mt-4 text-center text-[13px] text-tan">
+              <p className="mt-4 text-center text-[13px] text-ink-500">
                 {t('auth.farmAutoCreated')}
               </p>
             </div>

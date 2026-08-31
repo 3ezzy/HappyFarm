@@ -8,21 +8,14 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
 import AlertsPanel from '../../components/alerts/AlertsPanel.jsx'
-import { TYPES, speciesBgClass, ageText, badge, cardClass } from '../../theme/hf.jsx'
+import {
+  TYPES, speciesBgClass, ageText, cardClass,
+  StatCard, EarTag, Pill, EmptyState,
+  btnPrimary, btnSecondary, btnGhost,
+} from '../../theme/hf.jsx'
 
-const StatCard = ({ value, label, className, valueClass, labelClass }) => (
-  <div className={classNames('rounded-2xl p-[22px] shadow-ribbon', className)}>
-    <div className={classNames('font-display text-[38px] font-bold leading-none', valueClass)}>{value}</div>
-    <p className={classNames('mt-2 text-sm font-medium', labelClass)}>{label}</p>
-  </div>
-)
-
-const quickActionBase =
-  'flex cursor-pointer items-center justify-between gap-2 rounded-full px-5 py-[13px] ' +
-  'font-display text-[15px] font-bold shadow-soft transition-all duration-200 ease-pop hover:scale-[1.03]'
-
-const QuickAction = ({ label, onClick, className }) => (
-  <button onClick={onClick} className={classNames(quickActionBase, className)}>
+const QuickAction = ({ label, onClick, variant }) => (
+  <button onClick={onClick} className={classNames(variant, 'w-full justify-between')}>
     {label} <span className="text-lg rtl:rotate-180">→</span>
   </button>
 )
@@ -77,15 +70,15 @@ const Dashboard = () => {
   }).format(new Date())
 
   return (
-    <div className="animate-hf-pop">
+    <div>
       {/* Welcome banner */}
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-[18px] rounded-2xl bg-brown px-7 py-[26px] shadow-toast">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-[18px] rounded-lg bg-meadow-900 px-7 py-[26px] shadow-e2">
         <div>
-          <h1 className="mb-2 text-[32px] leading-[1.1] text-cream">{t('dashboard.welcome', { name: firstName })}</h1>
-          <p className="text-base text-cream-muted">{t('dashboard.todayAt', { farm: farm?.name })}</p>
+          <h1 className="mb-2 text-[32px] leading-[1.1] text-white">{t('dashboard.welcome', { name: firstName })}</h1>
+          <p className="text-base text-meadow-100">{t('dashboard.todayAt', { farm: farm?.name })}</p>
         </div>
-        <div className="rounded-full bg-green-dark px-4 py-2">
-          <span className="text-[13.5px] font-medium text-cream">{today}</span>
+        <div className="rounded-pill bg-meadow-700 px-4 py-2">
+          <span className="text-[13.5px] font-medium text-white">{today}</span>
         </div>
       </div>
 
@@ -94,72 +87,75 @@ const Dashboard = () => {
         <AlertsPanel />
       </div>
 
-      {/* Stat cards */}
+      {/* Stat cards — neutral surfaces; meaning lives in the value text,
+          not the card background. The yellow accent border is reserved
+          for a future Eid-countdown card. */}
       <div className="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
-        <StatCard value={total} label={t('dashboard.totalAnimals')} className="bg-cream" valueClass="text-brown-text" labelClass="text-tan" />
-        <StatCard value={readyCount} label={t('dashboard.readyForSacrifice')} className="bg-green" valueClass="text-white" labelClass="text-green-pale" />
-        <StatCard value={notEligibleCount} label={t('dashboard.notYetEligible')} className="bg-yellow" valueClass="text-brown-text" labelClass="text-yellow-text" />
-        <StatCard value={sacrificedCount} label={t('dashboard.alreadySacrificed')} className="bg-tan" valueClass="text-white" labelClass="text-cream-muted" />
-        <StatCard value={pregnantCount} label={t('dashboard.pregnant')} className="bg-blue" valueClass="text-white" labelClass="text-blue-soft" />
-        <StatCard value={nursingCount} label={t('dashboard.nursing')} className="bg-green-soft" valueClass="text-brown-text" labelClass="text-tan" />
+        <StatCard value={total} label={t('dashboard.totalAnimals')} />
+        <StatCard value={<span className="text-ok-fg">{readyCount}</span>} label={t('dashboard.readyForSacrifice')} />
+        <StatCard value={<span className="text-warn-fg">{notEligibleCount}</span>} label={t('dashboard.notYetEligible')} />
+        <StatCard value={<span className="text-hold-fg">{sacrificedCount}</span>} label={t('dashboard.alreadySacrificed')} />
+        <StatCard value={<span className="text-info-fg">{pregnantCount}</span>} label={t('dashboard.pregnant')} />
+        <StatCard value={<span className="text-info-fg">{nursingCount}</span>} label={t('dashboard.nursing')} />
       </div>
 
       {/* Flock + quick actions */}
       <div className="grid grid-cols-1 items-start gap-6 wide:grid-cols-[1.4fr_1fr]">
         <div className={classNames(cardClass, 'p-6')}>
-          <h2 className="mb-[18px] text-[22px]">{t('dashboard.yourFlock')}</h2>
+          <h2 className="mb-[18px] text-[22px] text-ink-900">{t('dashboard.yourFlock')}</h2>
           <div className="grid grid-cols-2 gap-3.5 xs:grid-cols-4">
             {byType.map((bt) => (
-              <div key={bt.type} className={classNames('rounded-2xl px-2.5 py-3.5 text-center', bt.bgClass)}>
+              <div key={bt.type} className={classNames('rounded-lg px-2.5 py-3.5 text-center', bt.bgClass)}>
                 <div className="mx-auto mb-1.5 h-[54px] w-[54px]">
                   <AnimalIcon type={bt.type} size={54} />
                 </div>
-                <div className="font-display text-[22px] font-bold text-brown-text">{bt.count}</div>
-                <div className="text-[12.5px] font-medium text-tan">{bt.label}</div>
+                <div className="font-display text-[22px] font-semibold text-ink-900">{bt.count}</div>
+                <div className="text-[12.5px] font-medium text-ink-500">{bt.label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-2xl bg-green-soft p-6 shadow-ribbon">
-          <h2 className="mb-4 text-[22px]">{t('dashboard.quickActions')}</h2>
+        <div className="rounded-lg border border-line bg-surface-card p-6 shadow-e1">
+          <h2 className="mb-4 text-[22px] text-ink-900">{t('dashboard.quickActions')}</h2>
           <div className="flex flex-col gap-3">
-            <QuickAction label={t('dashboard.addNewAnimal')} onClick={() => navigate('/animals/add')} className="border-none bg-brown text-white hover:bg-brown-dark" />
-            <QuickAction label={t('dashboard.viewAllAnimals')} onClick={() => navigate('/animals')} className="border-none bg-green text-white hover:bg-green-dark" />
-            <QuickAction label={t('dashboard.farmStatistics')} onClick={() => navigate('/farm')} className="border-2 border-line bg-cream text-brown-text" />
-            <QuickAction label={t('dashboard.viewReports')} onClick={() => navigate('/reports')} className="border-2 border-line bg-cream text-brown-text" />
+            <QuickAction label={t('dashboard.addNewAnimal')} onClick={() => navigate('/animals/add')} variant={btnPrimary} />
+            <QuickAction label={t('dashboard.viewAllAnimals')} onClick={() => navigate('/animals')} variant={btnSecondary} />
+            <QuickAction label={t('dashboard.farmStatistics')} onClick={() => navigate('/farm')} variant={btnGhost} />
+            <QuickAction label={t('dashboard.viewReports')} onClick={() => navigate('/reports')} variant={btnGhost} />
           </div>
         </div>
       </div>
 
       {/* Recent animals */}
       <div className={classNames(cardClass, 'mt-6 p-6')}>
-        <h2 className="mb-1.5 text-[22px]">{t('dashboard.recentAnimals')}</h2>
-        <p className="mb-[18px] text-sm text-tan">{t('dashboard.recentAnimalsSub')}</p>
+        <h2 className="mb-1.5 text-[22px] text-ink-900">{t('dashboard.recentAnimals')}</h2>
+        <p className="mb-[18px] text-sm text-ink-500">{t('dashboard.recentAnimalsSub')}</p>
         {recent.length === 0 ? (
-          <p className="text-tan">{t('dashboard.noAnimalsYet')}</p>
+          <EmptyState title={t('dashboard.noAnimalsYet')} />
         ) : (
           <div className="flex flex-col gap-3">
             {recent.map((a) => (
               <button
                 key={a.id}
                 onClick={() => navigate(`/animals/${a.id}`)}
-                className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border-none bg-green-soft2 px-4 py-3 text-start transition-all duration-200 ease-pop hover:scale-[1.01] hover:bg-green-hover"
+                className="flex w-full cursor-pointer items-center justify-between gap-3 rounded border border-line bg-surface-card px-4 py-3 text-start transition-colors duration-hf hover:bg-surface-sunken"
               >
                 <span className="flex items-center gap-3.5">
-                  <span className={classNames('inline-flex h-[46px] w-[46px] items-center justify-center rounded-xl', speciesBgClass(a.type))}>
+                  <span className={classNames('inline-flex h-[46px] w-[46px] items-center justify-center rounded-lg', speciesBgClass(a.type))}>
                     <AnimalIcon type={a.type} size={40} />
                   </span>
                   <span>
-                    <span className="block font-display text-[17px] font-bold text-brown-text">{a.name}</span>
-                    <span className="block text-[13.5px] text-tan">{t(`species.${a.type}.label`)} · {ageText(a.age, t)}</span>
+                    <span className="mb-1 flex items-center gap-2">
+                      <span className="font-display text-[17px] font-semibold text-ink-900">{a.name}</span>
+                      <EarTag species={a.type} tag={a.tag} archived={a.is_sacrificed} />
+                    </span>
+                    <span className="block text-[13.5px] text-ink-500">{t(`species.${a.type}.label`)} · {ageText(a.age, t)}</span>
                   </span>
                 </span>
-                {a.is_sacrificed ? (
-                  <span className={badge('sacrificed')}>{t('animals.filters.sacrificed')}</span>
-                ) : (
-                  <span className={badge('active')}>{t('animals.filters.active')}</span>
-                )}
+                <Pill tone={a.is_sacrificed ? 'hold' : 'ok'}>
+                  {t(a.is_sacrificed ? 'animals.filters.sacrificed' : 'animals.filters.active')}
+                </Pill>
               </button>
             ))}
           </div>

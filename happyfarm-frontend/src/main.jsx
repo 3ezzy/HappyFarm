@@ -32,24 +32,23 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 duration: 2800,
                 // react-hot-toast styles its portal via a style object, so
                 // these stay inline — but the values come from the palette.
+                // Matches the .hf-toast spec: dark ink background, green
+                // icon by default, red icon for error toasts.
                 style: {
-                  background: C.cream,
-                  color: C.brownText,
-                  fontFamily: "'Zilla Slab', serif",
-                  fontWeight: 600,
-                  fontSize: '15px',
-                  border: `3px solid ${C.greenLine}`,
-                  borderRadius: '9999px',
-                  padding: '10px 18px',
-                  boxShadow: '0 10px 20px -3px rgba(107,92,67,0.22)',
+                  background: C.ink900,
+                  color: '#fff',
+                  fontFamily: "'IBM Plex Sans Arabic', 'Readex Pro', system-ui, sans-serif",
+                  fontWeight: 500,
+                  fontSize: '14px',
+                  borderRadius: '8px',
+                  padding: '12px 16px',
+                  boxShadow: '0 4px 12px rgba(19, 26, 20, .08)',
                 },
                 success: {
-                  iconTheme: { primary: C.green, secondary: C.cream },
-                  style: { border: `3px solid ${C.greenLine}` },
+                  iconTheme: { primary: C.meadow500, secondary: C.ink900 },
                 },
                 error: {
-                  iconTheme: { primary: C.red, secondary: C.cream },
-                  style: { border: `3px solid ${C.redLine}` },
+                  iconTheme: { primary: C.dangerFg, secondary: C.ink900 },
                 },
               }}
             />
