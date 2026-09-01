@@ -9,6 +9,7 @@ import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
 import ConfirmModal from '../../components/common/UI/ConfirmModal.jsx'
 import { speciesBgClass, ageText, fmt, fmtDate, timeSince, badge, cardClass, HfInput, HfSelect, btnSecondary, btnDangerGhost, AlertRow } from '../../theme/hf.jsx'
+import { Icon } from '../../theme/icons.jsx'
 import BreedingSection from './sections/BreedingSection.jsx'
 import BirthsSection from './sections/BirthsSection.jsx'
 import BirthModal from './sections/BirthModal.jsx'
@@ -249,14 +250,14 @@ const AnimalDetails = () => {
             <div className="mt-6 grid grid-cols-1 gap-3.5 xs:grid-cols-2">
               <div className="rounded-lg bg-info-bg p-[18px]">
                 <div className="mb-1.5 flex items-center justify-between">
-                  <h4 className="text-[15px] font-medium text-info-fg">{t('animalDetails.lastFed')}</h4><span className="text-lg">🌾</span>
+                  <h4 className="text-[15px] font-medium text-info-fg">{t('animalDetails.lastFed')}</h4><Icon.feed width={18} height={18} />
                 </div>
                 <p className="text-sm font-semibold text-ink-900">{fmt(animal.fed_at, i18n.language, t)}</p>
                 {animal.fed_at && <p className="mt-[3px] text-[12.5px] text-ink-500">{timeSince(animal.fed_at, t)}</p>}
               </div>
               <div className="rounded-lg bg-ok-bg p-[18px]">
                 <div className="mb-1.5 flex items-center justify-between">
-                  <h4 className="text-[15px] font-medium text-ok-fg">{t('animalDetails.lastGroomed')}</h4><span className="text-lg">✨</span>
+                  <h4 className="text-[15px] font-medium text-ok-fg">{t('animalDetails.lastGroomed')}</h4><Icon.groom width={18} height={18} />
                 </div>
                 <p className="text-sm font-semibold text-ink-900">{fmt(animal.groomed_at, i18n.language, t)}</p>
                 {animal.groomed_at && <p className="mt-[3px] text-[12.5px] text-ink-500">{timeSince(animal.groomed_at, t)}</p>}
@@ -281,7 +282,7 @@ const AnimalDetails = () => {
             ) : animal.is_sacrificed ? (
               <div className="mt-3.5 rounded-lg border border-line bg-surface-sunken p-[18px]">
                 <div className="mb-1.5 flex items-center justify-between">
-                  <h4 className="text-[15px] font-medium text-ink-900">{t('animalDetails.sacrificedPanelTitle')}</h4><span className="text-lg">🤲</span>
+                  <h4 className="text-[15px] font-medium text-ink-900">{t('animalDetails.sacrificedPanelTitle')}</h4><Icon.sacrifice width={18} height={18} />
                 </div>
                 <p className="text-sm font-semibold text-ink-700">{fmt(animal.sacrificed_at, i18n.language, t)}</p>
                 {animal.exit_reason && (
@@ -294,7 +295,7 @@ const AnimalDetails = () => {
             ) : animal.exit_reason ? (
               <div className="mt-3.5 rounded-lg border border-line bg-surface-sunken p-[18px]">
                 <div className="mb-1.5 flex items-center justify-between">
-                  <h4 className="text-[15px] font-medium text-ink-900">{t('animalDetails.exitedPanelTitle')}</h4><span className="text-lg">📋</span>
+                  <h4 className="text-[15px] font-medium text-ink-900">{t('animalDetails.exitedPanelTitle')}</h4><Icon.exited width={18} height={18} />
                 </div>
                 <p className="text-sm font-semibold text-ink-700">{fmtDate(animal.exit_date, i18n.language)}</p>
                 <p className="mt-[3px] text-[12.5px] text-ink-500">
@@ -309,7 +310,7 @@ const AnimalDetails = () => {
                 )}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl">{animal.is_eligible ? '🌙' : '⏳'}</span>
+                  {animal.is_eligible ? <Icon.eligible width={20} height={20} /> : <Icon.notEligible width={20} height={20} />}
                   <div>
                     <h4 className="text-[15px] font-medium text-ink-900">{t('animalDetails.eligibilityTitle')}</h4>
                     <p className="mt-[3px] text-sm text-ink-700">{eligMsg}</p>
@@ -364,18 +365,18 @@ const AnimalDetails = () => {
           <h2 className="mb-[18px] text-[22px]">{t('animalDetails.care')}</h2>
           {animal.is_archived ? (
             <div className="px-2 py-6 text-center">
-              <div className="mb-2.5 text-[40px]">🗄️</div>
+              <Icon.archived width={40} height={40} className="mx-auto mb-2.5" />
               <p className="font-semibold text-ink-700">{t('animalDetails.archivedBannerBody')}</p>
             </div>
           ) : animal.is_sacrificed ? (
             <div className="px-2 py-6 text-center">
-              <div className="mb-2.5 text-[40px]">🤲</div>
+              <Icon.sacrifice width={40} height={40} className="mx-auto mb-2.5" />
               <p className="font-semibold text-ink-700">{t('animalDetails.sacrificedCareMsg')}</p>
               <p className="mt-1.5 text-[13.5px] text-ink-500">{t('animalDetails.sacrificedCareSub')}</p>
             </div>
           ) : animal.exit_reason ? (
             <div className="px-2 py-6 text-center">
-              <div className="mb-2.5 text-[40px]">📋</div>
+              <Icon.exited width={40} height={40} className="mx-auto mb-2.5" />
               <p className="font-semibold text-ink-700">{t('animalDetails.exitedCareMsg')}</p>
               <p className="mt-1.5 text-[13.5px] text-ink-500">{t('animalDetails.exitedCareSub')}</p>
             </div>
@@ -386,14 +387,14 @@ const AnimalDetails = () => {
                 disabled={feedMutation.isLoading}
                 className={classNames(careBtnClass, 'bg-meadow-700 enabled:hover:bg-meadow-900')}
               >
-                <span className="text-[17px]">🌾</span> {t('animalDetails.feed', { name: animal.name })}
+                <Icon.feed width={17} height={17} /> {t('animalDetails.feed', { name: animal.name })}
               </button>
               <button
                 onClick={() => groomMutation.mutate()}
                 disabled={groomMutation.isLoading}
                 className={classNames(careBtnClass, 'bg-info-fg enabled:hover:brightness-110')}
               >
-                <span className="text-[17px]">✨</span> {t('animalDetails.groom', { name: animal.name })}
+                <Icon.groom width={17} height={17} /> {t('animalDetails.groom', { name: animal.name })}
               </button>
               <div className="my-1.5 h-px bg-line" />
               {animal.is_eligible ? (
@@ -401,7 +402,7 @@ const AnimalDetails = () => {
                   onClick={() => setShowSacrifice(true)}
                   className={classNames(careBtnClass, 'bg-danger-fg enabled:hover:brightness-110')}
                 >
-                  🔪 {t('animalDetails.sacrifice', { name: animal.name })}
+                  <Icon.sacrifice width={17} height={17} /> {t('animalDetails.sacrifice', { name: animal.name })}
                 </button>
               ) : (
                 <>

@@ -10,12 +10,13 @@ import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
 import ConfirmModal from '../../components/common/UI/ConfirmModal.jsx'
 import { TYPES, speciesBgClass, cardClass, HfInput, HfSelect, StatCard, btnPrimary } from '../../theme/hf.jsx'
+import { Icon } from '../../theme/icons.jsx'
 import { apiErrorMessage } from '../../utils/apiError.js'
 
-const InfoItem = ({ emoji, iconClass, label, value, sub }) => (
+const InfoItem = ({ icon, iconClass, label, value, sub }) => (
   <div className="flex items-center gap-3.5">
-    <span className={classNames('inline-flex h-12 w-12 items-center justify-center rounded-full text-[22px]', iconClass)}>
-      {emoji}
+    <span className={classNames('inline-flex h-12 w-12 items-center justify-center rounded-full', iconClass)}>
+      {icon}
     </span>
     <div>
       <p className="text-[13px] font-medium text-ink-500">{label}</p>
@@ -25,9 +26,9 @@ const InfoItem = ({ emoji, iconClass, label, value, sub }) => (
   </div>
 )
 
-const CareRow = ({ emoji, label, value, valueClass }) => (
+const CareRow = ({ icon, label, value, valueClass }) => (
   <div className="flex items-center justify-between">
-    <span className="text-sm font-medium text-ink-700">{emoji} {label}</span>
+    <span className="flex items-center gap-2 text-sm font-medium text-ink-700">{icon} {label}</span>
     <span className={classNames('font-display text-lg font-semibold', valueClass)}>{value}</span>
   </div>
 )
@@ -238,9 +239,9 @@ const Farm = () => {
 
       <div className={classNames(cardClass, 'mb-6 p-6')}>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
-          <InfoItem emoji="🏡" iconClass="bg-ok-bg" label={t('farm.farmName')} value={farmName} />
-          <InfoItem emoji="👤" iconClass="bg-ok-bg" label={t('farm.owner')} value={userName} sub={userEmail} />
-          <InfoItem emoji="📅" iconClass="bg-info-bg" label={t('farm.farmAge')} value={t('farm.days', { count: farmDays })} />
+          <InfoItem icon={<Icon.farmHome width={20} height={20} className="text-ok-fg" />} iconClass="bg-ok-bg" label={t('farm.farmName')} value={farmName} />
+          <InfoItem icon={<Icon.owner width={20} height={20} className="text-ok-fg" />} iconClass="bg-ok-bg" label={t('farm.owner')} value={userName} sub={userEmail} />
+          <InfoItem icon={<Icon.calendar width={20} height={20} className="text-info-fg" />} iconClass="bg-info-bg" label={t('farm.farmAge')} value={t('farm.days', { count: farmDays })} />
         </div>
       </div>
 
@@ -270,10 +271,10 @@ const Farm = () => {
         <div className={classNames(cardClass, 'p-6')}>
           <h2 className="mb-[18px] text-[22px]">{t('farm.careStatus')}</h2>
           <div className="flex flex-col gap-3.5">
-            <CareRow emoji="🌾" label={t('farm.fedLast24h')} value={fed24} valueClass="text-ok-fg" />
-            <CareRow emoji="✨" label={t('farm.groomedLast24h')} value={groomed24} valueClass="text-info-fg" />
-            <CareRow emoji="🌙" label={t('farm.eligibleForSacrifice')} value={readyCount} valueClass="text-ok-fg" />
-            <CareRow emoji="⏳" label={t('farm.notYetEligible')} value={notEligibleCount} valueClass="text-warn-fg" />
+            <CareRow icon={<Icon.feed width={16} height={16} />} label={t('farm.fedLast24h')} value={fed24} valueClass="text-ok-fg" />
+            <CareRow icon={<Icon.groom width={16} height={16} />} label={t('farm.groomedLast24h')} value={groomed24} valueClass="text-info-fg" />
+            <CareRow icon={<Icon.eligible width={16} height={16} />} label={t('farm.eligibleForSacrifice')} value={readyCount} valueClass="text-ok-fg" />
+            <CareRow icon={<Icon.notEligible width={16} height={16} />} label={t('farm.notYetEligible')} value={notEligibleCount} valueClass="text-warn-fg" />
           </div>
         </div>
       </div>

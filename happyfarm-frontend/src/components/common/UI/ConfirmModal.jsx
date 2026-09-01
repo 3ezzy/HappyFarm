@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Icon } from '../../../theme/icons.jsx'
 
 /**
  * Shared confirm/cancel modal — used by every delete/destructive-action
@@ -12,6 +13,7 @@ const ConfirmModal = ({
   const { t } = useTranslation()
 
   const iconBg = tone === 'danger' ? 'bg-danger-bg' : 'bg-warn-bg'
+  const iconColor = tone === 'danger' ? 'text-danger-fg' : 'text-warn-fg'
   const confirmBtnClass =
     tone === 'danger'
       ? 'bg-danger-fg enabled:hover:brightness-90'
@@ -27,7 +29,9 @@ const ConfirmModal = ({
         className="w-full max-w-[420px] overflow-hidden rounded-lg border border-line bg-surface-card shadow-e3"
       >
         <div className="px-7 pb-2 pt-7 text-center">
-          <div className={`mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full text-[26px] ${iconBg}`}>⚠️</div>
+          <div className={`mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full ${iconBg} ${iconColor}`}>
+            <Icon.warning width={26} height={26} />
+          </div>
           <h3 className="mb-2 text-2xl text-ink-900">{title}</h3>
           {body && <p className="mx-6 text-[15px] leading-relaxed text-ink-500">{body}</p>}
         </div>

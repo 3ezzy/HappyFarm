@@ -1,5 +1,6 @@
 import classNames from 'classnames'
 import { C } from './colors.js'
+import { Icon } from './icons.jsx'
 
 /* ============================================================
    HappyFarm — shared design tokens & helpers (Meadow design system)
@@ -250,15 +251,7 @@ export function AlertRow({ severity = 'info', title, detail, when, actions, clas
 export function Eligibility({ eligible, label, className }) {
   return (
     <span className={classNames('hf-elig', !eligible && 'no', className)}>
-      {eligible ? (
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M11.2 2.4a6 6 0 100 11.2 6.8 6.8 0 010-11.2z" fill="currentColor" />
-        </svg>
-      ) : (
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <circle cx="8" cy="8" r="5.6" stroke="currentColor" strokeWidth="1.4" />
-        </svg>
-      )}
+      {eligible ? <Icon.eligible width={13} height={13} /> : <Icon.notEligible width={13} height={13} />}
       {label}
     </span>
   )

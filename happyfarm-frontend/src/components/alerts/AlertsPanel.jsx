@@ -6,15 +6,16 @@ import toast from 'react-hot-toast'
 import { alertService } from '../../services/api/alerts.js'
 import LoadingSpinner from '../common/UI/LoadingSpinner.jsx'
 import { fmtDate, cardClass, AlertRow, EmptyState } from '../../theme/hf.jsx'
+import { Icon } from '../../theme/icons.jsx'
 import { apiErrorMessage } from '../../utils/apiError.js'
 
 const TYPE_ICON = {
-  breeding_check_due: '🩺',
-  lambing_due: '🐣',
-  weaning_due: '🌾',
-  reinsemination_due: '💞',
-  health_due: '💉',
-  low_stock: '📦',
+  breeding_check_due: Icon.breedingCheck,
+  lambing_due: Icon.lambing,
+  weaning_due: Icon.weaning,
+  reinsemination_due: Icon.reinsemination,
+  health_due: Icon.healthDue,
+  low_stock: Icon.archived,
 }
 
 const smBtnBase =
@@ -89,36 +90,39 @@ const AlertsPanel = () => {
         <EmptyState title={t('alerts.empty')} />
       ) : (
         <div className="flex flex-col gap-2.5">
-          {alerts.map((alert) => (
-            <AlertRow
-              key={alert.key}
-              severity={isUrgent(alert) ? 'danger' : 'warn'}
-              title={
-                <>
-                  <span className="me-2">{TYPE_ICON[alert.type] || '🔔'}</span>
-                  {typeLabel(alert)} — {alert.type === 'low_stock' ? alert.item_name : alert.animal_name}
-                </>
-              }
-              detail={detailLabel(alert)}
-              actions={
-                <div className="flex flex-none items-center gap-2">
-                  <button
-                    onClick={() => navigate(alert.type === 'low_stock' ? '/inventory' : `/animals/${alert.animal_id}`)}
-                    className={smBtnOutline}
-                  >
-                    {alert.type === 'low_stock' ? t('alerts.viewInventory') : t('alerts.viewAnimal')}
-                  </button>
-                  <button
-                    onClick={() => dismissMutation.mutate(alert.key)}
-                    disabled={dismissMutation.isLoading}
-                    className={smBtnGhost}
-                  >
-                    {t('alerts.dismiss')}
-                  </button>
-                </div>
-              }
-            />
-          ))}
+          {alerts.map((alert) => {
+            const AlertIcon = TYPE_ICON[alert.type] || Icon.bell
+            return (
+              <AlertRow
+                key={alert.key}
+                severity={isUrgent(alert) ? 'danger' : 'warn'}
+                title={
+                  <>
+                    <span className="me-2 inline-flex align-middle"><AlertIcon width={16} height={16} /></span>
+                    {typeLabel(alert)} — {alert.type === 'low_stock' ? alert.item_name : alert.animal_name}
+                  </>
+                }
+                detail={detailLabel(alert)}
+                actions={
+                  <div className="flex flex-none items-center gap-2">
+                    <button
+                      onClick={() => navigate(alert.type === 'low_stock' ? '/inventory' : `/animals/${alert.animal_id}`)}
+                      className={smBtnOutline}
+                    >
+                      {alert.type === 'low_stock' ? t('alerts.viewInventory') : t('alerts.viewAnimal')}
+                    </button>
+                    <button
+                      onClick={() => dismissMutation.mutate(alert.key)}
+                      disabled={dismissMutation.isLoading}
+                      className={smBtnGhost}
+                    >
+                      {t('alerts.dismiss')}
+                    </button>
+                  </div>
+                }
+              />
+            )
+          })}
         </div>
       )}
     </div>
