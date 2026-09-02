@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
@@ -6,15 +7,10 @@ import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { farmService } from '../../services/api/farm.js'
 import { authService } from '../../services/api/auth.js'
-import { initialsOf, HfInput, cardClass } from '../../theme/hf.jsx'
+import { initialsOf, HfInput, cardClass, btnPrimary, btnDangerGhost } from '../../theme/hf.jsx'
 import { apiErrorMessage } from '../../utils/apiError.js'
 
-const labelClass = 'mb-1.5 block text-xs font-semibold text-brown-text'
-
-const saveBtnClass =
-  'cursor-pointer rounded-2xl border-none bg-green px-5 py-2.5 font-display text-sm font-bold text-white ' +
-  'shadow-chip transition-transform duration-200 ease-pop enabled:hover:scale-[1.03] ' +
-  'disabled:cursor-not-allowed disabled:opacity-70'
+const labelClass = 'mb-1.5 block text-xs font-medium text-ink-700'
 
 const Profile = () => {
   const { t, i18n } = useTranslation()
@@ -86,35 +82,35 @@ const Profile = () => {
   }
 
   return (
-    <div className="mx-auto max-w-[680px] animate-hf-pop">
+    <div className="mx-auto max-w-[680px]">
       <h1 className="mb-[22px] text-[34px]">{t('profile.title')}</h1>
 
-      <div className="mb-6 rounded-2xl bg-cream p-7 shadow-ribbon">
+      <div className={classNames(cardClass, 'mb-6 p-7')}>
         <div className="flex items-center gap-[18px]">
-          <span className="inline-flex h-[72px] w-[72px] items-center justify-center rounded-full bg-green font-display text-[26px] font-bold text-white shadow-ribbon">
+          <span className="inline-flex h-[72px] w-[72px] items-center justify-center rounded-full bg-meadow-700 font-display text-[26px] font-semibold text-white">
             {initialsOf(user?.name)}
           </span>
           <div>
             <h2 className="text-[26px]">{user?.name}</h2>
-            <p className="mt-1 text-tan">{user?.email}</p>
+            <p className="mt-1 text-ink-500">{user?.email}</p>
           </div>
         </div>
         <div className="mt-6 grid grid-cols-1 gap-3.5 xs:grid-cols-2">
-          <div className="rounded-2xl bg-green-soft p-4">
-            <p className="text-[13px] font-medium text-tan">{t('profile.farm')}</p>
-            <p className="mt-[3px] font-display text-base font-bold text-brown-text">{farm?.name}</p>
+          <div className="rounded-lg border border-line bg-surface-sunken p-4">
+            <p className="text-[13px] font-medium text-ink-500">{t('profile.farm')}</p>
+            <p className="mt-[3px] font-display text-base font-semibold text-ink-900">{farm?.name}</p>
           </div>
-          <div className="rounded-2xl bg-green-soft p-4">
-            <p className="text-[13px] font-medium text-tan">{t('profile.memberSince')}</p>
-            <p className="mt-[3px] font-display text-base font-bold text-brown-text">{memberSince}</p>
+          <div className="rounded-lg border border-line bg-surface-sunken p-4">
+            <p className="text-[13px] font-medium text-ink-500">{t('profile.memberSince')}</p>
+            <p className="mt-[3px] font-display text-base font-semibold text-ink-900">{memberSince}</p>
           </div>
         </div>
       </div>
 
-      <div className={`${cardClass} mb-6 p-6`}>
+      <div className={classNames(cardClass, 'mb-6 p-6')}>
         <h2 className="mb-4 text-[22px]">{t('profile.accountSettings')}</h2>
 
-        <div className="mb-6 border-b border-cream-muted pb-6">
+        <div className="mb-6 border-b border-line pb-6">
           <label className={labelClass}>{t('profile.farmName')}</label>
           <div className="flex flex-col gap-3 xs:flex-row xs:items-center">
             <HfInput
@@ -123,14 +119,14 @@ const Profile = () => {
               onChange={(e) => setFarmNameInput(e.target.value)}
               className="xs:flex-1"
             />
-            <button onClick={submitFarmName} disabled={renameFarmMutation.isLoading} className={saveBtnClass}>
+            <button onClick={submitFarmName} disabled={renameFarmMutation.isLoading} className={btnPrimary}>
               {renameFarmMutation.isLoading ? t('common.saving') : t('common.save')}
             </button>
           </div>
         </div>
 
         <div>
-          <h3 className="mb-3 text-[15px] font-semibold text-brown-text">{t('profile.changePassword')}</h3>
+          <h3 className="mb-3 text-[15px] font-semibold text-ink-900">{t('profile.changePassword')}</h3>
           <div className="grid grid-cols-1 gap-3.5 xs:grid-cols-2">
             <div className="xs:col-span-2">
               <label className={labelClass}>{t('profile.currentPassword')}</label>
@@ -148,17 +144,14 @@ const Profile = () => {
           <button
             onClick={submitPasswordChange}
             disabled={changePasswordMutation.isLoading}
-            className={`${saveBtnClass} mt-4`}
+            className={classNames(btnPrimary, 'mt-4')}
           >
             {changePasswordMutation.isLoading ? t('common.saving') : t('profile.updatePassword')}
           </button>
         </div>
       </div>
 
-      <button
-        onClick={handleLogout}
-        className="inline-flex cursor-pointer items-center gap-2 rounded-full border-2 border-red-line bg-cream px-6 py-3 font-display text-[15px] font-bold text-red-dark transition-all duration-200 ease-pop hover:scale-[1.03] hover:bg-red-soft"
-      >
+      <button onClick={handleLogout} className={btnDangerGhost}>
         {t('profile.logOut')}
       </button>
     </div>

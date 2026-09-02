@@ -234,7 +234,9 @@
     "noneFound": "Aucun animal ici",
     "noneMatchSearch": "Aucun animal ne correspond à votre recherche.",
     "tryAnotherFilter": "Essayez un autre filtre ou ajoutez votre premier animal.",
-    "eligible": "Éligible"
+    "eligible": "Éligible",
+    "ageHeader": "Âge",
+    "statusHeader": "Statut"
   },
   "animalDetails": {
     "notFoundTitle": "Animal introuvable",

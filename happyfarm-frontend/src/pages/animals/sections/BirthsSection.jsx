@@ -9,20 +9,11 @@ import { breedingCycleService } from '../../../services/api/breedingCycles.js'
 import { animalService } from '../../../services/api/animals.js'
 import ConfirmModal from '../../../components/common/UI/ConfirmModal.jsx'
 import LoadingSpinner from '../../../components/common/UI/LoadingSpinner.jsx'
-import { HfInput, HfSelect, fmtDate, cardClass } from '../../../theme/hf.jsx'
+import { HfInput, HfSelect, fmtDate, cardClass, btnPrimary, btnSecondary } from '../../../theme/hf.jsx'
 import { apiErrorMessage } from '../../../utils/apiError.js'
 
 const today = () => new Date().toISOString().slice(0, 10)
-const fieldLabel = 'mb-1.5 block text-xs font-semibold text-brown-text'
-
-const actionBtnClass =
-  'inline-flex cursor-pointer items-center gap-2 rounded-full border-none bg-green px-5 py-2.5 ' +
-  'font-display text-sm font-bold text-white shadow-chip transition-transform duration-200 ease-pop ' +
-  'enabled:hover:scale-[1.03] disabled:cursor-not-allowed disabled:opacity-70'
-
-const ghostBtnClass =
-  'cursor-pointer rounded-full border-2 border-line bg-cream px-4 py-2 font-display text-[13.5px] font-bold ' +
-  'text-brown-text transition-transform duration-200 ease-pop hover:scale-[1.03]'
+const fieldLabel = 'mb-1.5 block text-xs font-medium text-ink-700'
 
 const EditBirthForm = ({ birth, cycles, sires, onSave, onCancel, isSaving }) => {
   const { t } = useTranslation()
@@ -66,7 +57,7 @@ const EditBirthForm = ({ birth, cycles, sires, onSave, onCancel, isSaving }) => 
   }
 
   return (
-    <div className="mt-3 grid grid-cols-1 gap-3 rounded-xl bg-sand p-4 xs:grid-cols-3">
+    <div className="mt-3 grid grid-cols-1 gap-3 rounded-lg border border-line bg-surface-sunken p-4 xs:grid-cols-3">
       <div>
         <label className={fieldLabel}>{t('births.cycle')}</label>
         <HfSelect value={cycleId} onChange={(e) => setCycleId(e.target.value)}>
@@ -115,11 +106,11 @@ const EditBirthForm = ({ birth, cycles, sires, onSave, onCancel, isSaving }) => 
         <button
           onClick={submit}
           disabled={isSaving}
-          className={actionBtnClass}
+          className={btnPrimary}
         >
           {isSaving ? t('common.saving') : t('common.save')}
         </button>
-        <button onClick={onCancel} className={ghostBtnClass}>{t('common.cancel')}</button>
+        <button onClick={onCancel} className={btnSecondary}>{t('common.cancel')}</button>
       </div>
     </div>
   )
@@ -177,37 +168,37 @@ const BirthsSection = ({ dam, onRecordBirth }) => {
     <div className={classNames(cardClass, 'p-7')}>
       <div className="mb-[18px] flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[22px]">{t('births.title')}</h2>
-        <button onClick={onRecordBirth} className={actionBtnClass}>{t('births.recordBirth')}</button>
+        <button onClick={onRecordBirth} className={btnPrimary}>{t('births.recordBirth')}</button>
       </div>
 
       {isLoading ? (
         <div className="flex justify-center py-6"><LoadingSpinner message={t('common.loading')} /></div>
       ) : births.length === 0 ? (
-        <p className="text-sm text-tan">{t('births.empty')}</p>
+        <p className="text-sm text-ink-500">{t('births.empty')}</p>
       ) : (
         <div className="flex flex-col gap-2.5">
           {births.map((b) => (
-            <div key={b.id} className="rounded-xl bg-sand px-4 py-3.5">
+            <div key={b.id} className="rounded-lg border border-line bg-surface-sunken px-4 py-3.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <span className="font-display text-base font-bold text-brown-text">{fmtDate(b.born_on, i18n.language)}</span>
-                  <span className="ms-2 text-[13px] text-tan">
+                  <span className="font-display text-base font-semibold text-ink-900">{fmtDate(b.born_on, i18n.language)}</span>
+                  <span className="ms-2 text-[13px] text-ink-500">
                     {t('births.offspringAlive')}: {b.offspring_alive} / {t('births.offspringTotal').toLowerCase()}: {b.offspring_total}
                   </span>
-                  {b.difficulty && <span className="ms-2 text-[13px] text-tan">· {t(`births.difficulty.${b.difficulty}`)}</span>}
+                  {b.difficulty && <span className="ms-2 text-[13px] text-ink-500">· {t(`births.difficulty.${b.difficulty}`)}</span>}
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => setEditingBirth(editingBirth === b.id ? null : b.id)} className="text-[12.5px] font-semibold text-green underline decoration-dotted underline-offset-2">
+                  <button onClick={() => setEditingBirth(editingBirth === b.id ? null : b.id)} className="text-[12.5px] font-medium text-meadow-700 underline decoration-dotted underline-offset-2">
                     {t('common.edit')}
                   </button>
-                  <button onClick={() => setDeletingBirth(b)} className="text-[12.5px] font-semibold text-red underline decoration-dotted underline-offset-2">
+                  <button onClick={() => setDeletingBirth(b)} className="text-[12.5px] font-medium text-danger-fg underline decoration-dotted underline-offset-2">
                     {t('common.delete')}
                   </button>
                 </div>
               </div>
 
-              {b.sire_name && <p className="mt-1 text-[12.5px] text-tan">{t('births.sire')}: {b.sire_name}</p>}
-              {b.notes && <p className="mt-1 text-[12.5px] text-tan">{b.notes}</p>}
+              {b.sire_name && <p className="mt-1 text-[12.5px] text-ink-500">{t('births.sire')}: {b.sire_name}</p>}
+              {b.notes && <p className="mt-1 text-[12.5px] text-ink-500">{b.notes}</p>}
 
               {b.animals?.length > 0 && (
                 <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -215,9 +206,9 @@ const BirthsSection = ({ dam, onRecordBirth }) => {
                     <button
                       key={a.id}
                       onClick={() => navigate(`/animals/${a.id}`)}
-                      className="cursor-pointer rounded-full border border-green-line bg-green-badgeBg px-3 py-1 text-[12.5px] font-semibold text-green-badge transition-transform duration-150 hover:scale-105"
+                      className="cursor-pointer rounded-pill border border-ok-fg/25 bg-ok-bg px-3 py-1 text-[12.5px] font-medium text-ok-fg transition-colors duration-hf hover:brightness-95"
                     >
-                      {a.name} <span className="text-tan">({t(`addAnimal.${a.sex}`)})</span>
+                      {a.name} <span className="text-ink-500">({t(`addAnimal.${a.sex}`)})</span>
                     </button>
                   ))}
                 </div>

@@ -1,15 +1,15 @@
 import { Outlet } from 'react-router-dom'
-import Header from './Header.jsx'
+import Topbar from './Topbar.jsx'
+import Sidebar from './Sidebar.jsx'
 
 const Layout = () => {
   return (
-    <div className="hf-leaf-bg relative min-h-screen bg-pageBg">
-      <div className="relative">
-        <Header />
-        <main className="relative mx-auto max-w-[1152px] px-6 pb-[72px] pt-9">
-          <Outlet />
-        </main>
-      </div>
+    <div className="min-h-screen bg-surface-page">
+      <Topbar />
+      <Sidebar />
+      <main className="relative mx-auto max-w-content px-4 pb-24 pt-24 nav:ps-sidebar nav:pb-9 nav:pt-24 nav:pe-6">
+        <Outlet />
+      </main>
     </div>
   )
 }

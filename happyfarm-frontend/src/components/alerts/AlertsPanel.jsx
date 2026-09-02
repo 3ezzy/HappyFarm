@@ -5,17 +5,24 @@ import { useQuery, useMutation, useQueryClient } from 'react-query'
 import toast from 'react-hot-toast'
 import { alertService } from '../../services/api/alerts.js'
 import LoadingSpinner from '../common/UI/LoadingSpinner.jsx'
-import { fmtDate, cardClass } from '../../theme/hf.jsx'
+import { fmtDate, cardClass, AlertRow, EmptyState } from '../../theme/hf.jsx'
+import { Icon } from '../../theme/icons.jsx'
 import { apiErrorMessage } from '../../utils/apiError.js'
 
 const TYPE_ICON = {
-  breeding_check_due: '🩺',
-  lambing_due: '🐣',
-  weaning_due: '🌾',
-  reinsemination_due: '💞',
-  health_due: '💉',
-  low_stock: '📦',
+  breeding_check_due: Icon.breedingCheck,
+  lambing_due: Icon.lambing,
+  weaning_due: Icon.weaning,
+  reinsemination_due: Icon.reinsemination,
+  health_due: Icon.healthDue,
+  low_stock: Icon.archived,
 }
+
+const smBtnBase =
+  'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded border px-3 py-[5px] ' +
+  'text-[13px] font-medium transition-colors duration-hf disabled:cursor-not-allowed disabled:opacity-45'
+const smBtnOutline = `${smBtnBase} border-line-strong bg-surface-card text-ink-900 hover:bg-surface-sunken`
+const smBtnGhost = `${smBtnBase} border-transparent bg-transparent text-ink-500 hover:text-ink-900`
 
 /**
  * Alerts are computed on the backend at read time (see AlertGenerator) —
@@ -67,58 +74,55 @@ const AlertsPanel = () => {
       ? t('alerts.lowStockDetail', { stock: alert.current_stock, unit: alert.unit, threshold: alert.low_stock_threshold })
       : `${fmtDate(alert.due_on, i18n.language)} · ${dueLabel(alert)}`
 
-  // Every other alert type turns red once overdue (days_until < 0, which
-  // low_stock's fixed days_until=0 never triggers) — for low_stock, red
+  // Every other alert type turns urgent once overdue (days_until < 0, which
+  // low_stock's fixed days_until=0 never triggers) — for low_stock, urgent
   // means "completely out" instead.
   const isUrgent = (alert) => (alert.type === 'low_stock' ? alert.current_stock <= 0 : alert.days_until < 0)
 
   return (
     <div className={classNames(cardClass, 'p-6')}>
-      <h2 className="mb-1.5 text-[22px]">{t('alerts.title')}</h2>
-      <p className="mb-[18px] text-sm text-tan">{t('alerts.subtitle')}</p>
+      <h2 className="mb-1.5 text-[22px] text-ink-900">{t('alerts.title')}</h2>
+      <p className="mb-[18px] text-sm text-ink-500">{t('alerts.subtitle')}</p>
 
       {isLoading ? (
         <div className="flex justify-center py-8"><LoadingSpinner message={t('alerts.loading')} /></div>
       ) : alerts.length === 0 ? (
-        <p className="text-sm text-tan">{t('alerts.empty')}</p>
+        <EmptyState title={t('alerts.empty')} />
       ) : (
         <div className="flex flex-col gap-2.5">
-          {alerts.map((alert) => (
-            <div
-              key={alert.key}
-              className={classNames(
-                'flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3',
-                isUrgent(alert) ? 'bg-red-soft' : 'bg-yellow-badgeBg'
-              )}
-            >
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="text-xl">{TYPE_ICON[alert.type] || '🔔'}</span>
-                <div className="min-w-0">
-                  <p className="truncate font-display text-[15px] font-bold text-brown-text">
+          {alerts.map((alert) => {
+            const AlertIcon = TYPE_ICON[alert.type] || Icon.bell
+            return (
+              <AlertRow
+                key={alert.key}
+                severity={isUrgent(alert) ? 'danger' : 'warn'}
+                title={
+                  <>
+                    <span className="me-2 inline-flex align-middle"><AlertIcon width={16} height={16} /></span>
                     {typeLabel(alert)} — {alert.type === 'low_stock' ? alert.item_name : alert.animal_name}
-                  </p>
-                  <p className="text-[12.5px] text-tan">
-                    {detailLabel(alert)}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-none items-center gap-2">
-                <button
-                  onClick={() => navigate(alert.type === 'low_stock' ? '/inventory' : `/animals/${alert.animal_id}`)}
-                  className="cursor-pointer rounded-full border-2 border-line bg-cream px-3.5 py-1.5 font-display text-[12.5px] font-bold text-brown-text transition-transform duration-150 hover:scale-105"
-                >
-                  {alert.type === 'low_stock' ? t('alerts.viewInventory') : t('alerts.viewAnimal')}
-                </button>
-                <button
-                  onClick={() => dismissMutation.mutate(alert.key)}
-                  disabled={dismissMutation.isLoading}
-                  className="cursor-pointer rounded-full border-none bg-brown px-3.5 py-1.5 font-display text-[12.5px] font-bold text-white shadow-chip transition-transform duration-150 enabled:hover:scale-105 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {t('alerts.dismiss')}
-                </button>
-              </div>
-            </div>
-          ))}
+                  </>
+                }
+                detail={detailLabel(alert)}
+                actions={
+                  <div className="flex flex-none items-center gap-2">
+                    <button
+                      onClick={() => navigate(alert.type === 'low_stock' ? '/inventory' : `/animals/${alert.animal_id}`)}
+                      className={smBtnOutline}
+                    >
+                      {alert.type === 'low_stock' ? t('alerts.viewInventory') : t('alerts.viewAnimal')}
+                    </button>
+                    <button
+                      onClick={() => dismissMutation.mutate(alert.key)}
+                      disabled={dismissMutation.isLoading}
+                      className={smBtnGhost}
+                    >
+                      {t('alerts.dismiss')}
+                    </button>
+                  </div>
+                }
+              />
+            )
+          })}
         </div>
       )}
     </div>

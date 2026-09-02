@@ -16,23 +16,25 @@ import {
 } from 'recharts'
 import { farmService } from '../../services/api/farm.js'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { cardClass, C } from '../../theme/hf.jsx'
+import { cardClass, C, StatCard } from '../../theme/hf.jsx'
 
-const BREEDING_STATUS_COLORS = { not_bred: C.tan, bred: C.yellow, pregnant: C.blue, nursing: C.brown, available: C.green }
-const BREEDING_OUTCOME_COLORS = { bred: C.yellow, pregnant: C.blue, not_pregnant: C.tan, aborted: C.red, lambed: C.green }
+// Fixed per-status color (not positional "use in order") — these status
+// words appear in two side-by-side pie charts (current status vs. cycle
+// outcome) and must read as the same color in both. Positional assignment
+// via Object.entries() order could give e.g. "bred" a different color in
+// each chart, since the two API objects are independent. Substitution
+// preserves the exact word→hue-family associations the legacy palette
+// already had (bred=yellow, pregnant=blue, not_bred/not_pregnant=tan,
+// available/lambed=green), remapped 1:1 onto the Meadow chart tokens.
+const BREEDING_STATUS_COLORS = { not_bred: C.chart6, bred: C.chart3, pregnant: C.chart2, nursing: C.chart5, available: C.chart1 }
+const BREEDING_OUTCOME_COLORS = { bred: C.chart3, pregnant: C.chart2, not_pregnant: C.chart6, aborted: C.chart4, lambed: C.chart1 }
 const ALERT_TYPE_COLORS = {
-  breeding_check_due: C.blue,
-  lambing_due: C.green,
-  weaning_due: C.yellow,
-  reinsemination_due: C.brown,
-  health_due: C.red,
+  breeding_check_due: C.chart2,
+  lambing_due: C.chart1,
+  weaning_due: C.chart3,
+  reinsemination_due: C.chart5,
+  health_due: C.chart4,
 }
-const MiniStat = ({ label, value, valueClass }) => (
-  <div className={classNames(cardClass, 'p-5')}>
-    <p className="mb-1 text-[13px] font-medium text-tan">{label}</p>
-    <div className={classNames('font-display text-[28px] font-bold', valueClass)}>{value}</div>
-  </div>
-)
 
 const Reports = () => {
   const { t, i18n } = useTranslation()
@@ -81,37 +83,37 @@ const Reports = () => {
     }))
 
   return (
-    <div className="animate-hf-pop">
+    <div>
       <h1 className="mb-1 text-[34px]">{t('reports.title')}</h1>
-      <p className="mb-[22px] text-tan">{t('reports.subtitle')}</p>
+      <p className="mb-[22px] text-ink-500">{t('reports.subtitle')}</p>
 
       {/* Expense summary */}
       <div className={classNames(cardClass, 'mb-6 p-6')}>
         <h2 className="mb-[18px] text-[22px]">{t('reports.expenses.title')}</h2>
         <div className="mb-5 grid grid-cols-1 gap-3.5 xs:grid-cols-2">
-          <MiniStat label={t('reports.expenses.total')} value={expense.total.toFixed(2)} valueClass="text-brown-text" />
+          <StatCard value={expense.total.toFixed(2)} label={t('reports.expenses.total')} />
         </div>
-        <p className="mb-2 text-sm font-semibold text-brown-text">{t('reports.expenses.byMonth')}</p>
+        <p className="mb-2 text-sm font-semibold text-ink-900">{t('reports.expenses.byMonth')}</p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={byMonthData}>
-            <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+            <CartesianGrid strokeDasharray="3 3" stroke={C.chartGrid} />
             <XAxis dataKey="label" tick={{ fontSize: 12 }} />
             <YAxis tick={{ fontSize: 12 }} />
             <Tooltip />
-            <Bar dataKey="total" name={t('reports.expenses.total')} fill={C.green} radius={[6, 6, 0, 0]} />
+            <Bar dataKey="total" name={t('reports.expenses.total')} fill={C.chart1} radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
 
         {byKindData.length > 0 && (
           <>
-            <p className="mb-2 mt-6 text-sm font-semibold text-brown-text">{t('reports.expenses.byKind')}</p>
+            <p className="mb-2 mt-6 text-sm font-semibold text-ink-900">{t('reports.expenses.byKind')}</p>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={byKindData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+                <CartesianGrid strokeDasharray="3 3" stroke={C.chartGrid} />
                 <XAxis type="number" tick={{ fontSize: 12 }} />
                 <YAxis type="category" dataKey="label" width={110} tick={{ fontSize: 12 }} />
                 <Tooltip />
-                <Bar dataKey="total" name={t('reports.expenses.total')} fill={C.blue} radius={[0, 6, 6, 0]} />
+                <Bar dataKey="total" name={t('reports.expenses.total')} fill={C.chart2} radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </>
@@ -122,12 +124,11 @@ const Reports = () => {
       <div className={classNames(cardClass, 'mb-6 p-6')}>
         <h2 className="mb-[18px] text-[22px]">{t('reports.breeding.title')}</h2>
         <div className="mb-5 grid grid-cols-1 gap-3.5 xs:grid-cols-3">
-          <MiniStat label={t('reports.breeding.totalBirths')} value={breeding.total_births} valueClass="text-brown-text" />
-          <MiniStat label={t('reports.breeding.totalOffspring')} value={breeding.total_offspring_alive} valueClass="text-green" />
-          <MiniStat
+          <StatCard value={breeding.total_births} label={t('reports.breeding.totalBirths')} />
+          <StatCard value={<span className="text-ok-fg">{breeding.total_offspring_alive}</span>} label={t('reports.breeding.totalOffspring')} />
+          <StatCard
+            value={<span className="text-info-fg">{breeding.weaning_rate === null ? '—' : `${breeding.weaning_rate}%`}</span>}
             label={t('reports.breeding.weaningRate')}
-            value={breeding.weaning_rate === null ? '—' : `${breeding.weaning_rate}%`}
-            valueClass="text-blue"
           />
         </div>
         {breedingOutcomeData.length > 0 ? (
@@ -135,7 +136,7 @@ const Reports = () => {
             <PieChart>
               <Pie data={breedingOutcomeData} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={85} label>
                 {breedingOutcomeData.map((entry) => (
-                  <Cell key={entry.status} fill={BREEDING_OUTCOME_COLORS[entry.status] || C.tan} />
+                  <Cell key={entry.status} fill={BREEDING_OUTCOME_COLORS[entry.status] || C.chart6} />
                 ))}
               </Pie>
               <Tooltip />
@@ -143,7 +144,7 @@ const Reports = () => {
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-sm text-tan">{t('reports.breeding.empty')}</p>
+          <p className="text-sm text-ink-500">{t('reports.breeding.empty')}</p>
         )}
       </div>
 
@@ -156,7 +157,7 @@ const Reports = () => {
               <PieChart>
                 <Pie data={statusData} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={85} label>
                   {statusData.map((entry) => (
-                    <Cell key={entry.status} fill={BREEDING_STATUS_COLORS[entry.status] || C.tan} />
+                    <Cell key={entry.status} fill={BREEDING_STATUS_COLORS[entry.status] || C.chart6} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -164,7 +165,7 @@ const Reports = () => {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-sm text-tan">{t('reports.status.empty')}</p>
+            <p className="text-sm text-ink-500">{t('reports.status.empty')}</p>
           )}
         </div>
 
@@ -174,19 +175,19 @@ const Reports = () => {
           {alerts.total > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={alertData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
+                <CartesianGrid strokeDasharray="3 3" stroke={C.chartGrid} />
                 <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
                 <YAxis type="category" dataKey="label" width={130} tick={{ fontSize: 12 }} />
                 <Tooltip />
                 <Bar dataKey="count" name={t('reports.alerts.title')}>
                   {alertData.map((entry) => (
-                    <Cell key={entry.type} fill={ALERT_TYPE_COLORS[entry.type] || C.tan} />
+                    <Cell key={entry.type} fill={ALERT_TYPE_COLORS[entry.type] || C.chart6} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-sm text-tan">{t('reports.alerts.empty')}</p>
+            <p className="text-sm text-ink-500">{t('reports.alerts.empty')}</p>
           )}
         </div>
       </div>

@@ -7,21 +7,24 @@ import { adminService } from '../../services/api/admin.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
 import ConfirmModal from '../../components/common/UI/ConfirmModal.jsx'
-import { badge, cardClass, fmtDate } from '../../theme/hf.jsx'
+import { cardClass, fmtDate, Pill, EmptyState } from '../../theme/hf.jsx'
 import { apiErrorMessage } from '../../utils/apiError.js'
 
 const STATUSES = ['pending', 'approved', 'rejected', 'suspended']
+const STATUS_TONE = { pending: 'warn', approved: 'ok', rejected: 'danger', suspended: 'hold' }
 
 const filterBtnClass = (active) =>
   classNames(
-    'cursor-pointer rounded-full border-2 px-4 py-1.5 font-display text-[13.5px] font-bold transition-all duration-200',
-    active ? 'border-green bg-green text-white' : 'border-line bg-cream text-brown'
+    'cursor-pointer rounded-pill border px-4 py-1.5 text-[13.5px] font-medium transition-colors duration-hf',
+    active ? 'border-meadow-700 bg-meadow-700 text-white' : 'border-line-strong bg-surface-card text-ink-700'
   )
 
-const actionBtnClass =
-  'cursor-pointer rounded-full border-none px-4 py-1.5 font-display text-[13px] font-bold text-white ' +
-  'shadow-chip transition-transform duration-200 ease-pop enabled:hover:scale-[1.04] ' +
-  'disabled:cursor-not-allowed disabled:opacity-70'
+const actionBtnClass = (tone) =>
+  classNames(
+    'cursor-pointer rounded border-none px-4 py-1.5 text-[13px] font-medium text-white transition-colors duration-hf',
+    'enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45',
+    tone === 'ok' ? 'bg-ok-fg' : 'bg-danger-fg'
+  )
 
 /**
  * Admin-only user review/approval dashboard. Only reachable via AdminRoute
@@ -79,9 +82,9 @@ const AdminUsers = () => {
   })
 
   return (
-    <div className="animate-hf-pop">
+    <div>
       <h1 className="mb-1 text-[34px]">{t('admin.title')}</h1>
-      <p className="mb-[22px] text-tan">{t('admin.subtitle')}</p>
+      <p className="mb-[22px] text-ink-500">{t('admin.subtitle')}</p>
 
       <div className="mb-5 flex flex-wrap gap-2">
         {STATUSES.map((s) => (
@@ -97,20 +100,20 @@ const AdminUsers = () => {
             <LoadingSpinner size="large" message={t('common.loading')} />
           </div>
         ) : users.length === 0 ? (
-          <p className="text-sm text-tan">{t('admin.empty')}</p>
+          <EmptyState title={t('admin.empty')} />
         ) : (
           <div className="flex flex-col gap-2">
             {users.map((u) => (
-              <div key={u.id} className="rounded-xl bg-cream px-4 py-3 shadow-chip">
+              <div key={u.id} className="rounded-lg border border-line bg-surface-sunken px-4 py-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-display text-base font-bold text-brown-text">{u.name}</span>
-                      <span className={badge(u.status)}>{t(`admin.status.${u.status}`)}</span>
-                      {u.role === 'admin' && <span className={badge('active')}>{t('admin.role.admin')}</span>}
+                      <span className="font-display text-base font-semibold text-ink-900">{u.name}</span>
+                      <Pill tone={STATUS_TONE[u.status]}>{t(`admin.status.${u.status}`)}</Pill>
+                      {u.role === 'admin' && <Pill tone="ok">{t('admin.role.admin')}</Pill>}
                     </div>
-                    <p className="mt-0.5 truncate text-[13px] text-tan">{u.email}</p>
-                    <p className="mt-0.5 text-[12.5px] text-tan">
+                    <p className="mt-0.5 truncate text-[13px] text-ink-500">{u.email}</p>
+                    <p className="mt-0.5 text-[12.5px] text-ink-500">
                       {t('admin.farmLabel', { farm: u.farm_name || t('common.none') })} · {t('admin.registeredOn', { date: fmtDate(u.created_at, i18n.language) })}
                     </p>
                   </div>
@@ -120,14 +123,14 @@ const AdminUsers = () => {
                       <button
                         onClick={() => approveMutation.mutate(u.id)}
                         disabled={approveMutation.isLoading || rejectMutation.isLoading}
-                        className={classNames(actionBtnClass, 'bg-green')}
+                        className={actionBtnClass('ok')}
                       >
                         {t('admin.approve')}
                       </button>
                       <button
                         onClick={() => rejectMutation.mutate(u.id)}
                         disabled={approveMutation.isLoading || rejectMutation.isLoading}
-                        className={classNames(actionBtnClass, 'bg-red')}
+                        className={actionBtnClass('danger')}
                       >
                         {t('admin.reject')}
                       </button>
@@ -141,7 +144,7 @@ const AdminUsers = () => {
                     <div className="flex flex-none gap-2">
                       <button
                         onClick={() => setSuspendingUser(u)}
-                        className={classNames(actionBtnClass, 'bg-red')}
+                        className={actionBtnClass('danger')}
                       >
                         {t('admin.suspend')}
                       </button>
@@ -153,7 +156,7 @@ const AdminUsers = () => {
                       <button
                         onClick={() => reactivateMutation.mutate(u.id)}
                         disabled={reactivateMutation.isLoading}
-                        className={classNames(actionBtnClass, 'bg-green')}
+                        className={actionBtnClass('ok')}
                       >
                         {t('admin.reactivate')}
                       </button>

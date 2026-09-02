@@ -1,33 +1,27 @@
 import { useState } from 'react'
+import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation } from 'react-query'
 import toast from 'react-hot-toast'
 import { authService } from '../../services/api/auth.js'
 import { apiErrorMessage } from '../../utils/apiError.js'
-import { C, HfInput, LeafMark } from '../../theme/hf.jsx'
+import { C, HfInput, LeafMark, btnPrimary } from '../../theme/hf.jsx'
 
-const labelClass = 'mb-2 block text-sm font-medium text-brown-text'
-
-const submitClass =
-  'flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border-none ' +
-  'bg-brown p-[13px] font-display text-base font-bold text-white shadow-soft ' +
-  'transition-all duration-200 ease-pop ' +
-  'enabled:hover:scale-[1.03] enabled:hover:bg-brown-dark enabled:hover:shadow-ribbon ' +
-  'disabled:cursor-not-allowed disabled:opacity-70'
+const labelClass = 'mb-2 block text-sm font-medium text-ink-900'
 
 const CardShell = ({ children }) => (
-  <div className="hf-leaf-bg flex min-h-screen animate-hf-fade items-center justify-center bg-pageBg px-5 py-8">
+  <div className="flex min-h-screen items-center justify-center bg-surface-page px-5 py-8">
     <div className="relative w-full max-w-[430px]">
       <div className="mb-6 text-center">
         <div className="inline-flex items-center gap-2.5">
-          <span className="inline-flex h-[46px] w-[46px] items-center justify-center rounded-[14px] bg-green shadow-ribbon">
-            <LeafMark size={26} color={C.leafPale} />
+          <span className="inline-flex h-[46px] w-[46px] items-center justify-center rounded-lg bg-meadow-700 shadow-e1">
+            <LeafMark size={26} color={C.meadow100} />
           </span>
-          <span className="font-display text-3xl font-bold text-brown-text">HappyFarm</span>
+          <span className="font-display text-3xl font-semibold text-ink-900">HappyFarm</span>
         </div>
       </div>
-      <div className="animate-hf-pop rounded-2xl bg-cream p-7 shadow-card">{children}</div>
+      <div className="rounded-lg border border-line bg-surface-card p-7 shadow-e2">{children}</div>
     </div>
   </div>
 )
@@ -65,8 +59,8 @@ const ResetPassword = () => {
     return (
       <CardShell>
         <div className="text-center">
-          <p className="mb-5 text-[15px] text-brown-text">{t('auth.resetLinkInvalid')}</p>
-          <Link to="/forgot-password" className="font-display text-[15px] font-bold text-green">
+          <p className="mb-5 text-[15px] text-ink-900">{t('auth.resetLinkInvalid')}</p>
+          <Link to="/forgot-password" className="font-display text-[15px] font-semibold text-meadow-700">
             {t('auth.requestNewResetLink')}
           </Link>
         </div>
@@ -76,7 +70,7 @@ const ResetPassword = () => {
 
   return (
     <CardShell>
-      <p className="mb-5 text-center text-[15px] text-brown">{t('auth.resetPasswordTagline')}</p>
+      <p className="mb-5 text-center text-[15px] text-ink-500">{t('auth.resetPasswordTagline')}</p>
       <label htmlFor="rpp" className={labelClass}>{t('auth.newPassword')}</label>
       <HfInput
         id="rpp"
@@ -96,11 +90,11 @@ const ResetPassword = () => {
         placeholder="••••••••"
         className="mb-[22px]"
       />
-      <button onClick={submit} disabled={resetPasswordMutation.isLoading} className={submitClass}>
+      <button onClick={submit} disabled={resetPasswordMutation.isLoading} className={classNames(btnPrimary, 'w-full')}>
         {resetPasswordMutation.isLoading ? t('auth.resetting') : t('auth.resetPassword')}
       </button>
-      <p className="mt-4 text-center text-[13px] text-tan">
-        <Link to="/login" className="font-semibold text-brown-text">{t('auth.backToLogin')}</Link>
+      <p className="mt-4 text-center text-[13px] text-ink-500">
+        <Link to="/login" className="font-medium text-ink-900">{t('auth.backToLogin')}</Link>
       </p>
     </CardShell>
   )

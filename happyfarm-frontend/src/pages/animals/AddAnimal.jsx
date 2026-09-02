@@ -8,26 +8,21 @@ import { animalService } from '../../services/api/animals.js'
 import { breedService } from '../../services/api/breeds.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
-import { HfInput, HfSelect, TYPES } from '../../theme/hf.jsx'
-
-const backBtnClass =
-  'mb-5 inline-flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-line bg-cream ' +
-  'px-[18px] py-2 font-display text-sm font-bold text-brown-text ' +
-  'transition-transform duration-200 ease-pop hover:scale-[1.04]'
+import { HfInput, HfSelect, TYPES, cardClass, AlertRow, btnPrimary, btnSecondary } from '../../theme/hf.jsx'
 
 const choiceClass = (active) =>
   classNames(
-    'flex cursor-pointer flex-col items-center rounded-2xl border-2 px-2 py-3.5 transition-all duration-200 ease-pop',
-    active ? 'border-green bg-green-soft shadow-ribbon' : 'border-transparent bg-sand'
+    'flex cursor-pointer flex-col items-center rounded-lg border px-2 py-3.5 transition-colors duration-hf',
+    active ? 'border-meadow-700 bg-meadow-50 shadow-e1' : 'border-transparent bg-surface-sunken'
   )
 
 const toggleOptionClass = (active) =>
   classNames(
-    'flex-1 cursor-pointer rounded-full border-2 px-3 py-2 text-center font-sans text-[13.5px] font-semibold transition-all duration-200',
-    active ? 'border-green bg-green text-white' : 'border-line bg-cream text-brown'
+    'flex-1 cursor-pointer rounded border px-3 py-2 text-center font-sans text-[13.5px] font-medium transition-colors duration-hf',
+    active ? 'border-meadow-700 bg-meadow-700 text-white' : 'border-line-strong bg-surface-card text-ink-700'
   )
 
-const labelClass = 'mb-2 block text-sm font-semibold text-brown-text'
+const labelClass = 'mb-2 block text-sm font-medium text-ink-900'
 const fieldGroupClass = 'mb-[18px]'
 
 const AddAnimal = () => {
@@ -105,14 +100,14 @@ const AddAnimal = () => {
   }
 
   return (
-    <div className="mx-auto max-w-[680px] animate-hf-pop">
-      <button onClick={() => navigate('/animals')} className={backBtnClass}>
+    <div className="mx-auto max-w-[680px]">
+      <button onClick={() => navigate('/animals')} className={classNames(btnSecondary, 'mb-5 w-auto')}>
         <span className="text-base rtl:rotate-180">←</span> {t('common.back')}
       </button>
 
-      <div className="rounded-2xl bg-cream p-7 shadow-ribbon">
-        <h1 className="mb-1.5 text-3xl">{t('addAnimal.title')}</h1>
-        <p className="mb-6 text-tan">{t('addAnimal.welcomeSub', { farm: farm?.name })}</p>
+      <div className={classNames(cardClass, 'p-7')}>
+        <h1 className="mb-1.5 text-3xl text-ink-900">{t('addAnimal.title')}</h1>
+        <p className="mb-6 text-ink-500">{t('addAnimal.welcomeSub', { farm: farm?.name })}</p>
 
         <label className={labelClass}>{t('addAnimal.animalType')}</label>
         <div className="mb-[22px] grid grid-cols-2 gap-3 xs:grid-cols-4">
@@ -121,7 +116,7 @@ const AddAnimal = () => {
               <span className="mb-1 inline-flex h-[50px] w-[50px] items-center justify-center">
                 <AnimalIcon type={opt} size={50} />
               </span>
-              <span className="block font-display text-[15px] font-bold text-brown-text">{t(`species.${opt}.label`)}</span>
+              <span className="block font-display text-[15px] font-semibold text-ink-900">{t(`species.${opt}.label`)}</span>
             </button>
           ))}
         </div>
@@ -231,17 +226,13 @@ const AddAnimal = () => {
           </div>
         </div>
 
-        <div className="mb-6 rounded-2xl border-[3px] border-yellow-line bg-yellow-badgeBg px-4 py-3">
-          <p className="text-[13.5px] text-yellow-deep">
-            {t('addAnimal.eligibilityHint', { plural: t(`species.${type}.plural`), minAge: t(`minAge.${type}`) })}
-          </p>
-        </div>
+        <AlertRow
+          severity="info"
+          title={t('addAnimal.eligibilityHint', { plural: t(`species.${type}.plural`), minAge: t(`minAge.${type}`) })}
+          className="mb-6"
+        />
 
-        <button
-          onClick={submit}
-          disabled={createMutation.isLoading}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border-none bg-brown p-3.5 font-display text-base font-bold text-white shadow-soft transition-all duration-200 ease-pop enabled:hover:scale-[1.02] enabled:hover:bg-brown-dark disabled:cursor-not-allowed disabled:opacity-70"
-        >
+        <button onClick={submit} disabled={createMutation.isLoading} className={classNames(btnPrimary, 'w-full')}>
           {createMutation.isLoading ? t('addAnimal.submitting') : t('addAnimal.submit')} <span className="text-lg rtl:rotate-180">→</span>
         </button>
       </div>

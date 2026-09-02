@@ -10,17 +10,16 @@ import { apiErrorMessage } from '../../../utils/apiError.js'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
-const fieldLabel = 'mb-1.5 block text-xs font-semibold text-brown-text'
+const fieldLabel = 'mb-1.5 block text-xs font-medium text-ink-700'
 const fieldGroup = 'mb-4'
 
 const primaryBtnClass =
-  'flex-1 cursor-pointer rounded-full border-none bg-brown p-3 font-display text-[15px] font-bold text-white ' +
-  'shadow-soft transition-all duration-200 ease-pop enabled:hover:scale-[1.02] enabled:hover:bg-brown-dark ' +
-  'disabled:cursor-not-allowed disabled:opacity-70'
+  'flex-1 cursor-pointer rounded border-none bg-meadow-700 p-3 text-[15px] font-medium text-white ' +
+  'transition-colors duration-hf enabled:hover:bg-meadow-900 disabled:cursor-not-allowed disabled:opacity-45'
 
 const ghostBtnClass =
-  'flex-1 cursor-pointer rounded-full border-2 border-line bg-cream p-3 font-display text-[15px] font-bold ' +
-  'text-brown-text transition-transform duration-150 hover:scale-[1.03]'
+  'flex-1 cursor-pointer rounded border border-line-strong bg-surface-card p-3 text-[15px] font-medium ' +
+  'text-ink-900 transition-colors duration-hf hover:bg-surface-sunken'
 
 const makeOffspringRow = (t, damType, index) => ({
   key: `${Date.now()}-${index}-${Math.random()}`,
@@ -155,11 +154,11 @@ const BirthModal = ({ dam, initialCycleId, onClose }) => {
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex animate-hf-fade items-start justify-center overflow-y-auto bg-scrim p-5 backdrop-blur-[3px] sm:items-center"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-scrim p-5 backdrop-blur-[3px] sm:items-center"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="my-8 w-full max-w-[620px] animate-hf-modal overflow-hidden rounded-2xl bg-cream shadow-card"
+        className="my-8 w-full max-w-[620px] overflow-hidden rounded-lg border border-line bg-surface-card shadow-e3"
       >
         <div className="max-h-[80vh] overflow-y-auto p-7">
           <h3 className="mb-5 text-2xl">{t('breeding.recordBirth')}</h3>
@@ -219,11 +218,11 @@ const BirthModal = ({ dam, initialCycleId, onClose }) => {
 
           {offspring.length > 0 && (
             <div className="mb-2 mt-2 border-t border-line pt-4">
-              <h4 className="mb-1 text-base font-bold text-brown-text">{t('births.offspring')}</h4>
-              <p className="mb-3 text-[12.5px] text-tan">{t('births.offspringHint')}</p>
+              <h4 className="mb-1 text-base font-semibold text-ink-900">{t('births.offspring')}</h4>
+              <p className="mb-3 text-[12.5px] text-ink-500">{t('births.offspringHint')}</p>
               <div className="flex flex-col gap-3">
                 {offspring.map((row) => (
-                  <div key={row.key} className="grid grid-cols-2 gap-2.5 rounded-xl bg-sand p-3.5 xs:grid-cols-4">
+                  <div key={row.key} className="grid grid-cols-2 gap-2.5 rounded-lg border border-line bg-surface-sunken p-3.5 xs:grid-cols-4">
                     <div>
                       <label className={fieldLabel}>{t('births.offspringName')}</label>
                       <HfInput type="text" value={row.name} onChange={(e) => updateRow(row.key, 'name', e.target.value)} />

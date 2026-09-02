@@ -1,12 +1,13 @@
 import classNames from 'classnames'
 import { C } from './colors.js'
+import { Icon } from './icons.jsx'
 
 /* ============================================================
-   HappyFarm — shared design tokens & helpers
+   HappyFarm — shared design tokens & helpers (Meadow design system)
    ============================================================ */
 
 // Re-exported so existing imports of `C` keep working. Prefer Tailwind
-// classes in markup; `C` is for raw values (SVG fills, gradients).
+// classes in markup; `C` is for raw values (SVG fills, gradients, Recharts).
 export { C }
 
 export const TYPES = ['sheep', 'goat', 'cow', 'camel']
@@ -18,13 +19,13 @@ export const TYPES = ['sheep', 'goat', 'cow', 'camel']
  * API (`animal.is_eligible`); nothing here computes it.
  */
 const SPECIES_BG_CLASS = {
-  sheep: 'bg-species-sheep',
-  goat: 'bg-species-goat',
-  cow: 'bg-species-cow',
-  camel: 'bg-species-camel',
+  sheep: 'bg-sheep-bg',
+  goat: 'bg-goat-bg',
+  cow: 'bg-cow-bg',
+  camel: 'bg-camel-bg',
 }
 
-export const speciesBgClass = (type) => SPECIES_BG_CLASS[type] || 'bg-cream'
+export const speciesBgClass = (type) => SPECIES_BG_CLASS[type] || 'bg-surface-sunken'
 
 const toMs = (ts) => (ts ? new Date(ts).getTime() : null)
 
@@ -103,46 +104,62 @@ export const initialsOf = (name) =>
     .toUpperCase()
 
 /* ------------------------------------------------------------
-   Shared class recipes
+   Shared class recipes (Tailwind-utility composition — kept as plain
+   strings, same pattern as before, just retargeted to Meadow tokens)
    ------------------------------------------------------------ */
 
-/** Card surface. Callers add their own padding (p-6 or p-7). */
-export const cardClass = 'rounded-2xl bg-cream shadow-ribbon'
+/** Card surface. Callers add their own padding. */
+export const cardClass = 'rounded-lg bg-surface-card shadow-e1'
 
 const inputClass =
-  'block w-full rounded-2xl border-2 border-line-input bg-cream px-3.5 py-2.5 ' +
-  'text-[15px] text-brown-text outline-none transition-colors duration-200 ' +
-  'focus:border-green'
+  'w-full rounded border border-line-strong bg-surface-card px-3 py-2.5 ' +
+  'text-base text-ink-900 placeholder:text-ink-400 outline-none ' +
+  'transition-colors duration-hf hover:border-ink-400 ' +
+  'focus:border-meadow-700 focus:shadow-focus'
 
 const btnBase =
-  'inline-flex items-center justify-center gap-1.5 rounded-full font-display ' +
-  'font-bold cursor-pointer transition-transform duration-200 ease-pop ' +
-  'disabled:cursor-not-allowed disabled:opacity-60 enabled:hover:scale-105'
+  'inline-flex cursor-pointer items-center justify-center gap-2 rounded ' +
+  'px-[18px] py-2.5 text-sm font-medium transition-colors duration-hf ' +
+  'disabled:cursor-not-allowed disabled:opacity-45'
 
-export const btnCream = `${btnBase} bg-cream text-brown-text px-4 py-2 shadow-chip`
+/** Primary button — one per view. */
+export const btnPrimary = `${btnBase} border border-transparent bg-meadow-700 text-white enabled:hover:bg-meadow-900`
+/** Secondary button — outlined, neutral. */
+export const btnSecondary = `${btnBase} border border-line-strong bg-surface-card text-ink-900 enabled:hover:bg-surface-sunken`
+/** Ghost button — no border, no fill. */
+export const btnGhost = `${btnBase} border border-transparent bg-transparent text-meadow-700 enabled:hover:bg-meadow-50`
+/** Danger ghost — outlined, for destructive actions that aren't the page's primary action (e.g. Delete, Log out). */
+export const btnDangerGhost = `${btnBase} border border-danger-fg/30 bg-surface-card text-danger-fg enabled:hover:bg-danger-bg`
 
-/* Status pills, shared by the animal list, dashboard and detail screens.
-   `lg` is the roomier variant the detail page uses. */
-const badgeBase = 'rounded-full border-2 font-semibold'
+/* Legacy 7-tone status names (still used by ~15 not-yet-migrated pages via
+   badge()) mapped onto the design system's 5 status tones. Pill's own
+   `tone` prop takes the 5 canonical names directly — this map only exists
+   so badge() and Pill can never disagree about what e.g. "approved" means. */
+const TONE_MAP = {
+  sacrificed: 'hold',
+  active: 'ok',
+  eligible: 'warn',
+  pending: 'warn',
+  approved: 'ok',
+  rejected: 'danger',
+  suspended: 'hold',
+}
 
+const badgeBase = 'inline-flex items-center gap-1.5 rounded-pill border font-medium'
 const badgeSize = {
-  sm: 'px-3 py-[3px] text-xs',
-  lg: 'inline-flex items-center gap-1.5 px-3.5 py-[5px] text-[13px]',
+  sm: 'px-2.5 py-[3px] text-xs',
+  lg: 'px-3.5 py-[5px] text-[13px]',
+}
+const badgeToneClasses = {
+  ok: 'border-ok-fg/25 bg-ok-bg text-ok-fg',
+  warn: 'border-warn-fg/25 bg-warn-bg text-warn-fg',
+  danger: 'border-danger-fg/25 bg-danger-bg text-danger-fg',
+  hold: 'border-hold-fg/25 bg-hold-bg text-hold-fg',
+  info: 'border-info-fg/25 bg-info-bg text-info-fg',
 }
 
-const badgeTone = {
-  sacrificed: 'border-line bg-cream-muted text-tan',
-  active: 'border-green-line bg-green-badgeBg text-green-badge',
-  eligible: 'border-yellow-line bg-yellow-badgeBg text-yellow-badge',
-  pending: 'border-yellow-line bg-yellow-badgeBg text-yellow-badge',
-  approved: 'border-green-line bg-green-badgeBg text-green-badge',
-  rejected: 'border-red-line bg-red-soft text-red-dark',
-  // Same muted tone as sacrificed — reads as "inactive," distinct from
-  // rejected's red ("actively denied").
-  suspended: 'border-line bg-cream-muted text-tan',
-}
-
-export const badge = (tone, size = 'sm') => classNames(badgeBase, badgeSize[size], badgeTone[tone])
+export const badge = (tone, size = 'sm') =>
+  classNames(badgeBase, badgeSize[size], badgeToneClasses[TONE_MAP[tone] || tone])
 
 export function HfInput({ className, ...props }) {
   return <input {...props} className={classNames(inputClass, className)} />
@@ -157,7 +174,7 @@ export function HfSelect({ className, children, ...props }) {
 }
 
 /* shared logo mark */
-export function LeafMark({ size = 26, color = '#BEE6D5' }) {
+export function LeafMark({ size = 26, color = '#DCEDE4' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <path d="M12 3c3.5 3 3.5 9 0 12-3.5-3-3.5-9 0-12z" fill={color} />
@@ -165,3 +182,104 @@ export function LeafMark({ size = 26, color = '#BEE6D5' }) {
     </svg>
   )
 }
+
+/* ------------------------------------------------------------
+   New Meadow components — thin React wrappers around the .hf-* classes
+   defined in index.css's @layer components.
+   ------------------------------------------------------------ */
+
+/** The ear tag — the signature component. `tag` falsy renders an em dash. */
+export function EarTag({ species, tag, archived = false, size, className }) {
+  return (
+    <span className={classNames('hf-tag', species, archived && 'archived', size === 'lg' && 'lg', className)}>
+      {tag || '—'}
+    </span>
+  )
+}
+
+/** Status pill. `tone` is one of ok/warn/danger/hold/info (default hold). */
+export function Pill({ tone = 'hold', size, children, className }) {
+  return (
+    <span className={classNames('hf-pill', tone, size === 'lg' && 'px-3.5 py-1 text-sm', className)}>
+      {children}
+    </span>
+  )
+}
+
+/** Neutral stat card. `accent` (yellow top border) is reserved for a
+ *  future Eid-countdown feature — no current call site should pass it. */
+export function StatCard({ value, label, description, accent = false, className }) {
+  return (
+    <div className={classNames('hf-stat', accent && 'accent', className)}>
+      <span className="k">{label}</span>
+      <div className="v">{value}</div>
+      {description && <div className="d">{description}</div>}
+    </div>
+  )
+}
+
+/** Dashed-border empty state. */
+export function EmptyState({ icon, title, body, action, className }) {
+  return (
+    <div className={classNames('hf-empty', className)}>
+      {icon}
+      <h4>{title}</h4>
+      {body && <p>{body}</p>}
+      {action}
+    </div>
+  )
+}
+
+/** Alert row. Severity is carried by a 3px inline-start border only —
+ *  never a background wash. `severity`: 'info' (default) | 'warn' | 'danger'. */
+export function AlertRow({ severity = 'info', title, detail, when, actions, className }) {
+  return (
+    <div className={classNames('hf-alert', severity !== 'info' && severity, className)}>
+      <div className="body">
+        <div className="t">{title}</div>
+        {detail && <div className="m">{detail}</div>}
+      </div>
+      {when && <span className="when">{when}</span>}
+      {actions}
+    </div>
+  )
+}
+
+/** Sacrifice-eligibility badge. The filled/outline crescent carries the
+ *  eligible/not-eligible state; the "why" and "when" (if it's only a
+ *  matter of time) belong in `label`, not a second icon variant. */
+export function Eligibility({ eligible, label, className }) {
+  return (
+    <span className={classNames('hf-elig', !eligible && 'no', className)}>
+      {eligible ? <Icon.eligible width={13} height={13} /> : <Icon.notEligible width={13} height={13} />}
+      {label}
+    </span>
+  )
+}
+
+/** Stock quantity + optional proportional bar (only when `threshold` is
+ *  set — there's no "capacity" field on the backend, so the bar's full
+ *  reference is 2x the threshold, a presentational heuristic only).
+ *  `low` is the backend's own is_low_stock, never recomputed here. */
+export function StockMeter({ current, unit, threshold, low = false, className }) {
+  const hasBar = threshold != null && threshold > 0
+  const fillPercent = hasBar ? Math.min(100, Math.max(0, (current / (threshold * 2)) * 100)) : null
+
+  return (
+    <span className={classNames('hf-stock', className)}>
+      <span className="qty">{current} {unit}</span>
+      {hasBar && (
+        <span className={classNames('bar', low && 'low')}>
+          <span className="fill" style={{ width: `${fillPercent}%` }} />
+        </span>
+      )}
+    </span>
+  )
+}
+
+/* ------------------------------------------------------------
+   Still to build (later redesign slices, not this one):
+   - Table/Th/Td and the pedigree rail (.hf-ped) are page-local markup,
+     not shared components — see Animals.jsx and AnimalDetails.jsx for
+     their single real usages.
+   ------------------------------------------------------------ */

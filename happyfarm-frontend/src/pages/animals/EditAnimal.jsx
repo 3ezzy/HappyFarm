@@ -8,28 +8,23 @@ import { animalService } from '../../services/api/animals.js'
 import { breedService } from '../../services/api/breeds.js'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { HfInput, HfSelect, TYPES } from '../../theme/hf.jsx'
+import { HfInput, HfSelect, TYPES, cardClass, btnPrimary, btnSecondary } from '../../theme/hf.jsx'
 import { apiErrorMessage } from '../../utils/apiError.js'
-
-const backBtnClass =
-  'mb-5 inline-flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-line bg-cream ' +
-  'px-[18px] py-2 font-display text-sm font-bold text-brown-text ' +
-  'transition-transform duration-200 ease-pop hover:scale-[1.04]'
 
 const choiceClass = (active, disabled) =>
   classNames(
-    'flex flex-col items-center rounded-2xl border-2 px-2 py-3.5 transition-all duration-200 ease-pop',
+    'flex flex-col items-center rounded-lg border px-2 py-3.5 transition-colors duration-hf',
     disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
-    active ? 'border-green bg-green-soft shadow-ribbon' : 'border-transparent bg-sand'
+    active ? 'border-meadow-700 bg-meadow-50 shadow-e1' : 'border-transparent bg-surface-sunken'
   )
 
 const toggleOptionClass = (active) =>
   classNames(
-    'flex-1 cursor-pointer rounded-full border-2 px-3 py-2 text-center font-sans text-[13.5px] font-semibold transition-all duration-200',
-    active ? 'border-green bg-green text-white' : 'border-line bg-cream text-brown'
+    'flex-1 cursor-pointer rounded border px-3 py-2 text-center font-sans text-[13.5px] font-medium transition-colors duration-hf',
+    active ? 'border-meadow-700 bg-meadow-700 text-white' : 'border-line-strong bg-surface-card text-ink-700'
   )
 
-const labelClass = 'mb-2 block text-sm font-semibold text-brown-text'
+const labelClass = 'mb-2 block text-sm font-medium text-ink-900'
 const fieldGroupClass = 'mb-[18px]'
 
 const EditAnimal = () => {
@@ -141,8 +136,8 @@ const EditAnimal = () => {
 
   if (!animal) {
     return (
-      <div className="animate-hf-pop">
-        <button onClick={() => navigate('/animals')} className={backBtnClass}>
+      <div>
+        <button onClick={() => navigate('/animals')} className={classNames(btnSecondary, 'mb-5 w-auto')}>
           <span className="text-base rtl:rotate-180">←</span> {t('common.backToAnimals')}
         </button>
       </div>
@@ -152,13 +147,13 @@ const EditAnimal = () => {
   const locked = animal.breeding_locked
 
   return (
-    <div className="mx-auto max-w-[680px] animate-hf-pop">
-      <button onClick={() => navigate(`/animals/${id}`)} className={backBtnClass}>
+    <div className="mx-auto max-w-[680px]">
+      <button onClick={() => navigate(`/animals/${id}`)} className={classNames(btnSecondary, 'mb-5 w-auto')}>
         <span className="text-base rtl:rotate-180">←</span> {t('common.back')}
       </button>
 
-      <div className="rounded-2xl bg-cream p-7 shadow-ribbon">
-        <h1 className="mb-6 text-3xl">{t('editAnimal.title', { name: animal.name })}</h1>
+      <div className={classNames(cardClass, 'p-7')}>
+        <h1 className="mb-6 text-3xl text-ink-900">{t('editAnimal.title', { name: animal.name })}</h1>
 
         <label className={labelClass}>{t('addAnimal.animalType')}</label>
         <div className="mb-2 grid grid-cols-2 gap-3 xs:grid-cols-4">
@@ -173,11 +168,11 @@ const EditAnimal = () => {
               <span className="mb-1 inline-flex h-[50px] w-[50px] items-center justify-center">
                 <AnimalIcon type={opt} size={50} />
               </span>
-              <span className="block font-display text-[15px] font-bold text-brown-text">{t(`species.${opt}.label`)}</span>
+              <span className="block font-display text-[15px] font-semibold text-ink-900">{t(`species.${opt}.label`)}</span>
             </button>
           ))}
         </div>
-        {locked && <p className="mb-[22px] text-[12.5px] text-tan">{t('editAnimal.speciesLocked')}</p>}
+        {locked && <p className="mb-[22px] text-[12.5px] text-ink-500">{t('editAnimal.speciesLocked')}</p>}
         {!locked && <div className="mb-[22px]" />}
 
         <div className="grid grid-cols-1 gap-x-4 xs:grid-cols-2">
@@ -208,7 +203,7 @@ const EditAnimal = () => {
               <option value="female">{t('addAnimal.female')}</option>
               <option value="male">{t('addAnimal.male')}</option>
             </HfSelect>
-            {locked && <p className="mt-1.5 text-[12.5px] text-tan">{t('editAnimal.sexLocked')}</p>}
+            {locked && <p className="mt-1.5 text-[12.5px] text-ink-500">{t('editAnimal.sexLocked')}</p>}
           </div>
         </div>
 
@@ -286,11 +281,7 @@ const EditAnimal = () => {
           </div>
         </div>
 
-        <button
-          onClick={submit}
-          disabled={updateMutation.isLoading}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border-none bg-brown p-3.5 font-display text-base font-bold text-white shadow-soft transition-all duration-200 ease-pop enabled:hover:scale-[1.02] enabled:hover:bg-brown-dark disabled:cursor-not-allowed disabled:opacity-70"
-        >
+        <button onClick={submit} disabled={updateMutation.isLoading} className={classNames(btnPrimary, 'w-full')}>
           {updateMutation.isLoading ? t('editAnimal.submitting') : t('editAnimal.submit')}
         </button>
       </div>

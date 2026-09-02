@@ -6,17 +6,12 @@ import { useQuery } from 'react-query'
 import { animalService } from '../../services/api/animals.js'
 import AnimalIcon from '../../components/common/AnimalIcon.jsx'
 import LoadingSpinner from '../../components/common/UI/LoadingSpinner.jsx'
-import { HfInput, TYPES, speciesBgClass, ageText, badge, cardClass } from '../../theme/hf.jsx'
-
-const addBtnClass =
-  'inline-flex cursor-pointer items-center gap-2 rounded-full border-none bg-brown px-6 py-3 ' +
-  'font-display text-[15px] font-bold text-white shadow-soft transition-all duration-200 ease-pop ' +
-  'hover:scale-[1.04] hover:bg-brown-dark'
+import { HfInput, TYPES, speciesBgClass, ageText, Pill, EarTag, Eligibility, EmptyState, btnPrimary } from '../../theme/hf.jsx'
 
 const filterClass = (active) =>
   classNames(
-    'cursor-pointer rounded-full border-2 px-4 py-[7px] font-sans text-[13.5px] font-semibold transition-all duration-200',
-    active ? 'border-green bg-green text-white' : 'border-line bg-cream text-brown'
+    'cursor-pointer rounded-pill border px-4 py-[7px] font-sans text-[13.5px] font-medium transition-colors duration-hf',
+    active ? 'border-meadow-700 bg-meadow-700 text-white' : 'border-line-strong bg-surface-card text-ink-700'
   )
 
 /** Debounce a fast-changing value so search doesn't fire a request per keystroke. */
@@ -27,6 +22,12 @@ function useDebounced(value, delayMs) {
     return () => clearTimeout(id)
   }, [value, delayMs])
   return debounced
+}
+
+const statusPill = (a, t) => {
+  if (a.is_archived) return <Pill tone="hold">{t('animals.filters.archived')}</Pill>
+  if (a.is_sacrificed) return <Pill tone="hold">{t('animals.filters.sacrificed')}</Pill>
+  return <Pill tone="ok">{t('animals.filters.active')}</Pill>
 }
 
 const Animals = () => {
@@ -73,10 +74,10 @@ const Animals = () => {
   const emptyMessage = debouncedSearch ? t('animals.noneMatchSearch') : t('animals.noneFound')
 
   return (
-    <div className="animate-hf-pop">
+    <div>
       <div className="mb-[22px] flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-[34px]">{t('animals.title')}</h1>
-        <button onClick={() => navigate('/animals/add')} className={addBtnClass}>
+        <h1 className="text-[34px] text-ink-900">{t('animals.title')}</h1>
+        <button onClick={() => navigate('/animals/add')} className={btnPrimary}>
           {t('animals.addAnimal')} <span className="text-lg rtl:rotate-180">→</span>
         </button>
       </div>
@@ -102,46 +103,62 @@ const Animals = () => {
           <LoadingSpinner size="large" message={t('common.loading')} />
         </div>
       ) : list.length > 0 ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5">
-          {list.map((a) => (
-            <button
-              key={a.id}
-              onClick={() => navigate(`/animals/${a.id}`)}
-              className={classNames(cardClass, 'cursor-pointer border-none p-5 text-start transition-all duration-200 ease-pop hover:scale-[1.02] hover:shadow-toast')}
-            >
-              <div className="mb-3.5 flex items-center gap-3.5">
-                <span className={classNames('inline-flex h-[62px] w-[62px] flex-none items-center justify-center rounded-2xl', speciesBgClass(a.type))}>
-                  <AnimalIcon type={a.type} size={54} />
-                </span>
-                <div className="min-w-0">
-                  <h3 className="text-xl leading-tight">{a.name}</h3>
-                  <p className="mt-0.5 text-sm text-tan">{t(`species.${a.type}.label`)} · {ageText(a.age, t)}</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                {a.is_archived ? (
-                  <span className={badge('sacrificed')}>{t('animals.filters.archived')}</span>
-                ) : a.is_sacrificed ? (
-                  <span className={badge('sacrificed')}>{t('animals.filters.sacrificed')}</span>
-                ) : (
-                  <span className={badge('active')}>{t('animals.filters.active')}</span>
-                )}
-                {a.is_eligible && <span className={badge('eligible')}>{t('animals.eligible')}</span>}
-              </div>
-            </button>
-          ))}
+        <div className="hf-tablewrap">
+          <div className="hf-scroll">
+            <table className="hf-table">
+              <thead>
+                <tr>
+                  <th>{t('addAnimal.tag')}</th>
+                  <th>{t('addAnimal.name')}</th>
+                  <th>{t('addAnimal.animalType')}</th>
+                  <th>{t('addAnimal.sex')}</th>
+                  <th className="num">{t('animals.ageHeader')}</th>
+                  <th>{t('animals.eligible')}</th>
+                  <th>{t('animals.statusHeader')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((a) => (
+                  <tr key={a.id} onClick={() => navigate(`/animals/${a.id}`)} className="cursor-pointer">
+                    <td><EarTag species={a.type} tag={a.tag} archived={a.is_sacrificed} /></td>
+                    <td>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/animals/${a.id}`) }}
+                        className="flex cursor-pointer items-center gap-2.5 border-none bg-transparent p-0 text-start font-display text-[15px] font-semibold text-ink-900 underline-offset-2 hover:underline"
+                      >
+                        <span className={classNames('inline-flex h-8 w-8 flex-none items-center justify-center rounded', speciesBgClass(a.type))}>
+                          <AnimalIcon type={a.type} size={22} />
+                        </span>
+                        {a.name}
+                      </button>
+                    </td>
+                    <td className="text-ink-700">{t(`species.${a.type}.label`)}</td>
+                    <td className="text-ink-700">{a.sex ? t(`addAnimal.${a.sex}`) : '—'}</td>
+                    <td className="num text-ink-700">{ageText(a.age, t)}</td>
+                    <td>
+                      <Eligibility
+                        eligible={a.is_eligible}
+                        label={a.is_eligible ? t('animals.eligible') : t('dashboard.notYetEligible')}
+                      />
+                    </td>
+                    <td>{statusPill(a, t)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
-        <div className={classNames(cardClass, 'px-6 py-14 text-center')}>
-          <div className="mx-auto mb-3 h-[90px] w-[90px]">
-            <AnimalIcon type="sheep" size={90} />
-          </div>
-          <h3 className="mb-2 text-2xl">{emptyMessage}</h3>
-          <p className="mb-5 text-tan">{t('animals.tryAnotherFilter')}</p>
-          <button onClick={() => navigate('/animals/add')} className={addBtnClass}>
-            {t('animals.addAnimal')} <span className="text-lg rtl:rotate-180">→</span>
-          </button>
-        </div>
+        <EmptyState
+          icon={<div className="mx-auto mb-1 h-[64px] w-[64px]"><AnimalIcon type="sheep" size={64} /></div>}
+          title={emptyMessage}
+          body={t('animals.tryAnotherFilter')}
+          action={
+            <button onClick={() => navigate('/animals/add')} className={btnPrimary}>
+              {t('animals.addAnimal')} <span className="text-lg rtl:rotate-180">→</span>
+            </button>
+          }
+        />
       )}
     </div>
   )
