@@ -594,5 +594,44 @@
       "health_due": "{{kind}} à faire",
       "low_stock": "Stock faible"
     }
+  },
+  "landing": {
+    "getStarted": "Commencer",
+    "heroEyebrow": "HappyFarm — Gestion du troupeau pour l'Aïd al-Adha",
+    "heroTitle": "Votre troupeau, organisé et prêt pour l'Aïd al-Adha",
+    "heroSubtitle": "Suivez chaque animal, ses soins et son éligibilité au sacrifice — le tout dans un tableau de bord simple.",
+    "heroSecondary": "Vous avez déjà un compte ?",
+    "whatTitle": "Ce que fait HappyFarm",
+    "whatIntro": "Tout ce qu'il faut pour gérer votre troupeau, pensé pour le fonctionnement réel des fermes.",
+    "features": {
+      "animals": "Gérez les animaux de votre ferme — ajoutez, modifiez et organisez chaque mouton, chèvre, vache et chameau avec sa fiche d'identification.",
+      "care": "Suivez les soins quotidiens — enregistrez l'alimentation et le toilettage de chaque animal.",
+      "eligibility": "Connaissez l'éligibilité au sacrifice — voyez en un coup d'œil quels animaux sont prêts, selon leur âge et leur statut.",
+      "breeding": "Gérez la reproduction et les naissances — enregistrez les cycles de reproduction et les naissances au fur et à mesure.",
+      "health": "Suivez les dossiers de santé — conservez un historique des examens et des traitements.",
+      "weight": "Suivez l'historique du poids — observez l'évolution du poids de chaque animal dans le temps.",
+      "alerts": "Restez informé des alertes — soyez notifié des prochains contrôles de reproduction, des stocks bas, et plus encore."
+    },
+    "howTitle": "Comment ça marche",
+    "howSteps": {
+      "step1Title": "Ajoutez vos animaux",
+      "step1Body": "Enregistrez chaque animal avec son identifiant, son espèce et ses détails.",
+      "step2Title": "Suivez leurs soins et leurs dossiers",
+      "step2Body": "Enregistrez l'alimentation, le toilettage, la santé et la reproduction au fil du temps.",
+      "step3Title": "Surveillez leur statut et les événements",
+      "step3Body": "Consultez l'éligibilité, les alertes et les rapports quand vous en avez besoin."
+    },
+    "highlightsTitle": "Pensé pour tout le troupeau",
+    "highlights": {
+      "animals": "Fiches des animaux",
+      "care": "Suivi des soins",
+      "eligibility": "Éligibilité au sacrifice",
+      "breeding": "Reproduction et naissances",
+      "health": "Santé et poids",
+      "alerts": "Alertes"
+    },
+    "finalTitle": "Prêt à organiser votre troupeau ?",
+    "finalSubtitle": "Créez le compte de votre ferme et commencez à suivre dès aujourd'hui.",
+    "footerTagline": "Gestion numérique du troupeau pour l'Aïd al-Adha."
   }
 }
