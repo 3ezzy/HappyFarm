@@ -6,7 +6,8 @@ import { useMutation } from 'react-query'
 import toast from 'react-hot-toast'
 import { authService } from '../../services/api/auth.js'
 import { apiErrorMessage } from '../../utils/apiError.js'
-import { C, HfInput, LeafMark, btnPrimary } from '../../theme/hf.jsx'
+import { HfInput, btnPrimary } from '../../theme/hf.jsx'
+import { Logo } from '../../theme/logo.jsx'
 
 const labelClass = 'mb-2 block text-sm font-medium text-ink-900'
 
@@ -14,12 +15,7 @@ const CardShell = ({ children }) => (
   <div className="flex min-h-screen items-center justify-center bg-surface-page px-5 py-8">
     <div className="relative w-full max-w-[430px]">
       <div className="mb-6 text-center">
-        <div className="inline-flex items-center gap-2.5">
-          <span className="inline-flex h-[46px] w-[46px] items-center justify-center rounded-lg bg-meadow-700 shadow-e1">
-            <LeafMark size={26} color={C.meadow100} />
-          </span>
-          <span className="font-display text-3xl font-semibold text-ink-900">HappyFarm</span>
-        </div>
+        <Logo size={40} className="justify-center" textClassName="text-3xl" />
       </div>
       <div className="rounded-lg border border-line bg-surface-card p-7 shadow-e2">{children}</div>
     </div>

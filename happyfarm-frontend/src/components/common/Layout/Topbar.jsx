@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext.jsx'
-import { C, LeafMark, initialsOf } from '../../../theme/hf.jsx'
+import { initialsOf } from '../../../theme/hf.jsx'
+import { Logo } from '../../../theme/logo.jsx'
 import LanguageSwitcher from './LanguageSwitcher.jsx'
 
 const Topbar = () => {
@@ -15,10 +16,7 @@ const Topbar = () => {
         onClick={() => navigate('/')}
         className="flex cursor-pointer items-center gap-2.5 border-none bg-transparent"
       >
-        <span className="inline-flex h-9 w-9 items-center justify-center rounded bg-meadow-700 shadow-e1">
-          <LeafMark size={20} color={C.meadow100} />
-        </span>
-        <span className="font-display text-lg font-semibold text-ink-900">HappyFarm</span>
+        <Logo size={28} textClassName="text-lg" />
         {farm?.name && (
           <span className="hidden truncate text-sm text-ink-500 sm:inline">· {farm.name}</span>
         )}

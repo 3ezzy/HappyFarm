@@ -3,7 +3,8 @@ import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { AlertRow, C, HfInput, LeafMark, btnPrimary } from '../../theme/hf.jsx'
+import { AlertRow, HfInput, btnPrimary } from '../../theme/hf.jsx'
+import { Logo } from '../../theme/logo.jsx'
 
 const labelClass = 'mb-2 block text-sm font-medium text-ink-900'
 
@@ -59,12 +60,7 @@ const AuthScreen = ({ mode }) => {
     <div className="flex min-h-screen items-center justify-center bg-surface-page px-5 py-8">
       <div className="relative w-full max-w-[430px]">
         <div className="mb-6 text-center">
-          <div className="inline-flex items-center gap-2.5">
-            <span className="inline-flex h-[46px] w-[46px] items-center justify-center rounded-lg bg-meadow-700 shadow-e1">
-              <LeafMark size={26} color={C.meadow100} />
-            </span>
-            <span className="font-display text-3xl font-semibold text-ink-900">HappyFarm</span>
-          </div>
+          <Logo size={40} className="justify-center" textClassName="text-3xl" />
           <p className="mt-3 text-[15px] text-ink-500">{t('auth.tagline')}</p>
         </div>
 
@@ -105,9 +101,9 @@ const AuthScreen = ({ mode }) => {
               <button onClick={doLogin} disabled={isLoading} className={classNames(btnPrimary, 'w-full')}>
                 {isLoading ? t('auth.loggingIn') : t('auth.login')} <span className="text-lg rtl:rotate-180">→</span>
               </button>
-              <p className="mt-4 text-center text-[13px] text-ink-500">
+              {/* <p className="mt-4 text-center text-[13px] text-ink-500">
                 {t('auth.demoHintPrefix')} <strong className="text-ink-900">ali@example.com</strong>
-              </p>
+              </p> */}
             </div>
           ) : (
             <div>

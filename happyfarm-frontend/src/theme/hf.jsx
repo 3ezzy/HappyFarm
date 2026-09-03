@@ -173,16 +173,6 @@ export function HfSelect({ className, children, ...props }) {
   )
 }
 
-/* shared logo mark */
-export function LeafMark({ size = 26, color = '#DCEDE4' }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M12 3c3.5 3 3.5 9 0 12-3.5-3-3.5-9 0-12z" fill={color} />
-      <path d="M12 21V9" stroke={color} strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  )
-}
-
 /* ------------------------------------------------------------
    New Meadow components — thin React wrappers around the .hf-* classes
    defined in index.css's @layer components.
