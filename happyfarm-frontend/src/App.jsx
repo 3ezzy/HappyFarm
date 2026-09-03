@@ -10,6 +10,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute.jsx'
 import AdminRoute from './components/auth/AdminRoute.jsx'
 
 // Page Components
+import Landing from './pages/landing/Landing.jsx'
 import Login from './pages/auth/Login.jsx'
 import Register from './pages/auth/Register.jsx'
 import ForgotPassword from './pages/auth/ForgotPassword.jsx'
@@ -41,9 +42,18 @@ function App() {
   return (
     <div className="min-h-screen bg-pageBg">
       <Routes>
+        {/* Public marketing page — separate path, does not touch "/" (the
+            protected dashboard) or any existing redirect behavior. */}
+        <Route
+          path="/welcome"
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <Landing />
+          }
+        />
+
         {/* Public Routes */}
-        <Route 
-          path="/login" 
+        <Route
+          path="/login"
           element={
             isAuthenticated ? <Navigate to="/" replace /> : <Login />
           } 

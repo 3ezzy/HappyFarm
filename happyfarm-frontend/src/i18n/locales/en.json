@@ -594,5 +594,44 @@
       "health_due": "{{kind}} due",
       "low_stock": "Low stock"
     }
+  },
+  "landing": {
+    "getStarted": "Get started",
+    "heroEyebrow": "HappyFarm — Eid Al Adha flock management",
+    "heroTitle": "Your flock, organized and ready for Eid Al Adha",
+    "heroSubtitle": "Track every animal, their care, and their sacrifice eligibility — all in one simple dashboard.",
+    "heroSecondary": "Already have an account?",
+    "whatTitle": "What HappyFarm does",
+    "whatIntro": "Everything you need to manage your flock, built around how farms actually work.",
+    "features": {
+      "animals": "Manage your farm's animals — add, edit, and organize every sheep, goat, cow, and camel with ear-tag records.",
+      "care": "Track daily care — log feeding and grooming for each animal.",
+      "eligibility": "Know sacrifice eligibility — see at a glance which animals are ready, based on age and status.",
+      "breeding": "Manage breeding and births — record breeding cycles and births as they happen.",
+      "health": "Track health records — keep a history of checkups and treatments.",
+      "weight": "Track weight history — watch each animal's weight over time.",
+      "alerts": "Stay on top of alerts — get notified about upcoming breeding checks, low stock, and more."
+    },
+    "howTitle": "How it works",
+    "howSteps": {
+      "step1Title": "Add your animals",
+      "step1Body": "Register each animal with its ear tag, species, and details.",
+      "step2Title": "Track their care and records",
+      "step2Body": "Log feeding, grooming, health, and breeding as you go.",
+      "step3Title": "Monitor status and events",
+      "step3Body": "See eligibility, alerts, and reports whenever you need them."
+    },
+    "highlightsTitle": "Built for the whole flock",
+    "highlights": {
+      "animals": "Animal Records",
+      "care": "Care Tracking",
+      "eligibility": "Sacrifice Eligibility",
+      "breeding": "Breeding & Births",
+      "health": "Health & Weight",
+      "alerts": "Alerts"
+    },
+    "finalTitle": "Ready to organize your flock?",
+    "finalSubtitle": "Create your farm account and start tracking today.",
+    "footerTagline": "Digital flock management for Eid Al Adha readiness."
   }
 }
