@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Mail\Transport\BrevoApiTransport;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,6 +31,25 @@ class AppServiceProvider extends ServiceProvider
             return rtrim(config('app.frontend_url'), '/')
                 . '/reset-password?token=' . $token
                 . '&email=' . urlencode($user->email);
+        });
+
+        // Branded email presentation only — token generation, the broker,
+        // the reset endpoint, throttling, and the URL structure above are
+        // all untouched. Re-uses that exact same createUrlUsing callback
+        // so the link this email sends is byte-for-byte what the default
+        // notification would have sent, just rendered through our own
+        // views instead of the framework's generic notification email.
+        ResetPassword::toMailUsing(function (User $user, string $token) {
+            $url = call_user_func(ResetPassword::$createUrlCallback, $user, $token);
+            $expireMinutes = (int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire');
+
+            return (new MailMessage)
+                ->subject('Reset your HappyFarm password')
+                ->view(['emails.reset-password', 'emails.reset-password-text'], [
+                    'url' => $url,
+                    'userName' => $user->name,
+                    'expireMinutes' => $expireMinutes,
+                ]);
         });
 
         // Delivers mail through Brevo's Transactional Email API instead of
