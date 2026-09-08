@@ -545,6 +545,26 @@
     "administeredOnRequired": "Please enter a valid date.",
     "loadError": "Could not load health records."
   },
+  "feedingCost": {
+    "title": "Feeding cost",
+    "setCost": "Set daily cost",
+    "changeCost": "Change daily cost",
+    "currentDailyCost": "Current daily cost",
+    "totalFeedingCost": "Total feeding cost",
+    "dailyCostLabel": "Daily cost (DH)",
+    "effectiveFromLabel": "Start date",
+    "submit": "Save",
+    "submitting": "Saving…",
+    "current": "Current",
+    "ongoing": "Today",
+    "perDay": "/day",
+    "daysUnit_one": "{{count}} day",
+    "daysUnit_other": "{{count}} days",
+    "empty": "No feeding cost set yet.",
+    "created": "Feeding cost updated.",
+    "dailyCostRequired": "Please enter a valid daily cost.",
+    "unavailableNote": "Feeding cost can no longer be changed for this animal."
+  },
   "admin": {
     "title": "Admin",
     "subtitle": "Review new registrations and manage access to HappyFarm.",

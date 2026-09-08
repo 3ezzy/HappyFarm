@@ -77,6 +77,13 @@ export const HEALTH_RECORD_ENDPOINTS = {
   DELETE: (id) => `/health-records/${id}`
 }
 
+// Feeding-cost periods — same shape as health records: list/create are
+// scoped under the animal id, no per-period id-based routes (immutable).
+export const FEEDING_COST_ENDPOINTS = {
+  LIST: (animalId) => `/animals/${animalId}/feeding-costs`,
+  CREATE: (animalId) => `/animals/${animalId}/feeding-costs`
+}
+
 // Alerts — computed at read time on the farm, no per-animal scoping.
 export const ALERT_ENDPOINTS = {
   LIST: '/alerts',

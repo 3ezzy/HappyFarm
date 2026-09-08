@@ -95,6 +95,21 @@ export const fmtDate = (dateStr, language) => {
   }).format(date)
 }
 
+/**
+ * The app's only money unit today is DH (Moroccan Dirham), used as a
+ * plain label rather than an ISO currency code/symbol — no multi-currency
+ * support exists or is needed.
+ */
+export const fmtCurrency = (amount, language) => {
+  if (amount === null || amount === undefined) return null
+  const n = new Intl.NumberFormat(language, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    numberingSystem: 'latn',
+  }).format(Number(amount))
+  return `${n} DH`
+}
+
 export const initialsOf = (name) =>
   (name || '?')
     .split(' ')

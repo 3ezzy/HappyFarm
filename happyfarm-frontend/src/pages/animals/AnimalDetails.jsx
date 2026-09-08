@@ -15,6 +15,7 @@ import BirthsSection from './sections/BirthsSection.jsx'
 import BirthModal from './sections/BirthModal.jsx'
 import HealthRecordsSection from './sections/HealthRecordsSection.jsx'
 import WeightHistorySection from './sections/WeightHistorySection.jsx'
+import FeedingCostSection from './sections/FeedingCostSection.jsx'
 
 const careBtnClass =
   'flex cursor-pointer items-center gap-2.5 rounded border-none px-5 py-[13px] ' +
@@ -358,6 +359,8 @@ const AnimalDetails = () => {
           <HealthRecordsSection animalId={id} />
 
           <WeightHistorySection animalId={id} />
+
+          <FeedingCostSection animalId={id} animal={animal} />
         </div>
 
         {/* Care actions */}
