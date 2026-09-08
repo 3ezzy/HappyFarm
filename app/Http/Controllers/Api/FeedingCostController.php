@@ -17,7 +17,10 @@ class FeedingCostController extends Controller
      */
     public function index(Request $request, $animalId)
     {
-        $animal = $this->findOwnedAnimal($request, $animalId);
+        // withTrashed: archiving means read-only, not invisible — see
+        // WeightController::index() for the same reasoning. store() below
+        // keeps the default, so writes stay blocked for an archived animal.
+        $animal = $this->findOwnedAnimal($request, $animalId, withTrashed: true);
 
         if (!$animal) {
             return response()->json(['error' => 'Animal not found'], 404);
@@ -54,11 +57,17 @@ class FeedingCostController extends Controller
         return response()->json($this->present($period), 201);
     }
 
-    private function findOwnedAnimal(Request $request, $animalId): ?Animal
+    private function findOwnedAnimal(Request $request, $animalId, bool $withTrashed = false): ?Animal
     {
         $user = $request->user();
 
-        return Animal::whereHas('farm', fn ($q) => $q->where('user_id', $user->id))->find($animalId);
+        $query = Animal::whereHas('farm', fn ($q) => $q->where('user_id', $user->id));
+
+        if ($withTrashed) {
+            $query->withTrashed();
+        }
+
+        return $query->find($animalId);
     }
 
     private function present(FeedingCost $period): array

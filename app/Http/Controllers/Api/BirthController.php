@@ -17,7 +17,10 @@ class BirthController extends Controller
      */
     public function index(Request $request, $animalId)
     {
-        $dam = $this->findOwnedAnimal($request, $animalId);
+        // withTrashed: archiving means read-only, not invisible — see
+        // WeightController::index() for the same reasoning. store() below
+        // keeps the default, so writes stay blocked for an archived dam.
+        $dam = $this->findOwnedAnimal($request, $animalId, withTrashed: true);
 
         if (!$dam) {
             return response()->json(['error' => 'Animal not found'], 404);
@@ -163,11 +166,17 @@ class BirthController extends Controller
         return response()->json(['message' => 'Birth record deleted']);
     }
 
-    private function findOwnedAnimal(Request $request, $animalId): ?Animal
+    private function findOwnedAnimal(Request $request, $animalId, bool $withTrashed = false): ?Animal
     {
         $user = $request->user();
 
-        return Animal::whereHas('farm', fn ($q) => $q->where('user_id', $user->id))->find($animalId);
+        $query = Animal::whereHas('farm', fn ($q) => $q->where('user_id', $user->id));
+
+        if ($withTrashed) {
+            $query->withTrashed();
+        }
+
+        return $query->find($animalId);
     }
 
     private function findOwnedBirth(Request $request, $id): ?Birth
