@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Animal;
 use App\Http\Requests\AnimalRequest;
 use App\Http\Requests\AnimalUpdateRequest;
+use App\Services\FeedingCostManager;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -27,7 +28,7 @@ class AnimalController extends Controller
             return response()->json(['error' => 'No farm found for user'], 404);
         }
 
-        $query = $farm->animals()->with(['breed', 'breedingCycles.birth', 'healthRecords']);
+        $query = $farm->animals()->with(['breed', 'breedingCycles.birth', 'healthRecords', 'feedingCosts']);
 
         // Archived animals are excluded by the SoftDeletes scope by
         // default — this is the only way back into seeing them, and it's
@@ -106,7 +107,7 @@ class AnimalController extends Controller
         // withTrashed: an archived animal must still be viewable — both to
         // restore it and so a descendant's profile can link to an
         // archived dam/sire's own page.
-        $animal = $this->findOwnedAnimal($request, $id, with: ['breed', 'breedingCycles.birth', 'healthRecords'], withTrashed: true);
+        $animal = $this->findOwnedAnimal($request, $id, with: ['breed', 'breedingCycles.birth', 'healthRecords', 'feedingCosts'], withTrashed: true);
 
         if (!$animal) {
             return response()->json(['error' => 'Animal not found'], 404);
@@ -168,7 +169,7 @@ class AnimalController extends Controller
     /**
      * Sacrifice an animal.
      */
-    public function sacrifice(Request $request, $id)
+    public function sacrifice(Request $request, $id, FeedingCostManager $feedingCosts)
     {
         $animal = $this->findOwnedAnimal($request, $id);
 
@@ -202,6 +203,11 @@ class AnimalController extends Controller
             'exit_date' => $now->toDateString(),
             'exit_reason' => 'sacrifice',
         ]);
+
+        // Exit is a permanent freeze — closes any open feeding-cost
+        // period at the exit date; no-ops if cost tracking was never
+        // enabled for this animal.
+        $feedingCosts->closeOpenPeriod($animal, $now->toDateString());
 
         return response()->json([
             'id' => $animal->id,
@@ -248,7 +254,7 @@ class AnimalController extends Controller
 
         $animal->update($payload);
         $animal->refresh();
-        $animal->load(['breed', 'breedingCycles.birth', 'healthRecords']);
+        $animal->load(['breed', 'breedingCycles.birth', 'healthRecords', 'feedingCosts']);
 
         return response()->json($this->present($animal));
     }
@@ -261,7 +267,7 @@ class AnimalController extends Controller
      * that has ever had history — once archived, restore() is the only
      * way back.
      */
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, $id, FeedingCostManager $feedingCosts)
     {
         $animal = $this->findOwnedAnimal($request, $id);
 
@@ -272,11 +278,17 @@ class AnimalController extends Controller
         $hasHistory = $animal->weights()->exists()
             || $animal->healthRecords()->exists()
             || $animal->breedingCycles()->exists()
+            || $animal->feedingCosts()->exists()
             || Animal::where('dam_id', $animal->id)->orWhere('sire_id', $animal->id)->exists()
             || $animal->is_sacrificed
             || $animal->hasExited();
 
         if ($hasHistory) {
+            // Archiving pauses feeding-cost accrual (closes the open
+            // period, if any, at today) rather than freezing it forever
+            // like an exit — restore() below resumes it.
+            $feedingCosts->closeOpenPeriod($animal, Carbon::now()->toDateString());
+
             $animal->delete();
 
             return response()->json(['message' => 'Animal archived', 'action' => 'archived']);
@@ -291,7 +303,7 @@ class AnimalController extends Controller
      * Restores an archived animal. Ownership-scoped via withTrashed()
      * since the default scope would never find it otherwise.
      */
-    public function restore(Request $request, $id)
+    public function restore(Request $request, $id, FeedingCostManager $feedingCosts)
     {
         $animal = $this->findOwnedAnimal($request, $id, withTrashed: true);
 
@@ -304,7 +316,12 @@ class AnimalController extends Controller
         }
 
         $animal->restore();
-        $animal->load(['breed', 'breedingCycles.birth', 'healthRecords']);
+
+        // No-ops for an animal that also exited (exit stays a permanent
+        // freeze) or that never had feeding-cost tracking enabled.
+        $feedingCosts->resumeAfterArchive($animal, Carbon::now()->toDateString());
+
+        $animal->load(['breed', 'breedingCycles.birth', 'healthRecords', 'feedingCosts']);
 
         return response()->json($this->present($animal));
     }
@@ -316,7 +333,7 @@ class AnimalController extends Controller
      * sacrificed" — not the broader "has left the flock" that
      * Animal::hasExited() covers.
      */
-    public function recordExit(Request $request, $id)
+    public function recordExit(Request $request, $id, FeedingCostManager $feedingCosts)
     {
         $animal = $this->findOwnedAnimal($request, $id);
 
@@ -337,6 +354,8 @@ class AnimalController extends Controller
             'exit_date' => $validated['exit_date'],
             'exit_reason' => $validated['reason'],
         ]);
+
+        $feedingCosts->closeOpenPeriod($animal, $validated['exit_date']);
 
         return response()->json([
             'id' => $animal->id,
@@ -400,6 +419,8 @@ class AnimalController extends Controller
             // re-declaring Animal::MIN_AGES client-side.
             'min_age' => Animal::MIN_AGES[$animal->type] ?? null,
             'is_archived' => $animal->trashed(),
+            'current_daily_cost' => $animal->current_daily_cost,
+            'total_feeding_cost' => $animal->total_feeding_cost,
             // Same condition AnimalUpdateRequest enforces server-side —
             // exposed so the edit form can disable species/sex without
             // re-implementing the rule client-side.

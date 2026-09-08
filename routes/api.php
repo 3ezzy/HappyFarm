@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\BirthController;
 use App\Http\Controllers\Api\BreedController;
 use App\Http\Controllers\Api\BreedingCycleController;
 use App\Http\Controllers\Api\FarmController;
+use App\Http\Controllers\Api\FeedingCostController;
 use App\Http\Controllers\Api\HealthRecordController;
 use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\WeightController;
@@ -91,6 +92,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/animals/{id}/health-records', [HealthRecordController::class, 'store']);
     Route::put('/health-records/{id}', [HealthRecordController::class, 'update']);
     Route::delete('/health-records/{id}', [HealthRecordController::class, 'destroy']);
+
+    // Feeding costs (period-based history — no update/delete, see FeedingCostManager)
+    Route::get('/animals/{id}/feeding-costs', [FeedingCostController::class, 'index']);
+    Route::post('/animals/{id}/feeding-costs', [FeedingCostController::class, 'store']);
 
     // Alerts (computed at read time, no scheduler)
     Route::get('/alerts', [AlertController::class, 'index']);

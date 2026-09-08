@@ -545,6 +545,26 @@
     "administeredOnRequired": "Veuillez saisir une date valide.",
     "loadError": "Impossible de charger le suivi sanitaire."
   },
+  "feedingCost": {
+    "title": "Coût d'alimentation",
+    "setCost": "Définir le coût journalier",
+    "changeCost": "Modifier le coût journalier",
+    "currentDailyCost": "Coût journalier actuel",
+    "totalFeedingCost": "Coût d'alimentation total",
+    "dailyCostLabel": "Coût journalier (DH)",
+    "effectiveFromLabel": "Date de début",
+    "submit": "Enregistrer",
+    "submitting": "Enregistrement…",
+    "current": "En cours",
+    "ongoing": "Aujourd'hui",
+    "perDay": "/jour",
+    "daysUnit_one": "{{count}} jour",
+    "daysUnit_other": "{{count}} jours",
+    "empty": "Aucun coût d'alimentation défini.",
+    "created": "Coût d'alimentation mis à jour.",
+    "dailyCostRequired": "Veuillez saisir un coût journalier valide.",
+    "unavailableNote": "Le coût d'alimentation ne peut plus être modifié pour cet animal."
+  },
   "admin": {
     "title": "Admin",
     "subtitle": "Passez en revue les nouvelles inscriptions et gérez l'accès à HappyFarm.",

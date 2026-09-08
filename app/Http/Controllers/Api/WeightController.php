@@ -14,7 +14,12 @@ class WeightController extends Controller
      */
     public function index(Request $request, $animalId)
     {
-        $animal = $this->findOwnedAnimal($request, $animalId);
+        // withTrashed: archiving means read-only, not invisible — an
+        // archived animal's weight history must stay viewable on its
+        // profile. Every other action here keeps the default (no
+        // withTrashed), so writes remain blocked for an archived animal
+        // exactly as before.
+        $animal = $this->findOwnedAnimal($request, $animalId, withTrashed: true);
 
         if (!$animal) {
             return response()->json(['error' => 'Animal not found'], 404);
@@ -85,13 +90,19 @@ class WeightController extends Controller
         return response()->json(['message' => 'Weight record deleted']);
     }
 
-    private function findOwnedAnimal(Request $request, $animalId): ?Animal
+    private function findOwnedAnimal(Request $request, $animalId, bool $withTrashed = false): ?Animal
     {
         $user = $request->user();
 
-        return Animal::whereHas('farm', function ($query) use ($user) {
+        $query = Animal::whereHas('farm', function ($query) use ($user) {
             $query->where('user_id', $user->id);
-        })->find($animalId);
+        });
+
+        if ($withTrashed) {
+            $query->withTrashed();
+        }
+
+        return $query->find($animalId);
     }
 
     private function findOwnedWeight(Request $request, $id): ?Weight
