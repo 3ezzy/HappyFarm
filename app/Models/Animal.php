@@ -122,6 +122,11 @@ class Animal extends Model
         return $this->hasMany(HealthRecord::class);
     }
 
+    public function feedingCosts()
+    {
+        return $this->hasMany(FeedingCost::class);
+    }
+
     /**
      * The birth that created this animal, if it's a lamb/kid/calf born
      * on the farm rather than purchased or entered independently.
@@ -210,6 +215,41 @@ class Animal extends Model
             ->filter(fn (HealthRecord $r) => $r->isWithdrawalActive())
             ->sortByDesc('withdrawal_until')
             ->first();
+    }
+
+    /**
+     * The open feeding-cost period's rate, or null if cost tracking was
+     * never enabled for this animal. FeedingCostManager guarantees at
+     * most one open period exists at a time, so "the" open period is
+     * unambiguous.
+     */
+    public function getCurrentDailyCostAttribute(): ?float
+    {
+        $periods = $this->relationLoaded('feedingCosts')
+            ? $this->feedingCosts
+            : $this->feedingCosts()->whereNull('effective_until')->get();
+
+        $open = $periods->first(fn (FeedingCost $p) => $p->isOpen());
+
+        return $open ? (float) $open->daily_cost : null;
+    }
+
+    /**
+     * Sum of every feeding-cost period's accrued cost. Never stored —
+     * derived at read time from the immutable period history, same
+     * principle as InventoryItem::currentStock(). Safe to call
+     * unconditionally on an exited or archived animal: FeedingCostManager
+     * always closes the open period the moment an animal exits or is
+     * archived, so there is nothing left open to (mis)count past that
+     * point, and no separate "as of" cap is needed here.
+     */
+    public function getTotalFeedingCostAttribute(): float
+    {
+        $periods = $this->relationLoaded('feedingCosts') ? $this->feedingCosts : $this->feedingCosts()->get();
+
+        $total = $periods->sum(fn (FeedingCost $p) => $p->costAccrued());
+
+        return round((float) $total, 2);
     }
 
     /**
